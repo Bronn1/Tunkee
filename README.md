@@ -1,2 +1,2 @@
 # Tunkee
-Turn-based tactical strategy game with armored vehicles theme
+Turn-based tactical game with armored vehicles theme
