@@ -1,13 +1,13 @@
 #pragma once
 
-#include "core/game_board.h"
-#include "graphics/hexagonal_board.h"
+#include "../core/game_board.h"
+#include "../graphics/hexagonal_board.h"
 
 #include <memory>
 #include <vector>
 
 using BoardModelPtr = std::unique_ptr<core::GameBoard>;
-using BoardViewPtr = std::unique_ptr<graphics::HexagonalBoard>;
+using BoardViewPtr = std::unique_ptr<graphics::GameBoardView>;
 
 class BoardBuilder
 {

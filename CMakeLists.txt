@@ -31,7 +31,9 @@ set(Header_Files
         "src/graphics/entity_view.h"
         "src/graphics/tank_view.h"
         "src/graphics/game_tooltip.h"
-        "src/board_builder.h"
+        "src/builders/board_builder.h"
+        "src/graphics/graphics_data_types.h"
+        "src/graphics/game_world_view.h"
         "src/controllers/movement_controller.h"
         )
 source_group("Header Files" FILES ${Header_Files})
@@ -58,7 +60,8 @@ set(Source_Files
         "src/graphics/entity_view.cpp"
         "src/graphics/tank_view.cpp"
         "src/graphics/game_tooltip.cpp"
-        "src/board_builder.cpp"
+        "src/builders/board_builder.cpp"
+        "src/graphics/game_world_view.cpp"
         "src/controllers/movement_controller.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})

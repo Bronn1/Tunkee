@@ -24,25 +24,26 @@ namespace graphics
 
 
 	public:
-		TankView(Type type, const sf::Texture& textures, const sf::Texture& turrretTexture);
+		TankView(ObjectIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture);
 		sf::FloatRect       getBoundingRect() const;
 
-		void                moveTo(sf::Time dt);
-		void                rotateTurretTo(float angle);
-		void                setAsSelected();
-		void                showTooltip(sf::Vector2f mouse_pos);
-		inline void         setTooltipText(const std::string& text) { m_tooltipDescription.setText(text); }
+		void  moveTo(sf::Time dt);
+		void  rotateTurretTo(float angle);
+		void  setAsSelected();
+		void  showTooltip(const sf::Vector2f& mouse_pos);
+		inline void setTooltipText(const std::string& text) { m_tooltipDescription.setText(text); }
+		//ObjectIdentifier getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const override final;
 	private:
-		void		        drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
+		void drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 
 	private:
-		Type				m_type;
-		sf::Sprite			m_bodySprite;
+		Type m_type;
+		sf::Sprite	m_bodySprite;
 
-		sf::Sprite			m_turretSprite;
-		bool                m_isSelected{ false };
-		GameTooltip         m_tooltipDescription;
+		sf::Sprite m_turretSprite;
+		bool m_isSelected{ false };
+		GameTooltip m_tooltipDescription;
 		
 	};
 }

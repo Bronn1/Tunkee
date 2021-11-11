@@ -7,10 +7,12 @@
 #include "SFML/Graphics/RenderTarget.hpp"
 
 
-graphics::TankView::TankView(Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
-	: m_type(type)
+graphics::TankView::TankView(ObjectIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
+	:
+	m_type(type)
 	, m_bodySprite(textures), m_turretSprite(turrretTexture)
 {
+	m_id = id;
 	sf::FloatRect bounds = m_bodySprite.getLocalBounds();
 	sf::FloatRect turretBounds = m_turretSprite.getLocalBounds();
 	// setting up center point
@@ -61,7 +63,7 @@ void graphics::TankView::setAsSelected()
 	m_isSelected = m_isSelected ? false : true;
 }
 
-void graphics::TankView::showTooltip(sf::Vector2f mouse_pos)
+void graphics::TankView::showTooltip(const sf::Vector2f& mouse_pos) 
 {
 	if (getBoundingRect().contains(mouse_pos)) {
 		m_tooltipDescription.show();
@@ -70,4 +72,13 @@ void graphics::TankView::showTooltip(sf::Vector2f mouse_pos)
 		m_tooltipDescription.hide();
 	}
 }
+
+/*ObjectIdentifier graphics::TankView::getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const
+{
+	if (getBoundingRect().contains(clickedPos))
+	{
+		return m_id;
+	}
+	return ObjectIdentifier{0};
+}*/
 

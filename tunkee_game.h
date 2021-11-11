@@ -1,5 +1,7 @@
 #pragma once
 
+#include "src/graphics/game_world_view.h"
+
 #include <SFML/Graphics/RenderWindow.hpp>
 
 class TunkeGame 

@@ -6,7 +6,7 @@
 #include "src/core/unit_manager.h"
 #include "src/graphics/tank_view.h"
 
-#include "src/board_builder.h"
+#include "src/builders/board_builder.h"
 
 #include <vector>
 #include <iostream>
@@ -43,64 +43,40 @@ void TunkeGame::run()
     if (!m_grassTexture2.loadFromFile("data/textures/TopDown_soldier_tank_turrent.png"))
         std::cerr << "Can not load texture\n";
     m_grassTexture2.setSmooth(true);
-    graphics::TankView air(graphics::TankView::Type::Eagle, m_grassTexture, m_grassTexture2);
-    air.setPosition({ 289.827 ,326.928 });
-    air.setRotation(270);
+    std::unique_ptr< graphics::TankView > air = std::make_unique<graphics::TankView>(ObjectIdentifier{ 1 }, graphics::TankView::Type::Eagle, m_grassTexture, m_grassTexture2);
+    (*air).setPosition({ 289.827 ,326.928 });
+    (*air).setRotation(270);
     //air.setOrigin(100, 20);
-    air.setScale(0.17, 0.17);
+    (*air).setScale(0.17, 0.17);
     //air.outl
     bool wasButtonPresssed = false;
 
+    std::unique_ptr< graphics::TankView > air2 = std::make_unique<graphics::TankView>(ObjectIdentifier{ 2 }, graphics::TankView::Type::Eagle, m_grassTexture, m_grassTexture2);
+    (*air2).setPosition({ 250 ,349.928 });
+    (*air2).setRotation(270);
+    //air.setOrigin(100, 20);
+    (*air2).setScale(0.17, 0.17);
+    
+    graphics::GameWorldView worldView(m_window, std::move(hexBoard));
+
+     worldView.addNewUnitView(std::move(air), core::GameTile(0, 0));
+     worldView.addNewUnitView(std::move(air2), core::GameTile(0, 0));
+
     while (m_window.isOpen()) {
         sf::Event event;
-        while (m_window.pollEvent(event)) {
+        m_window.clear(sf::Color::Green);
+        worldView.draw();
+        worldView.update(event);
+        // should use screen stack
+        /*while (m_window.pollEvent(event)) {
+            worldView.update(event.type);
+
             if (event.type == sf::Event::Closed)
                 m_window.close();
-        }
+        }*/
 
-        m_window.clear(sf::Color::Green);
-        (*hexBoard).draw(m_window);
-        m_window.draw(air);
-        // TODO FOR tests only
-        auto mouse_pos = sf::Mouse::getPosition(m_window); // Mouse position relative to the window
-        auto translated_pos = m_window.mapPixelToCoords(mouse_pos); // Mouse position translated into world coordinates
-        air.showTooltip(translated_pos);
-        if (air.getBoundingRect().contains(translated_pos)) // Rectangle-contains-point check
-        {
-            auto [posx, posy] = air.getPosition();
-            //air.setScale(0.2, 0.2);
-            // m_tileSelector.setPosition(posx, posy);
-             //std::cout << posx << " " << posy << "\n";
-        }
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            wasButtonPresssed = true;
-            sf::Vector2f curPos = air.getPosition();
-
-            // now we have both the sprite position and the cursor
-            // position lets do the calculation so our sprite will
-            // face the position of the mouse
-            const float PI = 3.14159265;
-
-            float dx = curPos.x - mouse_pos.x;
-            float dy = curPos.y - mouse_pos.y;
-
-            float turretTextureOffset = 90;
-            float rotation = ((atan2(dy, dx)) * 180 / PI) + turretTextureOffset;
-            air.moveTo(TimePerFrame);
-            air.rotateTurretTo(rotation);
-        }
-        if (wasButtonPresssed && !sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            //m_window.create(sf::VideoMode(300,300), "Tunkee", sf::Style::Close | sf::Style::Titlebar | sf::Style::Resize, sf::ContextSettings(0, 0, 8));
-            if (air.getBoundingRect().contains(translated_pos)) // Rectangle-contains-point check
-            {
-                air.setAsSelected();
-                
-            }
-            wasButtonPresssed = false;
-            air.setPosition(439.91, 275);
-        }
+        //(*hexBoard).draw(m_window);
+        //m_window.draw((*air));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
         m_window.display();
