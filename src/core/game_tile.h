@@ -73,7 +73,7 @@ namespace core {
 }
 
 namespace std {
-	// hash function to have an ability to add GameTile to containers like map,set
+	// hash function to have an ability to add GameTile to containers like unordered map
 	template<> struct hash<core::GameTile> {
 		size_t operator()(const core::GameTile& h) const{
 			hash<int> hash;

@@ -8,7 +8,7 @@
 #include "../src/core/player.h"
 #include "../src/core/unit.h"
 #include "../src/core/unit_manager.h"
-#include "../src/core/main_engine.h"
+#include "../src/core/game_rules_engine.h"
 #include <ranges>
 #include <memory>
 
@@ -33,7 +33,7 @@ public:
     }
 
     void SetUp() {
-        testableBoard.setUnitManager(unitMng);
+        //testableBoard.setUnitManager(unitMng);
         
 
         unit.get()->setPosition(GameTile(4, 4));
@@ -55,25 +55,25 @@ public:
 };
 
 TEST_F(gameBoardFixture, GetMoveAreaCommand) {
-    std::shared_ptr<GameQuery> cmd{ std::make_shared<GetMoveAreaQuery>() };
-    core::MainEngine gameEngine{ testableBoard, unitMng, PlayerIdentifier{ 1 }, PlayerIdentifier{ 2 } };
+    auto cmd{ std::make_shared<GetMoveAreaQuery>() };
+    core::GameRulesEngine gameEngine{testableBoard, unitMng, PlayerIdentifier{1 }, PlayerIdentifier{2 } };
     cmd.get()->m_unitID = { 1 };
     cmd.get()->m_playerID = { 1 };
 
-    gameEngine.executeQuery(cmd);
+    gameEngine.queryMoveArea(cmd.get());
     EXPECT_EQ(1, 1);
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0) {
-    std::shared_ptr<GameAction> cmdMove{std::make_shared<MoveToAction>() };
+    auto cmdMove{std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };
     cmdMove.get()->m_playerID = { 1 };
     core::GameTile expectedPos = core::GameTile(1, 0);
     static_cast<MoveToAction*>(cmdMove.get())->m_destination = expectedPos;
 
 
-    bool result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()));
-    EXPECT_EQ(result, true) << "move command failed\n";
+    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    //EXPECT_EQ(result, true) << "move command failed\n";
     EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
@@ -90,14 +90,14 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo2_1) {
     testableBoard.setTileType(GameTile(5, 3), GameTileType::water);
     testableBoard.setTileType(GameTile(3, 5), GameTileType::water);
 
-    std::shared_ptr<GameAction> cmdMove{ std::make_shared<MoveToAction>() };
+    auto cmdMove{ std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };
     cmdMove.get()->m_playerID = { 1 };
     core::GameTile expectedPos = core::GameTile(2, 1);
     static_cast<MoveToAction*>(cmdMove.get())->m_destination = core::GameTile(1, 0);
 
-    bool result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()));
-    EXPECT_EQ(result, true) << "move command failed\n";
+    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    //EXPECT_EQ(result, true) << "move command failed\n";
     EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
@@ -105,14 +105,14 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo1_1) {
     testableBoard.setTileType(GameTile(1, 0), GameTileType::water);
     testableBoard.setTileType(GameTile(0, 1), GameTileType::water);
 
-    std::shared_ptr<GameAction> cmdMove{ std::make_shared<MoveToAction>() };
+    auto cmdMove{ std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };
     cmdMove.get()->m_playerID = { 1 };
     core::GameTile expectedPos = core::GameTile(2, 0);
-    static_cast<MoveToAction*>(cmdMove.get())->m_destination = core::GameTile(1, 0);
+    cmdMove.get()->m_destination = core::GameTile(1, 0);
 
-    bool result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()));
-    EXPECT_EQ(result, true) << "move command failed\n";
+    auto result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()), unit.get());
+    //EXPECT_EQ(result, true) << "move command failed\n";
     EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
@@ -120,13 +120,13 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithUnreachableTarget) {
     testableBoard.setTileAccessible(GameTile(1, 0), false);
     testableBoard.setTileAccessible(GameTile(0, 1), false);
 
-    std::shared_ptr<GameAction> cmdMove{ std::make_shared<MoveToAction>() };
+    auto cmdMove{ std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };
     cmdMove.get()->m_playerID = { 1 };
     core::GameTile expectedPos = core::GameTile(4, 4);
-    static_cast<MoveToAction*>(cmdMove.get())->m_destination = core::GameTile(1, 0);
+    cmdMove.get()->m_destination = core::GameTile(1, 0);
 
-    bool result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()));
-    EXPECT_EQ(result, false) << "move command should fail\n";
+    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    //EXPECT_EQ(result, false) << "move command should fail\n";
     EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
 }

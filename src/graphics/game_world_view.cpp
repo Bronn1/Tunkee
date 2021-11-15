@@ -4,14 +4,14 @@
 
 const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
-graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardViewPtr board) :
-	m_renderTarget(target), m_board(std::move(board))
+graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardViewPtr board, controllers::MovementController controller) :
+	m_renderTarget(target), m_board(std::move(board)), m_movementConroller(controller)
 {
 }
 
 void graphics::GameWorldView::draw()
 {
-    (*m_board).draw(m_renderTarget);
+    (m_board).draw(m_renderTarget);
     auto mouse_pos = sf::Mouse::getPosition(m_renderTarget);
     auto translated_pos = m_renderTarget.mapPixelToCoords(mouse_pos);
     for (const auto& [id, unit] : m_unitsGraph)
@@ -27,39 +27,12 @@ void graphics::GameWorldView::update(sf::Event& event)
     auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
     while (m_renderTarget.pollEvent(event)) 
     {
-        for (const auto& [id, unit] : m_unitsGraph)
+        switch (event.type)
         {
-            switch (event.type)
-            {
             case sf::Event::MouseButtonReleased:
-                if ((*unit).getBoundingRect().contains(translatedMousePos) && m_selectedUnitId != id)
+                if (!selectNewUnit(translatedMousePos) && m_unitsGraph.contains(m_selectedUnitId))
                 {
-                    if (m_unitsGraph.contains(m_selectedUnitId)) {
-                        auto prevSelectedUnit = m_unitsGraph[m_selectedUnitId].get();
-                        prevSelectedUnit->setAsSelected();
-                    }
-                    (*unit).setAsSelected();
-                    m_selectedUnitId = id;
-                }
-                else if (m_unitsGraph.contains(m_selectedUnitId))
-                {
-                    auto unit = m_unitsGraph[m_selectedUnitId].get();
-                    sf::Vector2f curPos = unit->getPosition();
-
-                    // now we have both the sprite position and the cursor
-                    // position lets do the calculation so our sprite will
-                    // face the position of the mouse
-                    const float PI = 3.14159265;
-
-                    float dx = curPos.x - translatedMousePos.x;
-                    float dy = curPos.y - translatedMousePos.y;
-
-                    float turretTextureOffset = 90;
-                    float rotation = ((atan2(dy, dx)) * 180 / PI) + turretTextureOffset;
-                    //unit->moveTo(TimePerFrame);
-                    unit->setPosition((*m_board).getTileSelectorPosition());
-                    unit->rotateTurretTo(rotation);
-
+                    moveSelectedUnit(translatedMousePos);
                 }
                 break;
             case sf::Event::MouseButtonPressed:
@@ -68,23 +41,68 @@ void graphics::GameWorldView::update(sf::Event& event)
             case sf::Event::Closed:
                 m_renderTarget.close();
                 break;
-
+                
                 // check the type of the event... event.type == sf::Event::MouseButtonPressed
             }
         }
-    }
+}
+
+bool graphics::GameWorldView::selectNewUnit(const sf::Vector2f& mousePos)
+{
+    for (const auto& [id, unit] : m_unitsGraph)
+    {
+        if ((*unit).getBoundingRect().contains(mousePos) && m_selectedUnitId != id)
+        {
+            if (m_unitsGraph.contains(m_selectedUnitId)) {
+                auto prevSelectedUnit = m_unitsGraph[m_selectedUnitId].get();
+                prevSelectedUnit->setAsSelected();
+            }
+            (*unit).setAsSelected();
+            m_selectedUnitId = id;
+            return true;
+        }
 
     }
+
+    return false;
+}
+
+void graphics::GameWorldView::moveSelectedUnit(const sf::Vector2f& mousePos)
+{
+
+    for (const auto& [id, unit] : m_unitsGraph)
+    {
+        auto unit = m_unitsGraph[m_selectedUnitId].get();
+        sf::Vector2f curPos = unit->getPosition();
+
+        // TODO Should be in Unit class
+        // now we have both the sprite position and the cursor
+        // position lets do the calculation so our sprite will
+        // face the position of the mouse
+        const float PI = 3.14159265;
+
+        float dx = curPos.x - mousePos.x;
+        float dy = curPos.y - mousePos.y;
+
+        float turretTextureOffset = 90;
+        float rotation = ((atan2(dy, dx)) * 180 / PI) + turretTextureOffset;
+        auto movePath = m_movementConroller.moveUnit(m_selectedUnitId, (m_board).getTileSelectorCoordinates());
+        if (std::size(movePath))
+        {
+            std::cout << movePath.back() << " Moved to\n";
+            unit->setPosition((m_board).getPositionByTileCoordinates(movePath.back()));
+        }
+        unit->rotateTurretTo(rotation);
+        break;
+    }
+}
 
 
 bool graphics::GameWorldView::addNewUnitView(SceneNodePtr unit, core::GameTile position)
 {
-    //auto is_tile_exists = [&position](HexagonalTile tile) { return  tile.getCoordinates() == position; };
+    //auto is_tile_exists = [&position](TileView tile) { return  tile.getCoordinates() == position; };
     //if (auto result = std::ranges::find_if(m_tiles, is_tile_exists); result != m_tiles.end())
-    //(*unit).setPosition({ 289.827 ,326.928 });
-    (*unit).setRotation(270);
-        //air.setOrigin(100, 20);
-    (*unit).setScale(0.17, 0.17);
+    unit->setPosition((m_board).getPositionByTileCoordinates(core::GameTile(0,0)));
      m_unitsGraph.insert({ (*unit).getId(), std::move(unit) });
     return true;
 }

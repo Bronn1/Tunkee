@@ -1,19 +1,19 @@
 #pragma once
 
+#include "events.h"
+
 #include "data_types.h"
-#include "unit_manager.h"
 
-#include <memory>
+//#include <memory>
 
-using UnitManagerPtr = std::shared_ptr<core::UnitManager>;
+//using UnitManagerPtr = std::shared_ptr<core::UnitManager>;
 
 namespace core {
 	class DamageCalculator : public events::Events
 	{
 	public:
-		DamageCalculator(const UnitManagerPtr unitMngr);
+		DamageCalculator();
 	private:
-		UnitManagerPtr m_unitManager;
 
 	};
 }

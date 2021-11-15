@@ -11,6 +11,8 @@
 //using UnitPtr
 
 namespace core {
+	/** For now unused
+	*/
 	class Player : public events::Events
 	{
 	public:

@@ -9,7 +9,7 @@ namespace core
 	/** Contains logic of possible action unit can do in
 	* a current turn. Unit has two possible types  of action
 	* move and shot, so at every turn unit can do either move-move
-	* or move-shot or shot-shot. Odd numbers in move and shot in half size
+	* or move-shot or shot-shot. Odd numbers in move and shot in a half size
 	* rounded to the next up
 	*/
 	class UnitActionState

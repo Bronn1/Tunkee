@@ -17,11 +17,7 @@ namespace events {
 	class Observer
 	{
 	public:
-		//virtual void handleEvent( const std::string& eventName) = 0;
-		/** should be notified about any event connected with tiles, last parameter is needed only for 
-		* 'getMoveArea' query exclusively 
-		*/
-		virtual void handleTileEvent(const std::string& eventName, const std::vector<core::GameTile>& tiles, int firstLayerMoveSize = 0) = 0;
+		virtual void update(const std::string& eventName) = 0;
 		virtual ~Observer() = default;
 	};
 
@@ -36,7 +32,7 @@ namespace events {
 	public:
 		void addObserver(const ObjectIdentifier& objectId, ObserverPtr& obs);
 		void removeObserver(const ObjectIdentifier& objectId);
-		void notifyTileEventObservers(const ObjectIdentifier& objectId, const std::string& eventName, std::vector<core::GameTile>& tiles, int firstLayerMoveSize = 0) const;
+		void notifyObservers(const ObjectIdentifier& objectId, const std::string& eventName) const;
 
 	private:
 		std::string m_name;

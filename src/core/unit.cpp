@@ -5,7 +5,7 @@
 // maybe better return by ref too, since we working with parameter which is passed by ref to avoid additional copy on return
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
 {// convert to tileDistance
-    int costSoFar = 0;
+    unsigned costSoFar = 0;
     auto [move] = getRemainingMovement();
 
     auto rmv_if = [&costSoFar, &move](const GameTile& t) {costSoFar += t.staticCastTypeToInt(); return costSoFar > move; };

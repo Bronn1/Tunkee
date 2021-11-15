@@ -13,10 +13,10 @@ void events::Events::removeObserver(const ObjectIdentifier& objectId)
 }
 
 // TODO try catch maybe
-void events::Events::notifyTileEventObservers(const ObjectIdentifier& objectId, const std::string& eventName, std::vector<core::GameTile>& tiles, int firstLayerMoveSize) const
+void events::Events::notifyObservers(const ObjectIdentifier& objectId, const std::string& eventName) const
 {
 	for (const auto [id, obs] : m_observers) {
 		if (id == objectId)
-			obs->handleTileEvent(eventName, tiles, firstLayerMoveSize);
+			obs->update(eventName);
 	}
 }

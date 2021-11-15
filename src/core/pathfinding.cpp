@@ -104,9 +104,6 @@ std::vector<GameTile> pathfinding::getShortestPath(const GameBoard& board, const
 				}
 			}
 		}
-		//std::cout << "\n";
-
-
 	}
 
 	return _createOrderedPath(cameFrom, source, destination);
@@ -118,7 +115,6 @@ std::vector<GameTile> pathfinding::_createOrderedPath(const std::unordered_map<G
 	GameTile current = destination;
 
 	while (cameFrom.contains(current)) {
-		// TODO maybe can do faster
 		resultPath.push_back(current);
 		current = cameFrom.at(current);
 	}
@@ -147,7 +143,7 @@ GameTile pathfinding::_roundToTile(const float q, const float r, const float s) 
 }
 
 //linear interpolation for line drawing.
-inline float pathfinding::_lerp(const double a, const double b, const  double t)
+inline float pathfinding::_lerp(const float a, const float b, const  float t)
 {
 	return a + (b - a) * t;
 }
@@ -166,7 +162,7 @@ std::vector<GameTile> pathfinding::drawLine(const GameTile& source, const GameTi
 
 	for (int i : std::views::iota(1, distance))
 	{
-		auto [q, r, s] = _cubeLerp(source, destination, 1.0 / distance * i);
+		auto [q, r, s] = _cubeLerp(source, destination, 1.0f / distance * i);
 		resultPath.push_back(_roundToTile(q, r, s));
 	}
 	resultPath.push_back(destination);

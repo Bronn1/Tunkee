@@ -5,7 +5,6 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include "../core/data_types.h"
-#include "../core/game_tile.h"
 
 #include <optional>
 #include <vector>
@@ -31,7 +30,6 @@ namespace graphics
 		void  update(sf::Time dt);
 		ObjectIdentifier  getId() const { return m_id; }
 		virtual void  showTooltip(const sf::Vector2f& mouse_pos) {}
-		//virtual ObjectIdentifier getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const;
 		virtual void  moveTo(sf::Time dt) {}
 		virtual void  rotateTurretTo(float angle) {}
 		virtual sf::FloatRect getBoundingRect() const = 0;
@@ -39,9 +37,7 @@ namespace graphics
 
 		sf::Vector2f  getWorldPosition() const;
 		sf::Transform  getWorldTransform() const;
-		virtual ~SceneNode() {
-
-		}
+		virtual ~SceneNode() = default;
 	private:
 		virtual void updateCurrent(sf::Time dt);
 		void	updateChildren(sf::Time dt);

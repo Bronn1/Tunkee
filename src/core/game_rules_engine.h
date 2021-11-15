@@ -4,6 +4,7 @@
 #include "game_command.h"
 #include "game_state_manager.h"
 #include "damage_calculator.h"
+#include "unit_manager.h"
 
 #include <vector>
 #include <memory>
@@ -13,18 +14,17 @@ using QueryPtr = std::shared_ptr<GameQuery>;
 using UnitManagerPtr = std::shared_ptr<core::UnitManager>;
 
 namespace core {
-	class MainEngine
+	class GameRulesEngine
 	{
 	public:
-		explicit MainEngine(const GameBoard& board, UnitManagerPtr unitMng, const PlayerIdentifier playerOneId = { 1 }, const PlayerIdentifier playerWTwoId = { 2 });
-
-		void executeAction(const ActionPtr& cmd);
-		void executeQuery(const QueryPtr& query);
+		explicit GameRulesEngine(const GameBoard& board, UnitManagerPtr unitMng, const PlayerIdentifier playerOneId = {1 }, const PlayerIdentifier playerWTwoId = {2 });
+		
+		std::vector<GameTile> executeMoveUnit(MoveToAction* action);
+		MoveAreaAndFirstLayerSize queryMoveArea(GetMoveAreaQuery* moveAreaQuery);
 		void undoLastCommand(const ActionPtr& cmd);
 		void endOfTurn();
 		const PlayerIdentifier getCurrentPlayer() const { return m_playerOneId; }
 		//void getMoveAreaForUnit(const ActionPtr& cmd) { m_board.getMoveAreaForUnit(cmd); }
-
 
 	private:
 		GameBoard m_board;
@@ -34,5 +34,6 @@ namespace core {
 		ActionStateStatus  m_playerRemainingActivity{ ActionStateStatus::full };
 		std::stack < ActionPtr > m_actionHistory;
 		DamageCalculator m_damageCalculator;
+		UnitManagerPtr  m_unitManager;
 	};
 }

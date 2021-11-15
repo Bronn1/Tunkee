@@ -1,14 +1,21 @@
-//
-// Created by ä on 06.11.2021.
-//
+#pragma once
 
-#ifndef TUNKEE_MOVEMENT_CONTROLLER_H
-#define TUNKEE_MOVEMENT_CONTROLLER_H
+#include "../core/game_rules_engine.h"
+#include "../core/data_types.h"
+#include "../core/game_tile.h"
 
+#include <vector>
 
-class MovementController {
+namespace controllers {
+	class MovementController
+	{
+	public:
+		MovementController(core::GameRulesEngine* engine, const PlayerIdentifier player);
+		std::vector<core::GameTile> selectUnit(const ObjectIdentifier& unitID) const;
+		std::vector<core::GameTile> moveUnit(const ObjectIdentifier& unitID, const core::GameTile& dest) const;
+	private:
+		core::GameRulesEngine* m_gameEngineRules;
+		PlayerIdentifier m_player;
+	};
+}
 
-};
-
-
-#endif //TUNKEE_MOVEMENT_CONTROLLER_H

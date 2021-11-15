@@ -6,7 +6,8 @@
 
 #include "SFML/Graphics/RenderTarget.hpp"
 
-
+constexpr float kDefaultUnitRotation = 270.f;
+constexpr float kDefaultUnitScale = 0.17f;
 graphics::TankView::TankView(ObjectIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
 	:
 	m_type(type)
@@ -21,6 +22,9 @@ graphics::TankView::TankView(ObjectIdentifier id, Type type, const sf::Texture& 
 	auto [x, y] = m_bodySprite.getPosition();
 	m_turretSprite.setPosition(x, y);
 	m_tooltipDescription.setParentBounds(bounds);
+
+	setRotation(kDefaultUnitRotation);
+	setScale(kDefaultUnitScale, kDefaultUnitScale);
 
 	EntityView::setVelocity({ kBasicVelocity, kBasicVelocity });
 }
@@ -72,13 +76,3 @@ void graphics::TankView::showTooltip(const sf::Vector2f& mouse_pos)
 		m_tooltipDescription.hide();
 	}
 }
-
-/*ObjectIdentifier graphics::TankView::getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const
-{
-	if (getBoundingRect().contains(clickedPos))
-	{
-		return m_id;
-	}
-	return ObjectIdentifier{0};
-}*/
-

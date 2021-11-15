@@ -18,6 +18,9 @@ enum class QueryTypes
     getMoveArea = 1
 };
 
+/**Player requests that can not be canceled. Mostly information requests
+* like get move area, get unit info and etc
+*/
 struct  GameQuery
 {
     GameQuery(QueryTypes type, std::string_view event_name) : m_type(type), m_name(event_name) {};
@@ -29,6 +32,10 @@ private:
     QueryTypes m_type;
 };
 
+
+/** Holds information about performed action by player.
+* Can be canceled by default.
+*/
 struct  GameAction
 {
 	GameAction(ActionTypes type, std::string_view event_name) : m_type(type), m_name(event_name) {};
@@ -51,4 +58,5 @@ struct MoveToAction : GameAction
 	MoveToAction() : GameAction(ActionTypes::moveUnit, "moveTo") {}
 	core::GameTile m_destination;
 };
+
 

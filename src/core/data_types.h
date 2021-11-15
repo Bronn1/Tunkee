@@ -1,6 +1,9 @@
 #pragma once
 
+#include "game_tile.h"
+
 #include <compare>
+#include <vector>
 
 /**
 * Object Identifier for every game entity 
@@ -31,6 +34,14 @@ struct Shots {
 	unsigned int shots;
 	//bool operator==(const RateOfFire&) const = default;
 	auto operator<=>(const Shots&) const = default;
+};
+
+struct MoveAreaAndFirstLayerSize {
+	MoveAreaAndFirstLayerSize() = default;
+	MoveAreaAndFirstLayerSize(std::vector<core::GameTile> area, int half): moveArea(area), firstLayerSize(half) {}
+	MoveAreaAndFirstLayerSize(MoveAreaAndFirstLayerSize&&) = default;
+	std::vector<core::GameTile> moveArea{};
+	int firstLayerSize{ 0 };
 };
 
 

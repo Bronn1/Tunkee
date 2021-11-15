@@ -8,7 +8,7 @@
 #include "../src/core/player.h"
 #include "../src/core/unit.h"
 #include "../src/core/events.h"
-#include "../src/core/main_engine.h"
+#include "../src/core/game_rules_engine.h"
 #include <ranges>
 #include <memory>
 
@@ -54,16 +54,14 @@ class MockObserver : public events::Observer {
 public:
     MockObserver() = default;
 
-    void handleTileEvent(const std::string& eventName,const  std::vector<core::GameTile>& tiles, int firstLayerMoveSize) override{
-        m_result =  tiles;
-        m_halfSize = firstLayerMoveSize;
+    void update(const std::string& eventName) override{
     }
     std::vector<core::GameTile> m_result;
     int m_halfSize;
 };
 
 TEST_F(observerFixture, observerMoveArea18_6) {
-    std::shared_ptr<GameQuery> cmd{ std::make_shared<GetMoveAreaQuery>() };
+    auto cmd{ std::make_shared<GetMoveAreaQuery>() };
     int expectedFull = 18;
     int expectedHalf = 6;
 
@@ -75,15 +73,15 @@ TEST_F(observerFixture, observerMoveArea18_6) {
     unit.get()->setPosition(GameTile(2, 2));
     unit.get()->setOwner(PlayerIdentifier{ 1 });
     (*unitMng).addUnit(unit);
-    std::shared_ptr<events::Observer> observer{ std::make_shared<MockObserver>() };
-    testableBoard.addObserver(cmd.get()->m_unitID, observer);
+    //std::shared_ptr<events::Observer> observer{ std::make_shared<MockObserver>() };
+    //testableBoard.addObserver(cmd.get()->m_unitID, observer);
 
-    core::MainEngine gameEngine{ testableBoard, unitMng, PlayerIdentifier{ 1 }, PlayerIdentifier{ 2 } };
-    gameEngine.executeQuery(cmd);
-    int resultSize = std::size(static_cast<MockObserver*>(observer.get())->m_result);
-    int resultSizeHalf = static_cast<MockObserver*>(observer.get())->m_halfSize;
+    core::GameRulesEngine gameEngine{testableBoard, unitMng, PlayerIdentifier{1 }, PlayerIdentifier{2 } };
+    auto moveArea = gameEngine.queryMoveArea(cmd.get());
+    int resultSize = std::size(moveArea.moveArea);
+    int resultFirstLayer = moveArea.firstLayerSize;
     EXPECT_EQ(resultSize, expectedFull);
-    EXPECT_EQ(resultSizeHalf, expectedHalf);
+    EXPECT_EQ(resultFirstLayer, expectedHalf);
     //EXPECT_EQ(result, true) << "move command failed\n";
     //EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
@@ -91,7 +89,7 @@ TEST_F(observerFixture, observerMoveArea18_6) {
 TEST_F(observerFixture, observerMoveArea9_5) {
     testableBoard.setTileAccessible(GameTile(1, 1), false);
     testableBoard.setTileAccessible(GameTile(3, 0), false);
-    std::shared_ptr<GameQuery> cmd{ std::make_shared<GetMoveAreaQuery>() };
+    auto cmd{ std::make_shared<GetMoveAreaQuery>() };
     int expectedFull = 9;
     int expectedHalf = 5;
 
@@ -103,16 +101,12 @@ TEST_F(observerFixture, observerMoveArea9_5) {
     unit.get()->setPosition(GameTile(0, 0));
     unit.get()->setOwner(PlayerIdentifier{ 1 });
     (*unitMng).addUnit(unit);
-    std::shared_ptr<events::Observer> observer{ std::make_shared<MockObserver>() };
-    testableBoard.addObserver(cmd.get()->m_unitID, observer);
 
-    core::MainEngine gameEngine{ testableBoard, unitMng, PlayerIdentifier{ 1 }, PlayerIdentifier{ 2 } };
-    gameEngine.executeQuery(cmd);
-    int resultSize = std::size(static_cast<MockObserver*>(observer.get())->m_result);
-    int resultSizeHalf = static_cast<MockObserver*>(observer.get())->m_halfSize;
+    core::GameRulesEngine gameEngine{testableBoard, unitMng, PlayerIdentifier{1 }, PlayerIdentifier{2 } };
+    auto moveArea = gameEngine.queryMoveArea(cmd.get());
+    int resultSize = std::size(moveArea.moveArea);
+    int resultFirstLayer = moveArea.firstLayerSize;
     EXPECT_EQ(resultSize, expectedFull);
-    EXPECT_EQ(resultSizeHalf, expectedHalf);
-    //EXPECT_EQ(result, true) << "move command failed\n";
-    //EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
+    EXPECT_EQ(resultFirstLayer, expectedHalf);
 }
 

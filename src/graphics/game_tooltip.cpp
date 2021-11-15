@@ -18,7 +18,7 @@ graphics::GameTooltip::GameTooltip()
 
 void graphics::GameTooltip::show()
 {
-	setText("HallfffffffA\nsdfdsfsdfdsf\n11232+\n11232+\n11232+");
+	setText("Random\nTESTSTETS\n11232+\nTOOLTIp\n11232+");
 	m_text.setColor(sf::Color::Black);
 
 	setFillColor(m_backgroundColor);

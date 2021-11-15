@@ -1,4 +1,4 @@
-#include "hexagonal_board.h"
+#include "board_view.h"
 
 #include<iostream>
 #include<ranges>
@@ -6,24 +6,23 @@
 constexpr float kSide = 55;
 constexpr float kOffset = 50;
 constexpr int   kPointCount = 6;
+constexpr float kHexOffsetMultiplierY = 0.93f;
+constexpr float kHexOffsetMultiplierX = 0.75f;
 
-graphics::GameBoardView::GameBoardView(const std::vector<core::GameTile>& tileCoordinateSystem, int width)
+graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width)
 {
     assert(width * width == std::size(tileCoordinateSystem));
 
-    graphics::HexagonalTile hexagon(kSide, 6, 0);
+    graphics::TileView hexagon(kSide, 0.f);
 
-    // TODO fix hardcoded path
-    if (!m_grassTexture.loadFromFile("data/textures/grass-test1.jpg"))
-        std::cerr << "Can not load texture\n";
-    m_grassTexture.setSmooth(true);
 
     for (int x : std::views::iota(0, width))
     {
         for (int y : std::views::iota(0, width))
         {
-            hexagon.setPosition((y % 2 ? (kOffset + kSide) * 0.93f : kOffset) + x * (hexagon.getGlobalBounds().width), kOffset + y * (hexagon.getGlobalBounds().height * 0.75));
-            hexagon.setTexture(&m_grassTexture);
+            hexagon.setPosition((y % 2 ? (kOffset + kSide) * kHexOffsetMultiplierY : kOffset) + x * (hexagon.getGlobalBounds().width), 
+                                kOffset + y * (hexagon.getGlobalBounds().height * kHexOffsetMultiplierX));
+            hexagon.setTexture(basicTexture);
             hexagon.setCoordinates(tileCoordinateSystem[x * width + y]);
             m_tiles.push_back(hexagon);
 
@@ -33,21 +32,17 @@ graphics::GameBoardView::GameBoardView(const std::vector<core::GameTile>& tileCo
     initTileSelector();
 }
 
-graphics::GameBoardView::GameBoardView(const int mapSize)
+graphics::BoardView::BoardView(const int mapSize, const  sf::Texture& basicTexture)
 {
-    graphics::HexagonalTile hexagon(kSide, 6, 0);
-
-    // TODO fix hardcoded path
-    if (!m_grassTexture.loadFromFile("data/textures/grass-test1.jpg"))
-        std::cerr << "Can not load texture\n";
-    m_grassTexture.setSmooth(true);
+    graphics::TileView hexagon(kSide, 0.f);
   
     for (int x : std::views::iota(0, mapSize))
     {
         for (int y : std::views::iota(0, mapSize))
         {
-            hexagon.setPosition((y % 2 ? (kOffset + kSide) * 0.93f : kOffset) + x * (hexagon.getGlobalBounds().width), kOffset + y * (hexagon.getGlobalBounds().height * 0.75));
-            hexagon.setTexture(&m_grassTexture);
+            hexagon.setPosition((y % 2 ? (kOffset + kSide) * kHexOffsetMultiplierY : kOffset) + x * (hexagon.getGlobalBounds().width), 
+                                kOffset + y * (hexagon.getGlobalBounds().height * kHexOffsetMultiplierX));
+            hexagon.setTexture(&basicTexture);
             m_tiles.push_back(hexagon);
         }
     }
@@ -55,10 +50,19 @@ graphics::GameBoardView::GameBoardView(const int mapSize)
     initTileSelector();
 }
 
-//auto is_tile_exists = [&position](HexagonalTile tile) { return  tile.getCoordinates()  == position; };
+//auto is_tile_exists = [&position](TileView tile) { return  tile.getCoordinates()  == position; };
 //if (auto result = std::ranges::find_if(m_tiles, is_tile_exists); result != m_tiles.end())
 
-void graphics::GameBoardView::initTileSelector() noexcept
+const sf::Vector2f& graphics::BoardView::getPositionByTileCoordinates(const core::GameTile& coordinates) const
+{
+    for (const auto& tile : m_tiles)
+    {
+        if (tile.getCoordinates() == coordinates)
+            return tile.getPosition();
+    }
+}
+
+void graphics::BoardView::initTileSelector() noexcept
 {
     m_tileSelector.setRadius(kSide);
     m_tileSelector.setPointCount(kPointCount);
@@ -68,7 +72,7 @@ void graphics::GameBoardView::initTileSelector() noexcept
     m_tileSelector.setOrigin(kSide, kSide);
 }
 
-void graphics::GameBoardView::draw(sf::RenderWindow& target)
+void graphics::BoardView::draw(sf::RenderWindow& target)
 {
     for (auto& tile: m_tiles)
     {

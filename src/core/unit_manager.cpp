@@ -1,7 +1,3 @@
-//
-// Created by ä on 02.11.2021.
-//
-
 #include "unit_manager.h"
 
 std::optional<core::Unit*> core::UnitManager::getUnitIfExist(const ObjectIdentifier& unitId) const
@@ -12,7 +8,7 @@ std::optional<core::Unit*> core::UnitManager::getUnitIfExist(const ObjectIdentif
 	}
 	else
 	{
-		std::cerr << "Unit with id: " << unitId.identifier << " does not exists\n"; // // TODO notify observer about existing units to sync up (not implemented yet)
+		std::cerr << "Unit with id: " << unitId.identifier << " does not exists\n";
 		return std::nullopt;
 	}
 }

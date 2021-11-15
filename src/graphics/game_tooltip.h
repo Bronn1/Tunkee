@@ -21,12 +21,12 @@ namespace graphics
 
 		GameTooltip();
 
-		void                 show();
-		void                 hide();
-		void                 setText(const std::string& text);
-		const sf::Text&      getTextToRender() const;
-		void                 setParentBounds(const sf::FloatRect& parentBounds);
-		void                 editTooltipSizeByText();
+		void  show();
+		void  hide();
+		void  setText(const std::string& text);
+		const sf::Text& getTextToRender() const;
+		void  setParentBounds(const sf::FloatRect& parentBounds);
+		void  editTooltipSizeByText();
 
 	private:
 		sf::Text             m_text;

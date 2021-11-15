@@ -34,19 +34,6 @@ void graphics::SceneNode::update(sf::Time dt)
 	updateChildren(dt);
 }
 
-/*ObjectIdentifier graphics::SceneNode::getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const
-{
-	// damn..
-	for (const auto& child : m_children)
-	{
-		auto nodeId = child->getNodeByCoordinatesIfExists(clickedPos);
-		if (nodeId != ObjectIdentifier{ 0 })
-			return nodeId;
-	}
-
-	return ObjectIdentifier{0};
-}*/
-
 void graphics::SceneNode::updateCurrent(sf::Time)
 {
 	// Do nothing by default

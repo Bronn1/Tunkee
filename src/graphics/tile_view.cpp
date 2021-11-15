@@ -1,6 +1,8 @@
-#include "hexagonal_tile.h"
+#include "tile_view.h"
 
-graphics::HexagonalTile::HexagonalTile(float radius, int pointCount, int outlineThicknes) : sf::CircleShape(radius, pointCount)
+constexpr int sidesAmount = 6;
+
+graphics::TileView::TileView(float radius, float outlineThicknes) : sf::CircleShape(radius, sidesAmount)
 {
     this->setOutlineColor(sf::Color::Black);
     this->setFillColor(sf::Color::White);
