@@ -1,8 +1,8 @@
 #include "pathfinding.h"
 
-#include <iostream>
 #include <ranges>
 #include <queue>
+#include <array>
 
 
 int pathfinding::getLength(const GameTile& tile) {
@@ -16,7 +16,7 @@ int pathfinding::getDistance(const GameTile& a, const GameTile& b) {
 std::vector<GameTile> pathfinding::getNeighbors(const GameBoard& board, const GameTile& source)
 {
 	auto [q, r, s, type, isAccessible] = source; //c++20 magic
-	std::vector<GameTile> possibleNeighbors = { GameTile(q, r - 1),GameTile(q + 1, r - 1), GameTile(q + 1, r),
+	std::array<GameTile, 6> possibleNeighbors = { GameTile(q, r - 1),GameTile(q + 1, r - 1), GameTile(q + 1, r),
 											 GameTile(q, r + 1), GameTile(q - 1, r + 1), GameTile(q - 1, r) };
 	std::vector<GameTile> actualNeighbors{};
 	for (auto&& i : possibleNeighbors) {
@@ -119,7 +119,6 @@ std::vector<GameTile> pathfinding::_createOrderedPath(const std::unordered_map<G
 		current = cameFrom.at(current);
 	}
 	std::ranges::reverse(resultPath);
-
 
 	return resultPath;
 }
