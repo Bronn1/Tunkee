@@ -45,6 +45,12 @@ void core::UnitActionState::setState(const ActionStateStatus& state)
 	}
 }
 
+TileDistance core::UnitActionState::getRemainingMoveInFirstHalf() const
+{
+	TileDistance remainingInFirstAction{ getRemainingMovePoints().distance - getHalfMovePoints().distance };
+	return TileDistance((m_movePoints.distance % 2 == 0) ? (remainingInFirstAction.distance) : (remainingInFirstAction.distance + 1));
+}
+
 Shots core::UnitActionState::getHalfShots() const
 {
 	return Shots((m_rateOfFire.shots % 2 == 0) ? (m_rateOfFire.shots / 2) : (m_rateOfFire.shots / 2) + 1);

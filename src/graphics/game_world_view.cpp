@@ -51,14 +51,24 @@ bool graphics::GameWorldView::selectNewUnit(const sf::Vector2f& mousePos)
 {
     for (const auto& [id, unit] : m_unitsGraph)
     {
-        if ((*unit).getBoundingRect().contains(mousePos) && m_selectedUnitId != id)
+        if ((*unit).getBoundingRect().contains(mousePos) )
         {
-            if (m_unitsGraph.contains(m_selectedUnitId)) {
-                auto prevSelectedUnit = m_unitsGraph[m_selectedUnitId].get();
-                prevSelectedUnit->setAsSelected();
+            if (m_selectedUnitId == id)
+            {
+                clearMoveArea();
+                (*unit).drawAsSelected();
+                m_selectedUnitId = { 0 };
             }
-            (*unit).setAsSelected();
-            m_selectedUnitId = id;
+            else
+            {
+                if (m_unitsGraph.contains(m_selectedUnitId)) {
+                    auto prevSelectedUnit = m_unitsGraph[m_selectedUnitId].get();
+                    prevSelectedUnit->drawAsSelected();
+                }
+                (*unit).drawAsSelected();
+                m_selectedUnitId = id;
+                showMoveAreaForUnit();
+            }
             return true;
         }
 
@@ -91,10 +101,23 @@ void graphics::GameWorldView::moveSelectedUnit(const sf::Vector2f& mousePos)
         {
             std::cout << movePath.back() << " Moved to\n";
             unit->setPosition((m_board).getPositionByTileCoordinates(movePath.back()));
+            showMoveAreaForUnit();
         }
         unit->rotateTurretTo(rotation);
         break;
     }
+}
+
+void graphics::GameWorldView::showMoveAreaForUnit()
+{
+    auto moveArea = m_movementConroller.getMoveArea(m_selectedUnitId);
+    m_board.resetMoveArea(moveArea);
+}
+
+void graphics::GameWorldView::clearMoveArea()
+{
+    auto emptyArea = MoveAreaAndFirstLayerSize{};
+    m_board.resetMoveArea(emptyArea);
 }
 
 

@@ -53,7 +53,7 @@ void graphics::TankView::rotateTurretTo(float angle)
 	m_turretSprite.setRotation(angle);
 }
 
-void graphics::TankView::setAsSelected()
+void graphics::TankView::drawAsSelected()
 {
 	if (m_isSelected) {
 		m_bodySprite.setColor(sf::Color::White);

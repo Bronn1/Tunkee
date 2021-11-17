@@ -3,6 +3,8 @@
 #include "tile_view.h"
 #include "scene_node.h"
 
+#include <unordered_map>
+
 
 namespace graphics {
 	/**
@@ -18,12 +20,18 @@ namespace graphics {
 		const core::GameTile& getTileSelectorCoordinates() const { return m_tileSelectorCoordinates;  }
 		const sf::Vector2f& getTileSelectorPosition() const { return m_tileSelector.getPosition(); }
 		const sf::Vector2f& getPositionByTileCoordinates(const core::GameTile& coordinates) const;
+
+
+		//MoveAreaAndFirstLayerSize& getMoveArea();
+		void resetMoveArea(MoveAreaAndFirstLayerSize& moveArea);
 	private:
 		void initTileSelector() noexcept;
 
-		std::vector<graphics::TileView>   m_tiles;
+		//std::vector<graphics::TileView>   m_tiles;
+		std::unordered_map<core::GameTile, graphics::TileView> m_tiles{};
 		sf::CircleShape  m_tileSelector;
 		core::GameTile   m_tileSelectorCoordinates{0, 0};
+		MoveAreaAndFirstLayerSize       m_moveArea;
 	};
 }
 

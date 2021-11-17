@@ -26,6 +26,8 @@ namespace graphics {
 	private:
 		bool selectNewUnit(const sf::Vector2f& mousePos);
 		void moveSelectedUnit(const sf::Vector2f& mousePos);
+		void showMoveAreaForUnit();
+		void clearMoveArea();
 	private:
 		sf::RenderWindow& m_renderTarget;
 		BoardViewPtr m_board;
@@ -33,7 +35,5 @@ namespace graphics {
 		PlayerIdentifier m_playerId{ 0 };
 		ObjectIdentifier  m_selectedUnitId{ 0 };
 		controllers::MovementController m_movementConroller;
-
-
 	};
 }

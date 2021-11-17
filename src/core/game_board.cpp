@@ -22,7 +22,6 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 	}
 }
 
-
 MoveAreaAndFirstLayerSize core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit)
 {
 	if (unit)
@@ -30,11 +29,13 @@ MoveAreaAndFirstLayerSize core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQ
 		// full distance and half distance should be printed with different colors in game
 		TileDistance halfMovement = unit->getHalfMovePoints();
 		TileDistance remainingMovement = unit->getRemainingMovement();
+		TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
 		std::vector<GameTile> moveArea = {};
-		int firstLayerSize;
-		if (remainingMovement > halfMovement)
+		int firstLayerSize = 0;
+
+		if (remainingMovement >= halfMovement)
 		{
-			moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), halfMovement);
+			moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovementInFirstHalf);
 			firstLayerSize = std::size(moveArea);
 			auto  fullMoveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
 			for (auto& tile : fullMoveArea)
@@ -47,9 +48,8 @@ MoveAreaAndFirstLayerSize core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQ
 		}
 		else {
 			moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
-			firstLayerSize = std::size(moveArea);
+			firstLayerSize = 0;
 		}
-		std::cout << std::size(moveArea) << "SIZE\n"; //notify observers
 		return MoveAreaAndFirstLayerSize{ std::move(moveArea), firstLayerSize };//moveArea;
 	}
 	return MoveAreaAndFirstLayerSize{};

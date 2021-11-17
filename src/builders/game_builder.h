@@ -11,7 +11,7 @@
 using BoardModelPtr = std::unique_ptr<core::GameBoard>;
 using WorldViewPtr = std::unique_ptr<graphics::GameWorldView>;
 using GameEnginePtr = std::unique_ptr<core::GameRulesEngine>;
-
+constexpr int kTestMapSize = 10;
 
 class GameBuilder
 {
@@ -26,7 +26,7 @@ public:
 
 private:
 	GameBuilder();
-	std::vector<core::GameTileType> generateMinimalTileset() { return std::vector<core::GameTileType>(25); }
+	std::vector<core::GameTileType> generateMinimalTileset() { return std::vector<core::GameTileType>(kTestMapSize); }
 	void reset();
 	// TODO only for TESTS switch to pointer back BoardModelPtr m_boardModel;
 	core::GameBoard m_boardModel;

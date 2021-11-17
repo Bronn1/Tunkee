@@ -25,6 +25,7 @@ struct PlayerIdentifier {
 struct TileDistance {
 	unsigned int distance;
 	bool operator==(const TileDistance&) const = default;
+	//auto operator-(const TileDistance& other) const { return TileDistance{ this->distance - other.distance }; }
 	TileDistance operator+=(const TileDistance& d) { distance += d.distance; return *this; }
 	auto operator<=>(const TileDistance&) const = default;
 };
@@ -39,7 +40,8 @@ struct Shots {
 struct MoveAreaAndFirstLayerSize {
 	MoveAreaAndFirstLayerSize() = default;
 	MoveAreaAndFirstLayerSize(std::vector<core::GameTile> area, int half): moveArea(area), firstLayerSize(half) {}
-	MoveAreaAndFirstLayerSize(MoveAreaAndFirstLayerSize&&) = default;
+	//MoveAreaAndFirstLayerSize(MoveAreaAndFirstLayerSize&&) = default;
+	MoveAreaAndFirstLayerSize& operator=(const MoveAreaAndFirstLayerSize& other) = default;
 	std::vector<core::GameTile> moveArea{};
 	int firstLayerSize{ 0 };
 };

@@ -1,5 +1,5 @@
 #include "board_view.h"
-
+#include "graphics_data_types.h"
 #include<iostream>
 #include<ranges>
 
@@ -8,6 +8,7 @@ constexpr float kOffset = 50;
 constexpr int   kPointCount = 6;
 constexpr float kHexOffsetMultiplierY = 0.93f;
 constexpr float kHexOffsetMultiplierX = 0.75f;
+
 
 graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width)
 {
@@ -23,8 +24,8 @@ graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinate
             hexagon.setPosition((y % 2 ? (kOffset + kSide) * kHexOffsetMultiplierY : kOffset) + x * (hexagon.getGlobalBounds().width), 
                                 kOffset + y * (hexagon.getGlobalBounds().height * kHexOffsetMultiplierX));
             hexagon.setTexture(basicTexture);
-            hexagon.setCoordinates(tileCoordinateSystem[x * width + y]);
-            m_tiles.push_back(hexagon);
+            hexagon.setCoordinates(tileCoordinateSystem[y * width + x]);
+            m_tiles.insert({ tileCoordinateSystem[y * width + x] , hexagon});
 
         }
     }
@@ -43,7 +44,8 @@ graphics::BoardView::BoardView(const int mapSize, const  sf::Texture& basicTextu
             hexagon.setPosition((y % 2 ? (kOffset + kSide) * kHexOffsetMultiplierY : kOffset) + x * (hexagon.getGlobalBounds().width), 
                                 kOffset + y * (hexagon.getGlobalBounds().height * kHexOffsetMultiplierX));
             hexagon.setTexture(&basicTexture);
-            m_tiles.push_back(hexagon);
+           // hexagon.setCoordinates(tileCoordinateSystem[x * mapSize + y]);
+            //m_tiles.insert({ tileCoordinateSystem[x * mapSize + y] , hexagon });
         }
     }
 
@@ -55,11 +57,35 @@ graphics::BoardView::BoardView(const int mapSize, const  sf::Texture& basicTextu
 
 const sf::Vector2f& graphics::BoardView::getPositionByTileCoordinates(const core::GameTile& coordinates) const
 {
-    for (const auto& tile : m_tiles)
+    if (m_tiles.contains(coordinates))
     {
-        if (tile.getCoordinates() == coordinates)
-            return tile.getPosition();
+       return m_tiles.at(coordinates).getPosition();
     }
+}
+
+void graphics::BoardView::resetMoveArea(MoveAreaAndFirstLayerSize& moveArea)
+{
+    int counter = 0;
+    sf::Color colorFirstLayer(kBoardFirstLayerColorR, kBoardFirstLayerColorG, kBoardFirstLayerColorB);
+    sf::Color colorSecondLayer(kBoardSecondLayerColorR, kBoardSecondLayerColorG, kBoardSecondLayerColorB, kBackSecondColorAlpha);
+    for (const auto& area : m_moveArea.moveArea)
+    {
+        m_tiles.at(area).setFillColor(sf::Color::White);
+    }
+
+    for (const auto& area : moveArea.moveArea)
+    {
+        if (counter < moveArea.firstLayerSize)
+        {
+            m_tiles.at(area).setFillColor(colorFirstLayer);
+        }
+        else
+        {
+            m_tiles.at(area).setFillColor(colorSecondLayer);
+        }
+        counter++;
+    }
+    m_moveArea = std::move(moveArea);
 }
 
 void graphics::BoardView::initTileSelector() noexcept
@@ -74,7 +100,7 @@ void graphics::BoardView::initTileSelector() noexcept
 
 void graphics::BoardView::draw(sf::RenderWindow& target)
 {
-    for (auto& tile: m_tiles)
+    for (auto& [coordinates, tile]: m_tiles)
     {
         target.draw(tile);
         auto mousePos = sf::Mouse::getPosition(target); // Mouse position relative to the window
@@ -84,7 +110,6 @@ void graphics::BoardView::draw(sf::RenderWindow& target)
             auto [posx, posy] = tile.getPosition();
             m_tileSelector.setPosition(posx, posy);
             m_tileSelectorCoordinates = core::GameTile(tile.getCoordinates());
-           // std::cout << posx << " " << posy << "\n";
            //std::cout << tile.getCoordinates() << "\n";
         }
        

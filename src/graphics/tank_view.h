@@ -29,7 +29,7 @@ namespace graphics
 
 		void  moveTo(sf::Time dt);
 		void  rotateTurretTo(float angle);
-		void  setAsSelected();
+		void  drawAsSelected();
 		void  showTooltip(const sf::Vector2f& mouse_pos);
 		inline void setTooltipText(const std::string& text) { m_tooltipDescription.setText(text); }
 		//ObjectIdentifier getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const override final;

@@ -33,7 +33,7 @@ namespace graphics
 		virtual void  moveTo(sf::Time dt) {}
 		virtual void  rotateTurretTo(float angle) {}
 		virtual sf::FloatRect getBoundingRect() const = 0;
-		virtual void  setAsSelected() {}
+		virtual void  drawAsSelected() {}
 
 		sf::Vector2f  getWorldPosition() const;
 		sf::Transform  getWorldTransform() const;

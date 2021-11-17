@@ -19,6 +19,7 @@ namespace core
 			: m_movePoints(movePts), m_rateOfFire(fireRate), m_remainingMovePoints(movePts), m_remainingShots(fireRate) {}
 		void setState(const ActionStateStatus& state);
 		TileDistance getRemainingMovePoints() const { return m_remainingMovePoints; }
+		TileDistance getRemainingMoveInFirstHalf() const;
 		TileDistance getFullMovePoints() const { return m_movePoints; }
 		Shots getHalfShots() const;
 		TileDistance getHalfMovePoints() const;
@@ -41,6 +42,7 @@ namespace core
 		inline GameTile getPosition() const { return m_position; }
 		inline TileDistance getHalfMovePoints() { return m_actionState.getHalfMovePoints(); }
 		TileDistance getRemainingMovement() { return m_actionState.getRemainingMovePoints(); }
+		TileDistance getRemainingMovementInFirstHalf() { return m_actionState.getRemainingMoveInFirstHalf(); }
 		TileDistance getFullMovement() { return m_actionState.getFullMovePoints(); }
 		void resetActionState() { m_actionState.setState(ActionStateStatus::full); }
 		inline PlayerIdentifier getOwnerID() const { return m_owner; }
