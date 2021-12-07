@@ -4,11 +4,13 @@
 
 #include "tank_view.h"
 
+#include <numbers>
 #include "SFML/Graphics/RenderTarget.hpp"
 
 constexpr float kDefaultUnitRotation = 270.f;
 constexpr float kDefaultUnitScale = 0.17f;
-graphics::TankView::TankView(ObjectIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
+
+graphics::TankView::TankView(UnitIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
 	:
 	m_type(type)
 	, m_bodySprite(textures), m_turretSprite(turrretTexture)
@@ -42,15 +44,25 @@ sf::FloatRect graphics::TankView::getBoundingRect() const
 	return getWorldTransform().transformRect(m_bodySprite.getGlobalBounds());
 }
 
-void graphics::TankView::moveTo(sf::Time dt)
+void graphics::TankView::rotateTurretTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
 {
-	EntityView::updateCurrent(dt);
-	//setR
+	float dx = curPoint.x - targetPoint.x;
+	float dy = curPoint.y - targetPoint.y;
+
+	float turretTextureOffset = 90;
+	float rotation = ((atan2(dy, dx)) * 180 / std::numbers::pi) + turretTextureOffset;
+	m_turretSprite.setRotation(rotation);
 }
 
-void graphics::TankView::rotateTurretTo(float angle)
+void graphics::TankView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
 {
-	m_turretSprite.setRotation(angle);
+	float dx = curPoint.x - targetPoint.x;
+	float dy = curPoint.y - targetPoint.y;
+
+	float rotation = ((atan2(dy, dx)) * 180 / std::numbers::pi);
+	setRotation(rotation);
+	float turretTextureOffset = 0;
+	m_turretSprite.setRotation(turretTextureOffset);
 }
 
 void graphics::TankView::drawAsSelected()

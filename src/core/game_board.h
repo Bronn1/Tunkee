@@ -1,6 +1,5 @@
 #pragma once
 
-#include "events.h"
 #include "game_tile.h"
 #include "unit.h"
 #include "game_command.h"
@@ -10,18 +9,17 @@
 #include <memory>
 
 using ActionPtr = std::shared_ptr<GameAction>;
-using UnitPtr = std::shared_ptr<core::Unit>;
 
 namespace core {
 
-	class GameBoard : public events::Events
+	class GameBoard
 	{
 		
 	public:
 		GameBoard() = default;
 		GameBoard(std::vector<GameTileType> tiles, int width, int height);
 
-		MoveAreaAndFirstLayerSize getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit);
+		MoveAreaInfo getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit);
 		std::vector<GameTile> moveTo(const MoveToAction* moveToCmd, Unit* unit);
 		
 		inline GameTile getTile(const  GameTile& tile) const { if (m_tiles.contains(tile)) return m_tiles.at(tile); else return GameTile(999, 9999); }
@@ -38,7 +36,7 @@ namespace core {
 				m_tiles.at(tile).isAccessible = isAccessible;
 		}
 
-		inline bool isAccessible(const GameTile& tile) const { return  tile.isAccessible; }
+		inline bool isAccessible(const GameTile& tile) const { return  m_tiles.at(tile).isAccessible; }
 		inline bool contains(const GameTile& tile) const { return  m_tiles.contains(tile); }
 		
 		void printBoardTest();

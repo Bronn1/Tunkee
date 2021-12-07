@@ -4,16 +4,16 @@ using namespace core;
 
 
 /*
-void core::Player::moveUnitTo(const ObjectIdentifier& id, const GameTile& destination)
+void core::Player::moveUnitTo(const UnitIdentifier& id, const GameTile& destination)
 {
 }
 
-GameTile Player::getUnitPosition(const ObjectIdentifier& id) const
+GameTile Player::getUnitPosition(const UnitIdentifier& id) const
 {
     return GameTile();
 }
 
-inline bool core::Player::hasUnitWithId(const ObjectIdentifier& id) const
+inline bool core::Player::hasUnitWithId(const UnitIdentifier& id) const
 {
     bool hasUnit = m_ownedUnits.contains(id);
 
@@ -26,7 +26,7 @@ inline bool core::Player::hasUnitWithId(const ObjectIdentifier& id) const
     }
 }
 
-bool Player::checkUnitPositionAndSetIfNot(const ObjectIdentifier& id, const GameTile& viewPosition)
+bool Player::checkUnitPositionAndSetIfNot(const UnitIdentifier& id, const GameTile& viewPosition)
 {
     auto [ID] = id;
     const GameTile& realPosition = m_ownedUnits.at(id).getPosition();
@@ -39,3 +39,19 @@ bool Player::checkUnitPositionAndSetIfNot(const ObjectIdentifier& id, const Game
             return false;
         }
 }*/
+
+core::Player::Player(const PlayerIdentifier id, UnitsPickType pickType) :
+    m_id(id), m_pickType(pickType)
+{
+}
+
+bool core::Player::isAbleToAddUnit()
+{
+    return true;
+}
+
+bool core::Player::endPickingStage()
+{
+    m_isFinishedPickingStage = true;
+    return true;
+}

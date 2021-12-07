@@ -5,20 +5,50 @@
 
 #include <map>
 #include <optional>
+#include <coroutine>
+#include <functional>
 
-using UnitPtr = std::shared_ptr<core::Unit>;
+using UnitPtr = std::unique_ptr<core::Unit>;
 
 namespace core {
-	
+	struct IdentifierGenerator {
+		struct promise_type {
+			using coroHandle = std::coroutine_handle<promise_type>;
+			unsigned m_value;
+			IdentifierGenerator get_return_object() {
+				return { .m_handle = coroHandle::from_promise(*this) };
+			}
+			std::suspend_never initial_suspend() { return {}; }
+			std::suspend_never final_suspend() noexcept { return {}; }
+			void unhandled_exception() {}
+			void return_void() noexcept {}
+			std::suspend_always yield_value(unsigned value)
+			{
+				m_value = value;
+				return {};
+			}
+
+		};
+		using coroHandle = std::coroutine_handle<promise_type>;
+		coroHandle m_handle;
+	};
+
+	/** Class holds all units in current game
+	* Unit id will be reassigned while unit being added to manager
+	* to keep unique ids even in multiplayer game 
+	* To generate id uses simple coroutine with co_yeild 
+	*/
 	class UnitManager 
 	{
 	public:
-		//UnitManager() = default;
-		std::optional<Unit*> getUnitIfExist(const ObjectIdentifier& unitId) const;
-		inline void addUnit(UnitPtr unit) { m_units.insert({ unit.get()->getID(), unit }); }
+		UnitManager();
+		std::optional<Unit*> getUnitIfExist(const UnitIdentifier& unitId) const;
+		UnitIdentifier addUnit(UnitPtr unit);
 
 	private:
-		std::map < ObjectIdentifier, UnitPtr, Comparator<ObjectIdentifier>> m_units{};
+		std::map < UnitIdentifier, UnitPtr, Comparator<UnitIdentifier>> m_units{};
+		std::function< IdentifierGenerator()> m_generator;
+		IdentifierGenerator::coroHandle m_generatorHandle;
 	};
 }
 

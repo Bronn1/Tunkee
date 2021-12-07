@@ -14,7 +14,7 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 		int r_offset = floor(r / 2.0); // or r>>1
 		for (int q = left - r_offset; q <= m_height - r_offset; q++) {
 			if (m_tiles.contains(core::GameTile(q, r))) {
-				std::cout << "fFFFF\n";
+				std::cout << "fFFFF\n"; // throw custom exception 
 			}
 			m_tiles.insert({ GameTile(q, r), GameTile(q, r) });
 			m_orderedBoard.push_back(GameTile(q, r));
@@ -22,37 +22,33 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 	}
 }
 
-MoveAreaAndFirstLayerSize core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit)
+MoveAreaInfo core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit)
 {
-	if (unit)
-	{
-		// full distance and half distance should be printed with different colors in game
-		TileDistance halfMovement = unit->getHalfMovePoints();
-		TileDistance remainingMovement = unit->getRemainingMovement();
-		TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
-		std::vector<GameTile> moveArea = {};
-		int firstLayerSize = 0;
+	// full distance and half distance should be printed with different colors in game
+	TileDistance halfMovement = unit->getHalfMovePoints();
+	TileDistance remainingMovement = unit->getRemainingMovement();
+	TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
+	std::vector<GameTile> moveArea = {};
+	int firstLayerSize = 0;
 
-		if (remainingMovement >= halfMovement)
+	if (remainingMovement >= halfMovement) 
+	{
+		moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovementInFirstHalf);
+		firstLayerSize = std::size(moveArea);
+		auto  fullMoveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
+		for (auto& tile : fullMoveArea)
 		{
-			moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovementInFirstHalf);
-			firstLayerSize = std::size(moveArea);
-			auto  fullMoveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
-			for (auto& tile : fullMoveArea)
-			{
-				//v2.insert(v2.end(), std::make_move_iterator(v1.begin() + 7), std::make_move_iterator(v1.end()));
-				// add only new(unique) tiles
-				if (std::ranges::find(moveArea, tile) == std::end(moveArea))
-					moveArea.push_back(tile);
-			}
+			//v2.insert(v2.end(), std::make_move_iterator(v1.begin() + 7), std::make_move_iterator(v1.end()));
+			// add only new(unique) tiles
+			if (std::ranges::find(moveArea, tile) == std::end(moveArea))
+				moveArea.push_back(tile);
 		}
-		else {
-			moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
-			firstLayerSize = 0;
-		}
-		return MoveAreaAndFirstLayerSize{ std::move(moveArea), firstLayerSize };//moveArea;
 	}
-	return MoveAreaAndFirstLayerSize{};
+	else {
+		moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
+		firstLayerSize = 0;
+	}
+	return MoveAreaInfo{ std::move(moveArea), firstLayerSize };//moveArea;
 }
 
 std::vector<core::GameTile> core::GameBoard::moveTo(const MoveToAction* moveToCmd, Unit* unit)

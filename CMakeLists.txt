@@ -11,8 +11,8 @@ add_subdirectory(src)
 source_group("" FILES ${no_group_source_files})
 
 set(Header_Files
-        "tunkee_game.h"
-        "src/core/game_state_manager.h"
+        "src/tunkee_game.h"
+        "src/core/game_rules.h"
         "src/core/data_types.h"
         "src/core/events.h"
         "src/core/unit_manager.h"
@@ -20,7 +20,7 @@ set(Header_Files
         "src/core/game_board.h"
         "src/core/game_command.h"
         "src/core/game_tile.h"
-        "src/core/game_rules_engine.h"
+        "src/core/game_engine.h"
         "src/core/pathfinding.h"
         "src/core/player.h"
         "src/core/unit.h"
@@ -31,17 +31,19 @@ set(Header_Files
         "src/graphics/entity_view.h"
         "src/graphics/tank_view.h"
         "src/graphics/game_tooltip.h"
-        "src/builders/game_builder.h"
+        "src/game_builder.h"
         "src/graphics/graphics_data_types.h"
         "src/graphics/game_world_view.h"
-        "src/controllers/movement_controller.h"
+        "src/controllers/game_controller.h"
+        "src/graphics/unit_setup_view.h"
+        "src/units_factory.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
         "main.cpp"
-        "tunkee_game.cpp"
-        "src/core/game_state_manager.cpp"
+        "src/tunkee_game.cpp"
+        "src/core/game_rules.cpp"
         "src/core/data_types.cpp"
         "src/core/events.cpp"
         "src/core/unit_manager.cpp"
@@ -49,7 +51,7 @@ set(Source_Files
         "src/core/game_board.cpp"
         "src/core/game_command.cpp"
         "src/core/game_tile.cpp"
-        "src/core/game_rules_engine.cpp"
+        "src/core/game_engine.cpp"
         "src/core/pathfinding.cpp"
         "src/core/player.cpp"
         "src/core/unit.cpp"
@@ -60,15 +62,17 @@ set(Source_Files
         "src/graphics/entity_view.cpp"
         "src/graphics/tank_view.cpp"
         "src/graphics/game_tooltip.cpp"
-        "src/builders/game_builder.cpp"
+        "src/game_builder.cpp"
         "src/graphics/game_world_view.cpp"
-        "src/controllers/movement_controller.cpp"
+        "src/controllers/game_controller.cpp"
+        "src/graphics/unit_setup_view.cpp"
+        "src/units_factory.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES})
+add_executable(Tunkee ${ALL_FILES} "src/graphics/resource_holder.h" "src/graphics/resource_holder.cpp")
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include "tunkee_game.h"
+#include "src/tunkee_game.h"
 
 #include <stdexcept>
 #include <iostream>

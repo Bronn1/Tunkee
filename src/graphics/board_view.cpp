@@ -26,7 +26,6 @@ graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinate
             hexagon.setTexture(basicTexture);
             hexagon.setCoordinates(tileCoordinateSystem[y * width + x]);
             m_tiles.insert({ tileCoordinateSystem[y * width + x] , hexagon});
-
         }
     }
 
@@ -55,7 +54,7 @@ graphics::BoardView::BoardView(const int mapSize, const  sf::Texture& basicTextu
 //auto is_tile_exists = [&position](TileView tile) { return  tile.getCoordinates()  == position; };
 //if (auto result = std::ranges::find_if(m_tiles, is_tile_exists); result != m_tiles.end())
 
-const sf::Vector2f& graphics::BoardView::getPositionByTileCoordinates(const core::GameTile& coordinates) const
+sf::Vector2f graphics::BoardView::getPositionByTileCoordinates(const core::GameTile& coordinates) const
 {
     if (m_tiles.contains(coordinates))
     {
@@ -63,19 +62,45 @@ const sf::Vector2f& graphics::BoardView::getPositionByTileCoordinates(const core
     }
 }
 
-void graphics::BoardView::resetMoveArea(MoveAreaAndFirstLayerSize& moveArea)
+std::vector<sf::Vector2f> graphics::BoardView::getVectorPositionsByTiles(const std::vector<core::GameTile>& coordinates) const
+{
+    std::vector<sf::Vector2f> positions{};
+    for (const auto& tile : coordinates)
+    {
+        auto position = getPositionByTileCoordinates(tile);
+        positions.push_back(position);
+    }
+
+    return positions;
+}
+
+std::optional<core::GameTile> graphics::BoardView::getCoordinatesIfValid(const sf::Vector2f& pos) const
+{
+    for (auto& [coordinates, tile] : m_tiles)
+    {
+        if (tile.getGlobalBounds().contains(pos))
+        {
+            return { tile.getCoordinates() };
+        }
+    }
+
+    return std::nullopt;
+}
+
+
+void graphics::BoardView::resetMoveArea(std::vector<core::GameTile> moveArea, int firstLayerSize)
 {
     int counter = 0;
     sf::Color colorFirstLayer(kBoardFirstLayerColorR, kBoardFirstLayerColorG, kBoardFirstLayerColorB);
     sf::Color colorSecondLayer(kBoardSecondLayerColorR, kBoardSecondLayerColorG, kBoardSecondLayerColorB, kBackSecondColorAlpha);
-    for (const auto& area : m_moveArea.moveArea)
+    for (const auto& area : m_moveArea)
     {
         m_tiles.at(area).setFillColor(sf::Color::White);
     }
 
-    for (const auto& area : moveArea.moveArea)
+    for (const auto& area : moveArea)
     {
-        if (counter < moveArea.firstLayerSize)
+        if (counter < firstLayerSize)
         {
             m_tiles.at(area).setFillColor(colorFirstLayer);
         }
