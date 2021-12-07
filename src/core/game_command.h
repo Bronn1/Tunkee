@@ -90,7 +90,7 @@ struct GameInfoMessage {
 	std::string m_message{}; // maybe string_view better here??
 };
 
-// structs like *Info containts information that view should know about changes in game model(core)
+// structs like *Info containts information which view should know about changes in game model(core)
 // model should notify view with these structures
 
 struct MoveAreaInfo {

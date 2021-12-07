@@ -12,11 +12,11 @@ namespace core
 	* or move-shot or shot-shot. Odd numbers in move and shot in a half size
 	* rounded to the next up
 	* Example
-	*  movementPoint = 5;
-    *  rateOfFire = 3;
-	*  move move - moveP = 5, shots = 0
-	*  move fire  - moveP = 3, shots = 2
-	*  fire fire - moveP = 0, shots = 3 
+	* movementPoint = 5;
+    * rateOfFire = 3;
+	* move move - moveP = 5, shots = 0
+	* move fire  - moveP = 3, shots = 2
+	* fire fire - moveP = 0, shots = 3 
 	*/
 	class UnitActionState
 	{

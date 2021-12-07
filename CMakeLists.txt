@@ -37,6 +37,7 @@ set(Header_Files
         "src/controllers/game_controller.h"
         "src/graphics/unit_setup_view.h"
         "src/units_factory.h"
+        "src/graphics/resource_holder.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -67,12 +68,13 @@ set(Source_Files
         "src/controllers/game_controller.cpp"
         "src/graphics/unit_setup_view.cpp"
         "src/units_factory.cpp"
+        "src/graphics/resource_holder.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES} "src/graphics/resource_holder.h" "src/graphics/resource_holder.cpp")
+add_executable(Tunkee ${ALL_FILES})
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

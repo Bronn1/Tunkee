@@ -46,7 +46,7 @@ namespace core
 
 	/* In first version of the rules players move units in turns one by one until all of units run out 
 	* of possible actions. Player can not select another unit if he already started action with 
-	* other unit until all possible actions has been used.
+	* one unit until all possible actions has been used.
 	**/
 	class GameRulesBasic : public GameRulesInterface
 	{
@@ -54,9 +54,6 @@ namespace core
 		GameRulesBasic() {};
 		bool isMoveActionAllowed(const MoveToAction& moveToaction)  override final;
 		UnitIdentifier selectUnit(const SelectUnitQuery* selectUnitQuery)  override final;
-		//bool isActionAllowed( const SelectUnitAction& selectAction) override;
-		//bool isActionAllowed( const UnitDeselectedAction& deselectAction);
-		//bool isActionAllowed( const MoveToAction& moveToaction);
 
 	private:
 		int m_actionLeft{ 2 };

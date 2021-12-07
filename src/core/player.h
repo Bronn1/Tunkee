@@ -32,17 +32,11 @@ namespace core {
 		bool isFinishedPickingStage() const { return m_isFinishedPickingStage; }
 		bool endPickingStage();
 		PlayerIdentifier getId() const { return m_id; }
-		//void moveUnitTo(const UnitIdentifier& id, const GameTile& destination);
-		
-		//GameTile getUnitPosition(const UnitIdentifier& id) const ;
-		
-		//inline bool hasUnitWithId(const UnitIdentifier& id) const;
-		//bool checkUnitPositionAndSetIfNot(const UnitIdentifier& id, const GameTile& pos);
+
 	private:
 		PlayerIdentifier m_id;
 		UnitsPickType m_pickType;
 		bool m_isFinishedPickingStage{ false };
-		//std::vector<Unit> m_ownedUnits;
 		std::set < UnitIdentifier, Comparator<UnitIdentifier>> m_ownedUnitIds{};
 	};
 

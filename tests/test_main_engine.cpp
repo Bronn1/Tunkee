@@ -1,16 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "../src/core/pathfinding.h"
-#include "../src/core/game_board.h"
-#include "../src/core/game_command.h"
-#include "../src/core/data_types.h"
-#include "../src/core/game_rules.h"
-#include "../src/core/player.h"
-#include "../src/core/unit.h"
-#include "../src/core/events.h"
 #include "../src/core/game_engine.h"
-#include <ranges>
-#include <memory>
 
 class MyGameEngineRulesFixture : public ::testing::Test {
 public:
