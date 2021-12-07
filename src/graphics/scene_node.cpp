@@ -70,6 +70,17 @@ void graphics::SceneNode::drawChildren(sf::RenderTarget& target, sf::RenderState
 	}
 }
 
+sf::Vector2f graphics::SceneNode::interpolateWithFactor(const sf::Vector2f& startPoint, const sf::Vector2f& endPoint, float factor) const
+{
+	if (factor > 1.f)
+		factor = 1.f;
+
+	else if (factor < 0.f)
+		factor = 0.f;
+
+	return startPoint + (endPoint - startPoint) * factor;
+}
+
 sf::Vector2f graphics::SceneNode::getWorldPosition() const
 {
 	return getWorldTransform() * sf::Vector2f();

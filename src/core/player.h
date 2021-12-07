@@ -1,34 +1,48 @@
 #pragma once
 
-#include "events.h"
-#include "unit.h"
 #include "data_types.h"
-#include "game_tile.h"
 
 #include <vector>
-#include <map>
+#include <set>
 
 //using UnitPtr
 
 namespace core {
-	/** For now unused
+	enum class UnitsPickType
+	{
+		gold,
+		unitsNumber
+	};
+
+	/** Class defining a player. Before game start player has either gold to buy units or 
+	* number of different units he can pick
+	* Each player has owned units and  id
 	*/
-	class Player : public events::Events
+	class Player
 	{
 	public:
-		Player() = default;
-		Player(const PlayerIdentifier id) : m_id(id) {}
+		Player(const PlayerIdentifier id, UnitsPickType pickType = UnitsPickType::unitsNumber);
+		Player( const Player& other) = default;
+		Player& operator =(const Player&) = default;
 
-		//void addUnit(Unit unit) { m_ownedUnits.insert({ unit.getID(), unit }); }
-		//void moveUnitTo(const ObjectIdentifier& id, const GameTile& destination);
-		
-		//GameTile getUnitPosition(const ObjectIdentifier& id) const ;
-		
-		//inline bool hasUnitWithId(const ObjectIdentifier& id) const;
-		//bool checkUnitPositionAndSetIfNot(const ObjectIdentifier& id, const GameTile& pos);
+		void addUnit(UnitIdentifier id) { m_ownedUnitIds.insert(id); }
+		void removeUnit(UnitIdentifier id) { m_ownedUnitIds.erase(id); }
+		//TODO pass amount of gold or unit type
+		bool isAbleToAddUnit();
+		bool isFinishedPickingStage() const { return m_isFinishedPickingStage; }
+		bool endPickingStage();
+		PlayerIdentifier getId() const { return m_id; }
+
 	private:
-		const PlayerIdentifier m_id;
-		//std::vector<Unit> m_ownedUnits;
-		//std::map < ObjectIdentifier, Unit, Comparator<ObjectIdentifier>> m_ownedUnits;
+		PlayerIdentifier m_id;
+		UnitsPickType m_pickType;
+		bool m_isFinishedPickingStage{ false };
+		std::set < UnitIdentifier, Comparator<UnitIdentifier>> m_ownedUnitIds{};
+	};
+
+	class NullPlayer : public Player
+	{
+	public:
+		NullPlayer(PlayerIdentifier id = { 0 }) : Player(id) {}
 	};
 }

@@ -2,6 +2,15 @@
 
 #include <ranges>
 
+bool core::Unit::isUnitHaveFullActionState() const
+{
+	if (getRemainingMovement() == getFullMovement() &&
+		getRemainingShots() == getFullShots())
+		return true;
+	return false;
+
+}
+
 // maybe better return by ref too, since we working with parameter which is passed by ref to avoid additional copy on return
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
 {// convert to tileDistance
@@ -32,11 +41,11 @@ std::vector<core::GameTile> core::Unit::moveTo(std::vector<GameTile>& pathToDest
 void core::UnitActionState::setState(const ActionStateStatus& state)
 {
 	if (state == ActionStateStatus::full) {
-		m_remainingMovePoints = m_movePoints;
+		m_remainingMovePoints = m_fullMovePoints;
 		m_remainingShots = m_rateOfFire;
 	}
 	else if (state == ActionStateStatus::half) {
-		m_remainingMovePoints.distance = m_movePoints.distance / 2;
+		m_remainingMovePoints.distance = m_fullMovePoints.distance / 2;
 		m_remainingShots.shots = m_rateOfFire.shots / 2;
 	}
 	else {
@@ -47,8 +56,8 @@ void core::UnitActionState::setState(const ActionStateStatus& state)
 
 TileDistance core::UnitActionState::getRemainingMoveInFirstHalf() const
 {
-	TileDistance remainingInFirstAction{ getRemainingMovePoints().distance - getHalfMovePoints().distance };
-	return TileDistance((m_movePoints.distance % 2 == 0) ? (remainingInFirstAction.distance) : (remainingInFirstAction.distance + 1));
+	TileDistance remainingInFirstAction{ getRemainingMovePoints() - getHalfMovePoints() };
+	return TileDistance((m_fullMovePoints.distance % 2 == 0) ? (remainingInFirstAction.distance) : (remainingInFirstAction.distance + 1));
 }
 
 Shots core::UnitActionState::getHalfShots() const
@@ -58,24 +67,32 @@ Shots core::UnitActionState::getHalfShots() const
 
 TileDistance core::UnitActionState::getHalfMovePoints() const
 {
-	return TileDistance((m_movePoints.distance % 2 == 0) ? (m_movePoints.distance / 2) : (m_movePoints.distance / 2) + 1);
+	return TileDistance((m_fullMovePoints.distance % 2 == 0) ? (m_fullMovePoints.distance / 2) : (m_fullMovePoints.distance / 2) + 1);
 }
 
 void core::UnitActionState::changeStateByMovement(const TileDistance& distance)
 {
 	if (distance > m_remainingMovePoints)
-		m_remainingMovePoints.distance = 0;
+		m_remainingMovePoints = { 0 };
 	else
-		m_remainingMovePoints.distance -= distance.distance;
+		m_remainingMovePoints -= distance;
 
 	TileDistance halfDistance = getHalfMovePoints();
-	if ((m_remainingMovePoints.distance < m_movePoints.distance) && 
-		(m_remainingMovePoints.distance > halfDistance.distance))
+	if ((m_remainingMovePoints < m_fullMovePoints) && 
+		(m_remainingMovePoints > halfDistance))
 	{
 		m_remainingShots = { 0 };
 	}
-	else if(m_remainingMovePoints.distance <= halfDistance.distance)
+	else if(m_remainingMovePoints <= halfDistance)
 	{
-		m_remainingShots.shots = (m_remainingShots.shots  / 2)  + 1;
+		if (m_remainingShots >= getHalfShots())
+		{
+			m_remainingShots.shots -= getHalfShots().shots;
+		}
+		else
+		{
+			//error?
+		 }
+		//m_remainingShots = { (m_remainingShots.shots / 2) + 1 };
 	}
 }

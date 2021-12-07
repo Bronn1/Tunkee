@@ -5,16 +5,16 @@
 
 #include <string>
 
+
+constexpr int kBackgroundColorR = 169;
+constexpr int kBackgroundColorG = 169;
+constexpr int kBackgroundColorB = 169;
+constexpr int kBackgroundColorAlpha = 120;
+constexpr int kTooltipCharacterSize = 120;
+constexpr int kBorderOffset = 20;
+
 namespace graphics
 {
-	constexpr int kBackgroundColorR = 169;
-	constexpr int kBackgroundColorG = 169;
-	constexpr int kBackgroundColorB = 169;
-	constexpr int kBackgroundColorAlpha = 120;
-	constexpr int kTooltipCharacterSize = 120;
-	constexpr int kBorderOffset = 20;
-
-
 	class GameTooltip : public sf::RectangleShape
 	{
 	public:

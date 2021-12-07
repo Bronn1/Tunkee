@@ -8,9 +8,10 @@
 /**
 * Object Identifier for every game entity 
 */
-struct ObjectIdentifier {
+struct UnitIdentifier {
 	unsigned int identifier;
-	bool operator==(const ObjectIdentifier&) const = default;
+	bool operator==(const UnitIdentifier&) const = default;
+	auto operator<=>(const UnitIdentifier&) const = default;
 };
 
 struct HealthPoints {
@@ -19,6 +20,7 @@ struct HealthPoints {
 
 struct PlayerIdentifier {
 	unsigned int identifier;
+	//PlayerIdentifier& operator =(const PlayerIdentifier&) = default;
 	bool operator==(const PlayerIdentifier&) const = default;
 };
 
@@ -26,26 +28,20 @@ struct TileDistance {
 	unsigned int distance;
 	bool operator==(const TileDistance&) const = default;
 	//auto operator-(const TileDistance& other) const { return TileDistance{ this->distance - other.distance }; }
-	TileDistance operator+=(const TileDistance& d) { distance += d.distance; return *this; }
+	auto operator+=(const TileDistance& other) { distance += other.distance; return *this; }
+	auto operator-=(const TileDistance& other) { distance -= other.distance; return *this; }
+	auto operator+ (const TileDistance & other) const { return TileDistance{ distance + other.distance }; }
+	auto operator- (const TileDistance& other) const { return TileDistance{ distance - other.distance }; }
 	auto operator<=>(const TileDistance&) const = default;
 };
-
 
 struct Shots {
 	unsigned int shots;
 	//bool operator==(const RateOfFire&) const = default;
 	auto operator<=>(const Shots&) const = default;
+	auto operator+ (const Shots& other) const { return TileDistance{ shots + other.shots }; }
+	auto operator- (const Shots& other) const { return TileDistance{ shots - other.shots }; }
 };
-
-struct MoveAreaAndFirstLayerSize {
-	MoveAreaAndFirstLayerSize() = default;
-	MoveAreaAndFirstLayerSize(std::vector<core::GameTile> area, int half): moveArea(area), firstLayerSize(half) {}
-	//MoveAreaAndFirstLayerSize(MoveAreaAndFirstLayerSize&&) = default;
-	MoveAreaAndFirstLayerSize& operator=(const MoveAreaAndFirstLayerSize& other) = default;
-	std::vector<core::GameTile> moveArea{};
-	int firstLayerSize{ 0 };
-};
-
 
 enum class ActionStateStatus
 {

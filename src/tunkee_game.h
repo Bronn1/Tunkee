@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/graphics/game_world_view.h"
+#include "graphics/game_world_view.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -12,8 +12,4 @@ public:
 
 private:
 	sf::RenderWindow       m_window;
-	//
-	//TextureHolder			mTextures;
-	//FontHolder				mFonts;
-
 };

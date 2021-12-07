@@ -4,6 +4,7 @@
 #include "scene_node.h"
 
 #include <unordered_map>
+#include <optional>
 
 
 namespace graphics {
@@ -17,13 +18,13 @@ namespace graphics {
 		BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width);
 		explicit BoardView(const int map_size, const  sf::Texture& basicTexture);
 		void draw(sf::RenderWindow& target);
-		const core::GameTile& getTileSelectorCoordinates() const { return m_tileSelectorCoordinates;  }
-		const sf::Vector2f& getTileSelectorPosition() const { return m_tileSelector.getPosition(); }
-		const sf::Vector2f& getPositionByTileCoordinates(const core::GameTile& coordinates) const;
+		core::GameTile getSelectorTileCoordinates() const { return m_tileSelectorCoordinates;  }
+		sf::Vector2f getTileSelectorPosition() const { return m_tileSelector.getPosition(); }
+		sf::Vector2f getPositionByTileCoordinates(const core::GameTile& coordinates) const;
+		std::vector<sf::Vector2f> getVectorPositionsByTiles(const std::vector < core::GameTile>& coordinates) const;
+		std::optional<core::GameTile> getCoordinatesIfValid(const sf::Vector2f& pos) const;
 
-
-		//MoveAreaAndFirstLayerSize& getMoveArea();
-		void resetMoveArea(MoveAreaAndFirstLayerSize& moveArea);
+		void resetMoveArea(std::vector<core::GameTile> moveArea, int firstLayerSize);
 	private:
 		void initTileSelector() noexcept;
 
@@ -31,7 +32,7 @@ namespace graphics {
 		std::unordered_map<core::GameTile, graphics::TileView> m_tiles{};
 		sf::CircleShape  m_tileSelector;
 		core::GameTile   m_tileSelectorCoordinates{0, 0};
-		MoveAreaAndFirstLayerSize       m_moveArea;
+		std::vector<core::GameTile> m_moveArea{};
 	};
 }
 

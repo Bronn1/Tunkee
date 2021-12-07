@@ -4,11 +4,11 @@
 #include "../src/core/game_board.h"
 #include "../src/core/game_command.h"
 #include "../src/core/data_types.h"
-#include "../src/core/game_state_manager.h"
+#include "../src/core/game_rules.h"
 #include "../src/core/player.h"
 #include "../src/core/unit.h"
 #include "../src/core/unit_manager.h"
-#include "../src/core/game_rules_engine.h"
+#include "../src/core/game_engine.h"
 #include <ranges>
 #include <memory>
 
@@ -17,17 +17,18 @@ using namespace core;
 
 class MockUnit7Distance : public Unit {
 public:
-    MockUnit7Distance(ObjectIdentifier id) : Unit(id, TileDistance{ 7 }, Shots{ 3 }) {}
+    MockUnit7Distance(UnitIdentifier id) : Unit(id, TileDistance{ 7 }, Shots{ 3 }) {}
 };
 
 class gameBoardFixture : public ::testing::Test {
 public:
     std::vector<core::GameTileType> testTypes{ core::GameTileType::grass, core::GameTileType::grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
-    UnitManagerPtr unitMng{ std::make_shared<UnitManager>() };
-    std::shared_ptr<Unit> unit{ std::make_shared<MockUnit7Distance>(ObjectIdentifier{ 1 } )};
+    UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
+    std::unique_ptr<Unit> unit{ std::make_unique<MockUnit7Distance>(UnitIdentifier{ 1 } )};
+    Unit* unitExpected;
 
-    gameBoardFixture() {
+        gameBoardFixture() {
         // initialization;
         // can also be done in SetUp()
     }
@@ -38,7 +39,8 @@ public:
 
         unit.get()->setPosition(GameTile(4, 4));
         unit.get()->setOwner(PlayerIdentifier{ 1 });
-        (*unitMng).addUnit(unit);
+        unitExpected = unit.get();
+        (*unitMng).addUnit(std::move(unit));
         // initialization or some code to run before each test
     }
 
@@ -55,12 +57,12 @@ public:
 };
 
 TEST_F(gameBoardFixture, GetMoveAreaCommand) {
-    auto cmd{ std::make_shared<GetMoveAreaQuery>() };
-    core::GameRulesEngine gameEngine{testableBoard, unitMng, PlayerIdentifier{1 }, PlayerIdentifier{2 } };
+    auto cmd{ std::make_shared<GetMoveAreaQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    core::GameEngine gameEngine{testableBoard, std::move(unitMng), PlayerIdentifier{1 }, PlayerIdentifier{2 } };
     cmd.get()->m_unitID = { 1 };
     cmd.get()->m_playerID = { 1 };
 
-    gameEngine.queryMoveArea(cmd.get());
+    gameEngine.requestMoveArea(cmd.get());
     EXPECT_EQ(1, 1);
 }
 
@@ -72,9 +74,9 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0) {
     static_cast<MoveToAction*>(cmdMove.get())->m_destination = expectedPos;
 
 
-    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    auto result = testableBoard.moveTo(cmdMove.get(), unitExpected);
     //EXPECT_EQ(result, true) << "move command failed\n";
-    EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
+    EXPECT_EQ(unitExpected->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo2_1) {
@@ -96,9 +98,9 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo2_1) {
     core::GameTile expectedPos = core::GameTile(2, 1);
     static_cast<MoveToAction*>(cmdMove.get())->m_destination = core::GameTile(1, 0);
 
-    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    auto result = testableBoard.moveTo(cmdMove.get(), unitExpected);
     //EXPECT_EQ(result, true) << "move command failed\n";
-    EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
+    EXPECT_EQ(unitExpected->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo1_1) {
@@ -111,9 +113,9 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo1_1) {
     core::GameTile expectedPos = core::GameTile(2, 0);
     cmdMove.get()->m_destination = core::GameTile(1, 0);
 
-    auto result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()), unit.get());
+    auto result = testableBoard.moveTo(static_cast<MoveToAction*>(cmdMove.get()), unitExpected);
     //EXPECT_EQ(result, true) << "move command failed\n";
-    EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
+    EXPECT_EQ(unitExpected->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0WithUnreachableTarget) {
@@ -126,7 +128,7 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithUnreachableTarget) {
     core::GameTile expectedPos = core::GameTile(4, 4);
     cmdMove.get()->m_destination = core::GameTile(1, 0);
 
-    auto result = testableBoard.moveTo(cmdMove.get(), unit.get());
+    auto result = testableBoard.moveTo(cmdMove.get(), unitExpected);
     //EXPECT_EQ(result, false) << "move command should fail\n";
-    EXPECT_EQ(unit.get()->getPosition(), expectedPos) << "incorrect pos after move\n";
+    EXPECT_EQ(unitExpected->getPosition(), expectedPos) << "incorrect pos after move\n";
 }
