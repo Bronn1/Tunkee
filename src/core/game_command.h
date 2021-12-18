@@ -72,7 +72,12 @@ struct SelectUnitQuery : GameQuery
 		: GameQuery(QueryTypes::selectUnit, "selectUnit", playerId, unitId)  {}
 };
 
-struct FinishSetupStageAction
+struct FinishSetupStage
+{
+	PlayerIdentifier m_playerID{ 0 };
+};
+
+struct FinishActionPhase
 {
 	PlayerIdentifier m_playerID{ 0 };
 };

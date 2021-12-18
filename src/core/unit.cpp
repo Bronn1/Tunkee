@@ -5,13 +5,12 @@
 bool core::Unit::isUnitHaveFullActionState() const
 {
 	if (getRemainingMovement() == getFullMovement() &&
-		getRemainingShots() == getFullShots())
+		getRemainingShots() == getRateOfFire())
 		return true;
 	return false;
 
 }
 
-// maybe better return by ref too, since we working with parameter which is passed by ref to avoid additional copy on return
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
 {// convert to tileDistance
     unsigned costSoFar = 0;
@@ -45,8 +44,8 @@ void core::UnitActionState::setState(const ActionStateStatus& state)
 		m_remainingShots = m_rateOfFire;
 	}
 	else if (state == ActionStateStatus::half) {
-		m_remainingMovePoints.distance = m_fullMovePoints.distance / 2;
-		m_remainingShots.shots = m_rateOfFire.shots / 2;
+		m_remainingMovePoints = getHalfMovePoints();
+		m_remainingShots = getHalfShots();
 	}
 	else {
 		m_remainingMovePoints = { 0 };
@@ -56,7 +55,7 @@ void core::UnitActionState::setState(const ActionStateStatus& state)
 
 TileDistance core::UnitActionState::getRemainingMoveInFirstHalf() const
 {
-	TileDistance remainingInFirstAction{ getRemainingMovePoints() - getHalfMovePoints() };
+	TileDistance remainingInFirstAction{ m_remainingMovePoints - getHalfMovePoints() };
 	return TileDistance((m_fullMovePoints.distance % 2 == 0) ? (remainingInFirstAction.distance) : (remainingInFirstAction.distance + 1));
 }
 
@@ -95,4 +94,12 @@ void core::UnitActionState::changeStateByMovement(const TileDistance& distance)
 		 }
 		//m_remainingShots = { (m_remainingShots.shots / 2) + 1 };
 	}
+}
+
+core::TankUnit::TankUnit(UnitIdentifier id, TileDistance dis)
+	: Unit(id, TileDistance{ dis }, Shots{ 3 }) 
+{
+	m_type = UnitType::Tank;
+	for (const auto& type : kTankDamageType)
+		m_possibleDamage.push_back(UnitDamageType{type});
 }

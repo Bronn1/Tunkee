@@ -25,7 +25,7 @@ SceneNodePtr TanksFactory::createBacisTankView(const UnitIdentifier id, const fl
 UnitModelPtr TanksFactory::createTank(const core::GameTile& pos, const TileDistance moveDistance, const PlayerIdentifier playerID)
 {
     UnitIdentifier unitId{ 1 };
-    std::unique_ptr<core::Unit> basicTank = std::make_unique<core::BasicTank>(unitId, moveDistance);
+    std::unique_ptr<core::Unit> basicTank = std::make_unique<core::TankUnit>(unitId, moveDistance);
     (*basicTank).setPosition(pos);
     (*basicTank).setOwner(playerID);
    // auto tank = std::make_unique<

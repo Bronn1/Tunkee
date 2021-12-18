@@ -38,6 +38,8 @@ set(Header_Files
         "src/graphics/unit_setup_view.h"
         "src/units_factory.h"
         "src/graphics/resource_holder.h"
+        "src/core/damage_handler.h"
+        "src/core/unit_damage_type.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -69,6 +71,7 @@ set(Source_Files
         "src/graphics/unit_setup_view.cpp"
         "src/units_factory.cpp"
         "src/graphics/resource_holder.cpp"
+        "src/core/damage_handler.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 

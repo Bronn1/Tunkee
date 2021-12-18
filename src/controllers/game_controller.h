@@ -18,7 +18,8 @@ namespace controllers {
 		GameController(core::GameEngine* engine, const PlayerIdentifier player);
 		void moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const;
 		void onUnitClicked(const UnitIdentifier unitID) const ;
-		void finishPickingStage(PlayerIdentifier playerId);
+		void finishSetupStage(PlayerIdentifier playerId);
+		void finishActionPhase(PlayerIdentifier playerId);
 		void addOwnUnit(const UnitIdentifier unitId) { m_ownUnits.insert(unitId); }
 		void addEnemyUnit(const UnitIdentifier unitId) { m_ownUnits.insert(unitId); }
 		void deleteOwnUnit(const UnitIdentifier unitId) { m_ownUnits.erase(unitId); }

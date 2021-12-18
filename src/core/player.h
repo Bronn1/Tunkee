@@ -30,7 +30,7 @@ namespace core {
 		//TODO pass amount of gold or unit type
 		bool isAbleToAddUnit();
 		bool isFinishedPickingStage() const { return m_isFinishedPickingStage; }
-		bool endPickingStage();
+		bool endSetupStage();
 		PlayerIdentifier getId() const { return m_id; }
 
 	private:

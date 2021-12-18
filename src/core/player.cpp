@@ -50,7 +50,7 @@ bool core::Player::isAbleToAddUnit()
     return true;
 }
 
-bool core::Player::endPickingStage()
+bool core::Player::endSetupStage()
 {
     m_isFinishedPickingStage = true;
     return true;
