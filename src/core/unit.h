@@ -44,16 +44,14 @@ namespace core
 		Shots m_remainingShots;
 	};
 
-	class TankLifeSupportModel
+	/*class TankLifeSupportModel
 	{
 	public:
 		friend class Unit;
 	private:
 		std::vector<UnitDamageType> m_possibleDamage;
 	};
-	// tank system infantry anti-tank gun 
-	// crtp and calculate depends on type
-
+	*/
 	class UnitLogger
 	{
 
