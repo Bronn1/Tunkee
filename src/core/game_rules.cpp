@@ -1,8 +1,8 @@
 #include "game_rules.h"
 
-bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction) 
+bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
 {
-	if (m_currStage != GameStage::PlayerIdle && m_currStage != GameStage::ActionPhase)
+	if (m_currStage != ActionPhase)
 		return false;
 
 	// checking nobody mocking us with wrong requests through connection(maybe unnecessary)
@@ -22,13 +22,50 @@ bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
 	return false;
 }
 
+void core::GameRulesBasic::nextActionPhase(const FinishActionPhase* finishActionPhase)
+{
+	assert(size(m_playerActiveUnits) == 2);
+
+	if (finishActionPhase->m_playerID != m_currentPlayer ||
+		m_currStage == TurnEnd)
+		return;
+
+	auto curPlayer = m_playerActiveUnits.extract(m_currentPlayer);
+	if (curPlayer.empty())
+		return; // TODO throw !!!
+	PlayerIdentifier secondPlayer = begin(m_playerActiveUnits)->first;
+	m_playerActiveUnits.insert(std::move(curPlayer));
+	m_playerActiveUnits[m_currentPlayer]--;
+
+	if (m_playerActiveUnits[secondPlayer] > 0)
+	{
+		setCurrentPlayer(secondPlayer);
+		m_currStage = ActionPhase;
+		m_selectedUnit = m_emptyUnitId;
+	}
+	else if (m_playerActiveUnits[m_currentPlayer] > 0)
+	{
+		//set current unit zero in action state
+		m_currStage = ActionPhase;
+		m_selectedUnit = m_emptyUnitId;
+	}
+	else
+	{
+		setCurrentPlayer(secondPlayer);
+		m_selectedUnit = m_emptyUnitId;
+		m_currStage = TurnEnd;
+	}
+}
+
+
 UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUnitQuery)
 {
-	if (m_currStage != GameStage::PlayerIdle && m_currStage != GameStage::EnemyTurn)
-		return UnitIdentifier{ 0 };
+	if (m_currStage != GameStage::ActionPhase)
+		return m_emptyUnitId;
 
 	auto queryUnit = m_unitManager->getUnitIfExist(selectUnitQuery->m_unitID);
-	if(!queryUnit || queryUnit.value()->getOwnerID() != m_currentPlayer)
+	if (!queryUnit || queryUnit.value()->getOwnerID() != m_currentPlayer || 
+		!queryUnit.value()->isUnitHaveFullActionState())
 		return m_selectedUnit;
 
 	// if somebody trying to cheat
@@ -36,8 +73,11 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 		return m_selectedUnit;
 	}
 
+	// TODO add check for unit owner
+
+
 	// if player didnt pick any unit yet
-	if (m_selectedUnit == UnitIdentifier{ 0 }) {
+	if (m_selectedUnit == m_emptyUnitId) {
 		m_selectedUnit = selectUnitQuery->m_unitID;
 		return m_selectedUnit;
 	}
@@ -52,7 +92,7 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 			return m_selectedUnit;
 		}
 		else { //diselect unit
-			m_selectedUnit = (isUnitFull) ? UnitIdentifier{ 0 } : m_selectedUnit;
+			m_selectedUnit = (isUnitFull) ? m_emptyUnitId : m_selectedUnit;
 			return m_selectedUnit;
 		}
 	}
@@ -60,6 +100,21 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 	return m_selectedUnit;
 }
 
+void core::GameRulesInterface::setActiveUnits(const PlayerIdentifier playerId)
+{
+	if (m_playerActiveUnits.contains(playerId))
+		m_playerActiveUnits[playerId] = m_unitManager->countUnitsOwnerBy(playerId);
+	else
+		std::cout << "Unknown players with ID: " << playerId.identifier << "\n"; //TODO logger and prob throw
+		
+}
+
 core::GameRulesInterface::GameRulesInterface()
 {
 }
+
+void core::GameRulesInterface::setPlayer(const PlayerIdentifier playerId)
+{
+	m_playerActiveUnits.insert({ playerId , 0});
+}
+

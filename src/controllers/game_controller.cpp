@@ -25,11 +25,24 @@ void controllers::GameController::onUnitClicked(const UnitIdentifier unitID) con
 	m_gameEngine->selectUnit(selectUnitQuery.get());
 }
 
-void controllers::GameController::finishPickingStage(PlayerIdentifier playerId)
+void controllers::GameController::finishSetupStage(PlayerIdentifier playerId)
 {
-	auto finishPickingStageAction{ std::make_shared<FinishSetupStageAction>() };
-	(*finishPickingStageAction).m_playerID = playerId;
-	m_gameEngine->switchToNewStage(finishPickingStageAction.get()); 
+	auto finishSetupStageAction{ std::make_shared<FinishSetupStage>() };
+	finishSetupStageAction->m_playerID = playerId;
+	m_gameEngine->finishSetupStage(finishSetupStageAction.get()); 
+}
+
+void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
+{
+	auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+	finishActionPhase->m_playerID = playerId;
+	m_gameEngine->finishActionPhase(finishActionPhase.get());
+	
+	// TODO for test
+	auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{1}) };
+	//m_gameEngine->selectUnit(selectUnitQuery.get());
+	finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
+	m_gameEngine->finishActionPhase(finishActionPhase.get());
 }
 
 controllers::UnitSetupContoller::UnitSetupContoller(core::GameEngine* engine, const PlayerIdentifier player) :

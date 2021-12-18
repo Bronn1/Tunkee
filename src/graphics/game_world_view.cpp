@@ -73,9 +73,17 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
     case sf::Event::KeyPressed:
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
         {
-            m_gameController.finishPickingStage(m_playerId);
+            m_gameController.finishSetupStage(m_playerId);
             m_unitsGraph.merge(m_unitsSetupView.getAddedUnitRef());
             endSetupStage();
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            // TODO only for tests of swtiching action phase
+            m_selectedUnit->drawAsSelected();
+            clearMoveArea();
+            m_selectedUnit = m_unitsGraph[UnitIdentifier{ 0 }].get();
+            m_gameController.finishActionPhase(m_playerId);
         }
         break;
     case sf::Event::Closed:
@@ -131,7 +139,7 @@ void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
     if (m_unitsGraph.contains(unitInfo.m_unitId))
     {
         m_selectedUnit = m_unitsGraph[unitInfo.m_unitId].get();
-        (*m_unitsGraph[unitInfo.m_unitId]).drawAsSelected();
+        m_unitsGraph[unitInfo.m_unitId]->drawAsSelected();
     }
 }
 

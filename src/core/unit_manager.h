@@ -43,6 +43,11 @@ namespace core {
 	public:
 		UnitManager();
 		std::optional<Unit*> getUnitIfExist(const UnitIdentifier& unitId) const;
+		std::vector<UnitIdentifier> getActiveUnitsForPlayer(const PlayerIdentifier& playerId) const;
+		bool hasActiveUnits(const PlayerIdentifier& playerId) const;
+		int countUnitsOwnerBy(const PlayerIdentifier& playerId) const;
+		void calculateAliveUnitsOnNextTurn();
+		void setUnitsActions(const ActionStateStatus state);
 		UnitIdentifier addUnit(UnitPtr unit);
 
 	private:

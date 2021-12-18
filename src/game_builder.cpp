@@ -53,14 +53,14 @@ GameBuilder& GameBuilder::addAi()
 	auto tmpUnit3 = m_tankFactory.createBacisTank(thirdUnitPos, player);
 	//UnitIdentifier unitId = (*tmpUnit).getID();
 	UnitIdentifier addedUnitID = m_gameEngine->addNewUnit(std::move(tmpUnit1));
-	UnitIdentifier addedUnitID2 = m_gameEngine->addNewUnit(std::move(tmpUnit2));
-	UnitIdentifier addedUnitID3 = m_gameEngine->addNewUnit(std::move(tmpUnit3));
+	//UnitIdentifier addedUnitID2 = m_gameEngine->addNewUnit(std::move(tmpUnit2));
+	//UnitIdentifier addedUnitID3 = m_gameEngine->addNewUnit(std::move(tmpUnit3));
 
 	float rotation = 270.f;
 	float scale = 0.17f;
 	m_worldView.get()->addNewUnitView(std::move(m_tankFactory.createBacisTankView(addedUnitID, rotation, scale)), firstUnitPos);
-	m_worldView.get()->addNewUnitView(std::move(m_tankFactory.createBacisTankView(addedUnitID2, rotation, scale)), secondUnitPos);
-	m_worldView.get()->addNewUnitView(std::move(m_tankFactory.createBacisTankView(addedUnitID3, rotation, scale)), thirdUnitPos);
+	//m_worldView.get()->addNewUnitView(std::move(m_tankFactory.createBacisTankView(addedUnitID2, rotation, scale)), secondUnitPos);
+	//m_worldView.get()->addNewUnitView(std::move(m_tankFactory.createBacisTankView(addedUnitID3, rotation, scale)), thirdUnitPos);
 
 	return *this;
 }

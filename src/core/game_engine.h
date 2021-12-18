@@ -23,10 +23,12 @@ namespace core {
 		explicit GameEngine(const GameBoard& board, UnitManagerPtr unitMng, const PlayerIdentifier playerOneId = {1 }, const PlayerIdentifier playerWTwoId = {2 });
 		
 		void moveUnit(MoveToAction* action);
-		void switchToNewStage(FinishSetupStageAction* finishSetupStageAction);
 		void requestMoveArea(GetMoveAreaQuery* moveAreaQuery);
 		void selectUnit(const SelectUnitQuery* selectUnitQuery);
 		UnitIdentifier addNewUnit(std::unique_ptr<core::Unit> unit);
+
+		void finishSetupStage(FinishSetupStage* finishSetupStageAction);
+		void finishActionPhase(FinishActionPhase* finishActionPhase);
 
 		void undoLastCommand(const ActionPtr& cmd);
 		void endOfTurn();
@@ -37,7 +39,7 @@ namespace core {
 	private:
 	private:
 		GameBoard m_board;
-		GameStateCheckerPtr m_gameRulesChecker;
+		GameStateCheckerPtr m_gameRules;
 		Player playerOne{ NullPlayer{} };
 		Player playerTwo{ NullPlayer{} };
 		std::stack < ActionPtr > m_actionHistory;
