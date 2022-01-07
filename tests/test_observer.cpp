@@ -16,7 +16,7 @@ using namespace core;
 
 class observerFixture : public ::testing::Test {
 public:
-    std::vector<core::GameTileType> testTypes{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
     
@@ -45,7 +45,10 @@ public:
 
 class MockUnit : public Unit {
 public:
-    MockUnit(UnitIdentifier id, TileDistance dis) : Unit(id, TileDistance{ dis }, Shots{ 3 }) {}
+    MockUnit(UnitIdentifier id, TileDistance dis) : Unit(id, TileDistance{ dis }, Shots{ 3 }) {
+        m_actionState.setConditionSystem(std::make_unique<tank_damage_system::TankCondition>(Crew{ 5, 3 }));
+    }
+    MOCK_CONST_METHOD0(isAlive, bool());
 
 };
 

@@ -13,8 +13,6 @@
 #include <vector>
 #include <map>
 
-using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
-
 namespace graphics
 {
 	constexpr int kBackgroundColorR = 169;
@@ -23,6 +21,7 @@ namespace graphics
 	constexpr int kBackgroundColorAlpha = 120;
 	constexpr int kTooltipCharacterSize = 120;
 	constexpr int kBorderOffset = 20;
+	using UnitIDMapUnit = std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>;
 
 	class UnitSetupView : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
 	{
@@ -46,13 +45,13 @@ namespace graphics
 		void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitSetupController = std::move(controller); }
 		void resetPickedUnit();
 
-		std::map<UnitIdentifier, SceneNodePtr, Comparator<UnitIdentifier>>& getAddedUnitRef() { return m_addedUnits; }
+		UnitIDMapUnit& getAddedUnitRef() { return m_addedUnits; }
 
 	private:
 		sf::RectangleShape m_background;
-		std::vector<SceneNodePtr> m_availableUnits;
+		std::vector<UnitViewPtr> m_availableUnits;
 		SceneNodePtr m_unitDragDropView;
-		std::map<UnitIdentifier, SceneNodePtr, Comparator<UnitIdentifier>>  m_addedUnits;
+		UnitIDMapUnit m_addedUnits;
 		controllers::UnitSetupContoller m_unitSetupController;
 
 		TanksFactory m_tankFactory;

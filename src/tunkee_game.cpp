@@ -11,7 +11,7 @@
 #include <chrono>
 #include <thread>
 
-const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+//const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 constexpr int kResHeight = 1800;
 constexpr int kResWidth = 1000;
 
@@ -46,7 +46,7 @@ void TunkeGame::run()
                 m_window.close();
         }*/
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
         m_window.display();
     }
 }

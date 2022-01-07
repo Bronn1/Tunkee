@@ -21,6 +21,7 @@ namespace core {
 
 		MoveAreaInfo getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit);
 		std::vector<GameTile> moveTo(const MoveToAction* moveToCmd, Unit* unit);
+		std::vector<GameTile> getStraightLine(const GameTile & from, const GameTile & to);
 		
 		inline GameTile getTile(const  GameTile& tile) const { if (m_tiles.contains(tile)) return m_tiles.at(tile); else return GameTile(999, 9999); }
 		PlayerIdentifier getCurrentPlayerId() { return PlayerIdentifier{ 1 }; }

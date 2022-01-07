@@ -19,5 +19,5 @@ sf::Vector2f graphics::EntityView::getVelocity() const
 
 void graphics::EntityView::updateCurrent(sf::Time dt)
 {
-	//move(m_velocity * dt.asSeconds());
+	move(m_velocity * dt.asSeconds());
 }

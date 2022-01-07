@@ -17,7 +17,8 @@ namespace controllers {
 	public:
 		GameController(core::GameEngine* engine, const PlayerIdentifier player);
 		void moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const;
-		void onUnitClicked(const UnitIdentifier unitID) const ;
+		void onChangeUnitRotation(const UnitIdentifier unitID, const Angle rotation, const SetUnitRotation::Type rotationType);
+		void onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const ;
 		void finishSetupStage(PlayerIdentifier playerId);
 		void finishActionPhase(PlayerIdentifier playerId);
 		void addOwnUnit(const UnitIdentifier unitId) { m_ownUnits.insert(unitId); }
@@ -38,7 +39,7 @@ namespace controllers {
 	public:
 		UnitSetupContoller() = default;
 		UnitSetupContoller(core::GameEngine* engine, const PlayerIdentifier player);
-		std::optional<SceneNodePtr> addUnit(const core::GameTile& position);
+		std::optional<UnitViewPtr> addUnit(const core::GameTile& position);
 		//void setWorldView(graphics::GameWorldView* worldView) { m_worldView = worldView; };
 	private:
 		core::GameEngine* m_gameEngine;

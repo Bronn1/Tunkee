@@ -24,6 +24,7 @@ namespace core
 		GameRulesInterface();
 		//template<typename Action_t>
 		virtual bool isMoveActionAllowed(const MoveToAction& moveToaction) = 0;
+		virtual bool isShootActionAllowed(const ShootAction& action) = 0;
 		//virtual bool isAllowedToEndTurn(const MoveToAction& moveToaction) = 0;
 		virtual UnitIdentifier selectUnit(const SelectUnitQuery* selectUnitQuery) = 0;
 		virtual void nextActionPhase(const FinishActionPhase* finishActionPhase) = 0;
@@ -59,7 +60,8 @@ namespace core
 	{
 	public:
 		GameRulesBasic() {};
-		bool isMoveActionAllowed(const MoveToAction& moveToaction)  override final;
+		bool isMoveActionAllowed(const MoveToAction& moveToaction)  override;
+		bool isShootActionAllowed(const ShootAction& shootAction) override;
 		void nextActionPhase(const FinishActionPhase* finishActionPhase) override;
 		UnitIdentifier selectUnit(const SelectUnitQuery* selectUnitQuery)  override final;
 

@@ -9,7 +9,8 @@
      
 enum class ActionTypes
 {
-	moveUnit = 1
+	moveUnit = 1,
+	shootUnit
 
 };
 
@@ -41,6 +42,8 @@ private:
 struct  GameAction
 {
 	GameAction(ActionTypes type, std::string_view event_name) : m_type(type), m_name(event_name) {};
+	GameAction(PlayerIdentifier playerId, UnitIdentifier srcUnit, ActionTypes type, std::string_view event_name) 
+		       : m_playerID(playerId), m_type(type), m_name(event_name), m_unitID(srcUnit) {};
 	UnitIdentifier m_unitID{0};
 	PlayerIdentifier m_playerID{0};
 	const std::string m_name;
@@ -59,6 +62,26 @@ struct MoveToAction : GameAction
 {
 	MoveToAction() : GameAction(ActionTypes::moveUnit, "moveTo") {}
 	core::GameTile m_destination;
+};
+
+struct ShootAction : GameAction
+{
+	ShootAction(PlayerIdentifier playerId, const UnitIdentifier srcUnit, const UnitIdentifier target) : GameAction(playerId, srcUnit, ActionTypes::moveUnit, "shootTo"), m_target(target) {}
+	UnitIdentifier  m_target;
+	// do we need this here, most likely not
+	std::string_view  m_damageDone;
+};
+
+struct SetUnitRotation : GameAction
+{
+	enum class Type
+	{
+		Body,
+		Gun
+	};
+	SetUnitRotation(const Angle& angle, Type type) : GameAction(ActionTypes::moveUnit, "Rotation"), m_angle(angle), m_type(type) {}
+	Angle m_angle;
+	Type m_type;
 };
 
 struct SwitchPlayerAction
@@ -114,6 +137,14 @@ struct MoveUnitInfo {
 		m_movePath(move), m_unitId(unitId) {}
 	std::vector<core::GameTile> m_movePath{};
 	UnitIdentifier m_unitId{};
+};
+
+struct ShootUnitInfo {
+	ShootUnitInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit) :
+		m_srcUnit(srcUnit), m_targetUnit(targetUnit) {}
+	UnitIdentifier m_srcUnit{};
+	UnitIdentifier m_targetUnit{};
+	std::string_view m_damageDone;
 };
 
 

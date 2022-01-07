@@ -12,13 +12,13 @@ bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
 		if (unitPtr)
 		{
 			bool canMove = unitPtr.value()->canMove();
-			m_lastError = (canMove) ? "" : "Unit doesn't have unit activity left!";
+			m_lastError = (canMove) ? "" : "Unit doesn't have any activity left!";
 			return canMove;
 		}
 		//
 	}
 	else
-		m_lastError = "Already another unit is selected\n";
+		m_lastError = "Movement is not allowed because of incorrect selected unit or enemy turn\n";
 	return false;
 }
 
@@ -103,7 +103,7 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 void core::GameRulesInterface::setActiveUnits(const PlayerIdentifier playerId)
 {
 	if (m_playerActiveUnits.contains(playerId))
-		m_playerActiveUnits[playerId] = m_unitManager->countUnitsOwnerBy(playerId);
+		m_playerActiveUnits[playerId] = m_unitManager->countActiveUnitsOwnedBy(playerId);
 	else
 		std::cout << "Unknown players with ID: " << playerId.identifier << "\n"; //TODO logger and prob throw
 		
@@ -116,5 +116,29 @@ core::GameRulesInterface::GameRulesInterface()
 void core::GameRulesInterface::setPlayer(const PlayerIdentifier playerId)
 {
 	m_playerActiveUnits.insert({ playerId , 0});
+}
+
+bool core::GameRulesBasic::isShootActionAllowed(const ShootAction& shootAction)
+{
+	if (m_currStage != ActionPhase)
+		return false;
+
+	if (shootAction.m_playerID == m_currentPlayer && m_selectedUnit == shootAction.m_unitID)
+	{
+		auto sourceUnit = m_unitManager->getUnitIfExist(m_selectedUnit);
+		auto targetUnit = m_unitManager->getUnitIfExist(shootAction.m_target);
+		
+		if (sourceUnit && targetUnit)
+		{
+			bool canShoot = sourceUnit.value()->canShoot();
+			m_lastError = (canShoot) ? "" : "Unit doesn't have activity to perform shooting!";
+			return canShoot;
+		}
+		//
+	}
+	else
+		m_lastError = "Shooting is not allowed because of incorrect selected unit or enemy turn\n";
+	return false;
+
 }
 

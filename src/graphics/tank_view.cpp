@@ -5,17 +5,36 @@
 #include "tank_view.h"
 
 #include <numbers>
-#include "SFML/Graphics/RenderTarget.hpp"
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/System/Clock.hpp>
 
 constexpr float kDefaultUnitRotation = 270.f;
 constexpr float kDefaultUnitScale = 0.17f;
+constexpr int   kBasicVelocity = 40;
+constexpr float kTurrentCenterPointDividerX = 1.25;
+//using ProjectilePtr = std::unique_ptr<Projectile>;
+constexpr float moveOffsetPerFrame = 0.02f;
+constexpr float moveTargetEps = 0.f;
 
-graphics::TankView::TankView(UnitIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture)
-	:
-	m_type(type)
-	, m_bodySprite(textures), m_turretSprite(turrretTexture)
+graphics::UnitView::UnitView(UnitIdentifier id, Type type, TextureHolder& textures) :
+	m_type(type), m_bodySprite(textures.get(textures::ID::T34TankBody)),
+	m_turretSprite(textures.get(textures::ID::T34TankTurret)), m_explosion(textures.get(textures::ID::Explosion)), m_explosion2(textures.get(textures::ID::Explosion)),
+	m_textures(textures), m_moveFrame(moveOffsetPerFrame, sf::Time::Zero, moveTargetEps)
 {
 	m_id = id;
+	m_explosion.setFrameSize(sf::Vector2i(256, 256));
+	m_explosion.setNumFrames(16);
+	m_explosion.setDuration(sf::seconds(1.f));
+	m_explosion.centerOrigin();
+	m_explosion.setScale({ 2.f,2.f });
+
+
+	m_explosion2.setFrameSize(sf::Vector2i(256, 256));
+	m_explosion2.setNumFrames(2);
+	m_explosion2.setDuration(sf::seconds(0.8f));
+	m_explosion2.centerOrigin();
+	m_explosion2.setScale({ 1.8f,2.3f });
+
 	sf::FloatRect bounds = m_bodySprite.getLocalBounds();
 	sf::FloatRect turretBounds = m_turretSprite.getLocalBounds();
 	// setting up center point
@@ -28,33 +47,90 @@ graphics::TankView::TankView(UnitIdentifier id, Type type, const sf::Texture& te
 	setRotation(kDefaultUnitRotation);
 	setScale(kDefaultUnitScale, kDefaultUnitScale);
 
-	EntityView::setVelocity({ kBasicVelocity, kBasicVelocity });
+	//EntityView::setVelocity({ kBasicVelocity, kBasicVelocity });
 }
 
-void graphics::TankView::drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
+//const sf::Time Application::TimePerFrame = sf::seconds(1.f/60.f);
+
+void graphics::UnitView::drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(m_bodySprite, states);
-	target.draw(m_turretSprite, states);
-	target.draw(m_tooltipDescription, states);
-	target.draw(m_tooltipDescription.getTextToRender(), states);
+	if (!m_isDestroyed)
+	{
+		target.draw(m_bodySprite, states);
+		target.draw(m_turretSprite, states);
+		target.draw(m_tooltipDescription, states);
+		target.draw(m_tooltipDescription.getTextToRender(), states);
+	}
+	else
+	{
+		target.draw(m_bodySprite, states);
+		//target.draw(m_explosion2, states);
+		target.draw(m_explosion, states);
+	}
 }
 
-sf::FloatRect graphics::TankView::getBoundingRect() const
+void graphics::UnitView::updateCurrent(sf::Time dt)
+{
+	m_moveFrame.elapsedTime += dt;
+	
+	if (!m_movementPath.empty())
+	{
+		if ( m_moveFrame.fullPath - m_moveFrame.distancePassedPercent > 0 )
+		{
+			auto targetPoint = m_movementPath.top();
+			setPosition(interpolateWithFactor(m_posBeforeMovement, targetPoint, m_moveFrame.distancePassedPercent));
+			m_moveFrame.distancePassedPercent += m_moveFrame.movementOffset;
+		}
+		else
+		{
+			m_moveFrame.distancePassedPercent = 0.f;
+			m_posBeforeMovement = getPosition();
+			m_movementPath.pop();
+			if (!m_movementPath.empty()) 
+			{
+				auto newTargetPoint = m_movementPath.top();
+				rotateTo(m_posBeforeMovement, newTargetPoint);
+			}
+			else
+			{
+				markAsSelected();
+				m_isPerformingAction = false;
+				std::cout << getRotation() << "  GYI\n";
+			}
+		}
+	}
+
+	if (m_isDestroyed && !m_explosion.isFinished())
+	{
+		m_explosion.update(dt);
+		m_explosion2.update(dt);	
+	}
+		
+}
+
+sf::FloatRect graphics::UnitView::getBoundingRect() const
 {
 	return getWorldTransform().transformRect(m_bodySprite.getGlobalBounds());
 }
 
-void graphics::TankView::rotateTurretTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
+Angle graphics::UnitView::rotateGunTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
 {
 	float dx = curPoint.x - targetPoint.x;
 	float dy = curPoint.y - targetPoint.y;
 
 	float turretTextureOffset = 90;
-	float rotation = ((atan2(dy, dx)) * 180 / std::numbers::pi) + turretTextureOffset;
+	float rotation = ((atan2(dy, dx)) * 180.f / std::numbers::pi) + (360.f - getRotation());
 	m_turretSprite.setRotation(rotation);
+	std::cout << Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) }.angle << " gyu angle\n";
+	return  Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) };
 }
 
-void graphics::TankView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
+sf::Vector2f graphics::UnitView::getGunPeakPosition()
+{
+	return sf::Vector2f();
+}
+
+void graphics::UnitView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
 {
 	float dx = curPoint.x - targetPoint.x;
 	float dy = curPoint.y - targetPoint.y;
@@ -65,7 +141,7 @@ void graphics::TankView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector
 	m_turretSprite.setRotation(turretTextureOffset);
 }
 
-void graphics::TankView::drawAsSelected()
+void graphics::UnitView::markAsSelected()
 {
 	if (m_isSelected) {
 		m_bodySprite.setColor(sf::Color::White);
@@ -79,7 +155,7 @@ void graphics::TankView::drawAsSelected()
 	m_isSelected = m_isSelected ? false : true;
 }
 
-void graphics::TankView::showTooltip(const sf::Vector2f& mouse_pos) 
+void graphics::UnitView::showTooltip(const sf::Vector2f& mouse_pos) 
 {
 	if (getBoundingRect().contains(mouse_pos)) {
 		m_tooltipDescription.show();
@@ -87,4 +163,30 @@ void graphics::TankView::showTooltip(const sf::Vector2f& mouse_pos)
 	else {
 		m_tooltipDescription.hide();
 	}
+}
+
+graphics::SceneNodePtr graphics::UnitView::shot(const sf::Vector2f& destination)  
+{
+	const float projectileScale = 0.3f;
+	sf::Vector2f offset(0.3f * m_bodySprite.getGlobalBounds().width, 0.3f * m_bodySprite.getGlobalBounds().height);
+	float midCoordinatesX = m_bodySprite.getOrigin().x - (m_bodySprite.getLocalBounds().width / 2.f);//std::sin(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
+	float midCoordinatesY = m_bodySprite.getOrigin().y - (m_bodySprite.getLocalBounds().height / 2.f);//std::cos(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
+	auto projectile = std::make_unique<Projectile>(getTransform().transformPoint({ midCoordinatesX, midCoordinatesY}), destination, this, m_textures.get(textures::ID::Missile));
+	projectile->setScale({ projectileScale, projectileScale });
+	projectile->setTarget(destination);
+	projectile->setRotation(Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) }.angle);
+
+	return projectile;
+}
+
+void graphics::UnitView::setMovementState(std::stack<sf::Vector2f> path)
+{
+	if (path.empty()) return;
+	if (m_isSelected) markAsSelected();
+
+	m_movementPath = std::move(path);
+	auto targetPoint = m_movementPath.top();
+	m_posBeforeMovement = getPosition();
+	rotateTo(m_posBeforeMovement, targetPoint);
+	m_isPerformingAction = true;
 }

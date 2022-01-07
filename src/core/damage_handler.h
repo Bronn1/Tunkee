@@ -9,17 +9,18 @@ namespace core {
 	constexpr  int kMaxLevel = 3;
 	constexpr  int kMinLevel = -3;
 
-	struct DamageLevel
+	struct ThreatLevel
 	{
-		DamageLevel(int lvl)
+		ThreatLevel(int lvl)
 		{
 			if (lvl > kMaxLevel) lvl = kMaxLevel;
 			if (lvl < kMinLevel) lvl = kMinLevel;
 			level = lvl;
 
 		}
-		bool operator==(const DamageLevel&) const = default;
-		auto operator<=>(const DamageLevel&) const = default;
+		// 270 +- 60 front else flank
+		bool operator==(const ThreatLevel&) const = default;
+		auto operator<=>(const ThreatLevel&) const = default;
 
 		int level;
 	};
@@ -28,9 +29,9 @@ namespace core {
 		float probability;
 	};
 
-	struct DamageLevelHasher
+	struct ThreatLevelHasher
 	{
-		size_t operator()(const DamageLevel& level) const
+		size_t operator()(const ThreatLevel& level) const
 		{
 			return (std::hash<int>()(level.level));
 		}
@@ -44,17 +45,17 @@ namespace core {
 	struct ProbabilitiesOfDamage {
 	public:
 		//ProbabilitiesOfDamage() { std::cout << "damageDDDDDD\n"; }
-		Probability getProbability(const DamageLevel& lvl);
-		void setProbability(const DamageLevel& lvl, const Probability& probability);
+		Probability getProbability(const ThreatLevel& lvl);
+		void setProbability(const ThreatLevel& lvl, const Probability& probability);
 	private:
-		std::unordered_map<DamageLevel, Probability, DamageLevelHasher> m_damageProbabilites{};
+		std::unordered_map<ThreatLevel, Probability, ThreatLevelHasher> m_damageProbabilites{};
 	};
 
 	using UnitDamageType = std::string_view;
 	class DamageHandler {
 	public:
 		void loadProbabilitiesFromFile(std::string_view filename);
-		void calcEvent(const DamageLevel& lvl);
+		void calcEvent(const ThreatLevel& lvl);
 		virtual ~DamageHandler() = default;
 	protected:
 		std::unordered_map<UnitDamageType, ProbabilitiesOfDamage> m_damageProbabilities;

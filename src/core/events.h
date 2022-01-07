@@ -18,10 +18,10 @@ namespace events {
 	class Observer
 	{
 	public:
-		virtual void newUnitSelected(const UnitSelectedInfo& unitInfo) = 0;
-		virtual void informationMsgRecieved(const GameInfoMessage& msgInfo) = 0;
-		virtual void moveAreaRecieved(const MoveAreaInfo& moveArea) = 0;
-		virtual void moveUnitRecieved(const MoveUnitInfo& moveUnit) = 0;
+		virtual void newUnitSelected(const UnitSelectedInfo& unitInfo) {}
+		virtual void informationMsgRecieved(const GameInfoMessage& msgInfo) {}
+		virtual void moveAreaRecieved(const MoveAreaInfo& moveArea) {}
+		virtual void moveUnitRecieved(const MoveUnitInfo& moveUnit) {}
 		void operator ()(const UnitSelectedInfo& unitInfo) { newUnitSelected(unitInfo); }
 		void operator ()(const GameInfoMessage& msgInfo) { informationMsgRecieved(msgInfo); }
 		void operator ()(const MoveAreaInfo& moveArea) { moveAreaRecieved(moveArea); }

@@ -5,7 +5,7 @@
 
 class MyGameEngineRulesFixture : public ::testing::Test {
 public:
-    std::vector<core::GameTileType> testTypes{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
     core::GameEngine gameEngine{testableBoard, std::move(unitMng), PlayerIdentifier{1 }, PlayerIdentifier{2 } };

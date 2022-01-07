@@ -9,7 +9,7 @@ using namespace core;
 
 class pathfindingFixture : public ::testing::Test {
 public:
-    std::vector<core::GameTileType> testTypes{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
 
     pathfindingFixture() {
@@ -92,7 +92,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement1) {
     auto source = GameTile(3, 1);
     std::unordered_set < GameTile> expected = { GameTile(3,0), GameTile(4,1),
                                              GameTile(3,2), GameTile(2,2), GameTile(2,1) };
-    testableBoard.setTileType(GameTile(4, 0), GameTileType::water); // this tile become unavailable cuz movement only 1
+    testableBoard.setTileType(GameTile(4, 0), GameTileType::Water); // this tile become unavailable cuz movement only 1
 
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 1 });
     int size = result.size();
@@ -109,7 +109,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement3) {
                                              GameTile(0,2), GameTile(1,2), GameTile(2,2),
                                               GameTile(3,2), GameTile(-1,3), GameTile(0,3) ,
                                                  GameTile(1,3), GameTile(2,3), GameTile(-2,4), GameTile(-1,4) };
-    testableBoard.setTileType(GameTile(0, 0), GameTileType::water); //
+    testableBoard.setTileType(GameTile(0, 0), GameTileType::Water); //
     testableBoard.setTileAccessible(GameTile(0, 4), false);
     testableBoard.setTileAccessible(GameTile(1, 4), false);
 
@@ -126,7 +126,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement3MoreBlocked) {
     std::unordered_set <GameTile> expected = { GameTile(1,2),GameTile(1,1), GameTile(0,1),
                                              GameTile(2,1), GameTile(3,1), GameTile(4,1), GameTile(4,2),
                                              GameTile(0,3), GameTile(-1,3), GameTile(-1, 4), GameTile(0,4) };
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water); //
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water); //
     testableBoard.setTileAccessible(GameTile(1, 0), false); 
     testableBoard.setTileAccessible(GameTile(2, 0), false);
     testableBoard.setTileAccessible(GameTile(3, 0), false);
@@ -152,7 +152,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement2) {
                                              GameTile(0,1), GameTile(1,1),
                                               GameTile(-1,3), GameTile(0,3),
                                              GameTile(-2,4)};
-    //testableBoard.setTileType(GameTile(5, 1), GameTileType::water); //
+    //testableBoard.setTileType(GameTile(5, 1), GameTileType::Water); //
     testableBoard.setTileAccessible(GameTile(-1, 4), false);
     testableBoard.setTileAccessible(GameTile(0, 2), false);
 
@@ -169,8 +169,8 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement4) {
     std::unordered_set < GameTile> expected = { GameTile(1,0),GameTile(0,1), GameTile(1,1), GameTile(-1,2),
                                                GameTile(0,2), GameTile(-1,3), GameTile(0,3), GameTile(1,3),
                                                GameTile(-2,4), GameTile(-1,4), GameTile(0,4) };
-    testableBoard.setTileType(GameTile(1, 0), GameTileType::water); //
-    testableBoard.setTileType(GameTile(1, 1), GameTileType::water);
+    testableBoard.setTileType(GameTile(1, 0), GameTileType::Water); //
+    testableBoard.setTileType(GameTile(1, 1), GameTileType::Water);
     testableBoard.setTileAccessible(GameTile(2, 0), false);
     testableBoard.setTileAccessible(GameTile(3, 0), false);
     testableBoard.setTileAccessible(GameTile(4, 0), false);
@@ -190,12 +190,12 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement4) {
 TEST_F(pathfindingFixture, getAvailableAreaEmpty) {
     auto source = GameTile(3, 1);
     std::unordered_set < GameTile> expected = { };
-    testableBoard.setTileType(GameTile(4, 0), GameTileType::water); // this tile become unavailable cuz movement only 1
-    testableBoard.setTileType(GameTile(3, 0), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 1), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 2), GameTileType::water);
-    testableBoard.setTileType(GameTile(2, 2), GameTileType::water);
-    testableBoard.setTileType(GameTile(2, 1), GameTileType::water);
+    testableBoard.setTileType(GameTile(4, 0), GameTileType::Water); // this tile become unavailable cuz movement only 1
+    testableBoard.setTileType(GameTile(3, 0), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 1), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 1), GameTileType::Water);
 
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 1 });
     int size = result.size();
@@ -223,10 +223,10 @@ TEST_F(pathfindingFixture, getShortestPath15) {
     testableBoard.setTileAccessible(GameTile(2, 2), false);
     testableBoard.setTileAccessible(GameTile(3, 2), false); // 
     testableBoard.setTileAccessible(GameTile(1, 3), false);
-    testableBoard.setTileType(GameTile(4, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(2, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 4), GameTileType::water);
+    testableBoard.setTileType(GameTile(4, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 4), GameTileType::Water);
 
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
@@ -253,9 +253,9 @@ TEST_F(pathfindingFixture, getShortestPath15TwoDiffPaths) {
     testableBoard.setTileAccessible(GameTile(2, 2), false);
     testableBoard.setTileAccessible(GameTile(3, 2), false); // 
     testableBoard.setTileAccessible(GameTile(1, 3), false);
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(2, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 4), GameTileType::water);
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 4), GameTileType::Water);
 
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
@@ -279,11 +279,11 @@ TEST_F(pathfindingFixture, getShortestPath9) {
     testableBoard.setTileAccessible(GameTile(2, 2), false);
     testableBoard.setTileAccessible(GameTile(3, 2), false); // 
     testableBoard.setTileAccessible(GameTile(1, 3), false);
-    testableBoard.setTileType(GameTile(0, 1), GameTileType::test3);
-    testableBoard.setTileType(GameTile(0, 2), GameTileType::test3);
-    testableBoard.setTileType(GameTile(2, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 3), GameTileType::water);
+    testableBoard.setTileType(GameTile(0, 1), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(0, 2), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(2, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 3), GameTileType::Water);
 
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
@@ -309,11 +309,11 @@ TEST_F(pathfindingFixture, getShortestPath1150) {
     testableBoard.setTileAccessible(GameTile(2, 2), false);
     testableBoard.setTileAccessible(GameTile(3, 2), false); // 
     testableBoard.setTileAccessible(GameTile(1, 3), false);
-    testableBoard.setTileType(GameTile(0, 1), GameTileType::test3);
-    testableBoard.setTileType(GameTile(0, 2), GameTileType::test3);
-    testableBoard.setTileType(GameTile(2, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 3), GameTileType::water);
+    testableBoard.setTileType(GameTile(0, 1), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(0, 2), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(2, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 3), GameTileType::Water);
 
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
@@ -339,12 +339,12 @@ TEST_F(pathfindingFixture, getShortestPath13) {
     testableBoard.setTileAccessible(GameTile(2, 2), false);
     testableBoard.setTileAccessible(GameTile(3, 2), false); // 
     testableBoard.setTileAccessible(GameTile(1, 3), false);
-    testableBoard.setTileType(GameTile(0, 1), GameTileType::test5);
-    testableBoard.setTileType(GameTile(0, 2), GameTileType::test5);
-    testableBoard.setTileType(GameTile(-1, 3), GameTileType::test3);
-    testableBoard.setTileType(GameTile(2, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 3), GameTileType::water);
+    testableBoard.setTileType(GameTile(0, 1), GameTileType::Test5);
+    testableBoard.setTileType(GameTile(0, 2), GameTileType::Test5);
+    testableBoard.setTileType(GameTile(-1, 3), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(2, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 3), GameTileType::Water);
 
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
@@ -408,7 +408,7 @@ TEST_F(pathfindingFixture, getShortestPath0) {
 }
 
 TEST_F(pathfindingFixture, getStrightLine) {
-    std::vector<core::GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(0, 0);
     auto destination = GameTile(0, 4);
@@ -422,7 +422,7 @@ TEST_F(pathfindingFixture, getStrightLine) {
 }
 
 TEST_F(pathfindingFixture, getLongLine) {
-    std::vector<core::GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(0, 0);
     auto destination = GameTile(4, 4);
@@ -437,7 +437,7 @@ TEST_F(pathfindingFixture, getLongLine) {
 }
 
 TEST_F(pathfindingFixture, getLine7) {
-    std::vector<core::GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(5, 0);
     auto destination = GameTile(-2, 4);
@@ -452,7 +452,7 @@ TEST_F(pathfindingFixture, getLine7) {
 }
 
 TEST_F(pathfindingFixture, getLine2) {
-    std::vector<core::GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(1, 0);
     auto destination = GameTile(3, 0);
@@ -466,7 +466,7 @@ TEST_F(pathfindingFixture, getLine2) {
 }
 
 TEST_F(pathfindingFixture, getLine1) {
-    std::vector<core::GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(4, 0);
     auto destination = GameTile(3, 0);
@@ -480,7 +480,7 @@ TEST_F(pathfindingFixture, getLine1) {
 }
 
 TEST_F(pathfindingFixture, getLineZero) {
-    std::vector<GameTileType> testTypes1{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<GameTileType> testTypes1{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard1{ testTypes1, 5, 7 };
     auto source = GameTile(1, 0);
     auto destination = GameTile(1, 0);

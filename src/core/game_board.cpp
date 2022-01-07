@@ -25,13 +25,13 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 MoveAreaInfo core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit)
 {
 	// full distance and half distance should be printed with different colors in game
-	TileDistance halfMovement = unit->getHalfMovePoints();
+	TileDistance halfMovement = unit->getHalfMovePointsRoundedUp();
 	TileDistance remainingMovement = unit->getRemainingMovement();
 	TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
 	std::vector<GameTile> moveArea = {};
 	int firstLayerSize = 0;
 
-	if (remainingMovement >= halfMovement) 
+	if (remainingMovement >= halfMovement ) 
 	{
 		moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovementInFirstHalf);
 		firstLayerSize = std::size(moveArea);
@@ -68,6 +68,11 @@ std::vector<core::GameTile> core::GameBoard::moveTo(const MoveToAction* moveToCm
 		}
 	}
 	return std::vector<core::GameTile>();
+}
+
+std::vector<GameTile> core::GameBoard::getStraightLine(const GameTile& from, const GameTile& to)
+{
+	return pathfinding::drawLine(from, to);
 }
 
 void core::GameBoard::printBoardTest()
