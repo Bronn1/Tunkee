@@ -150,7 +150,7 @@ bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
 
 void graphics::GameWorldView::onBoardClicked(const sf::Vector2f& mousePos)
 {
-    auto unit = m_selectedUnit;
+    //auto unit = m_selectedUnit;
     m_gameController.moveUnit(m_selectedUnit->getId(), (m_board).getSelectorTileCoordinates());
 
     auto tileCenter =  m_board.getTileCenterIfValid(mousePos);
@@ -200,6 +200,10 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
         return;
     m_unitsGraph[moveUnit.m_unitId]->setMovementState(std::move(movementPath));
     m_isPerformingAction = true;
+}
+
+void graphics::GameWorldView::shotUnitRecieved(const ShootUnitInfo& shotUnit)
+{
 }
 
 void graphics::GameWorldView::clearMoveArea()

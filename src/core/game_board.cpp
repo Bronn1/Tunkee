@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <optional>
 
 core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int height) : m_width(width-1), m_height(height-1)
 {
@@ -22,7 +21,7 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 	}
 }
 
-MoveAreaInfo core::GameBoard::getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit)
+MoveAreaInfo core::GameBoard::getMoveAreaForUnit(Unit *unit)
 {
 	// full distance and half distance should be printed with different colors in game
 	TileDistance halfMovement = unit->getHalfMovePointsRoundedUp();
@@ -77,7 +76,7 @@ std::vector<GameTile> core::GameBoard::getStraightLine(const GameTile& from, con
 
 void core::GameBoard::printBoardTest()
 {
-	int i = 0, j = 0;
+	int i = 0;
 	std::cout << std::size(m_orderedBoard) << "\n";
 	for (auto& p : m_orderedBoard)
 	{

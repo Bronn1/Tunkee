@@ -5,6 +5,8 @@ set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml/SFML-2.5.1)
 set(CMAKE_CXX_STANDARD 20)
 
+
+
 #add_executable(Tunkee main.cpp)
 add_subdirectory(src)
 include_directories(.)
@@ -39,7 +41,7 @@ set(Header_Files
         "src/units_factory.h"
         "src/graphics/resource_holder.h"
         "src/core/damage_handler.h"
-        "src/core/unit_damage_type.h"
+        "src/core/unit_state.h"
         "src/graphics/explosion_effects.h"
         "src/graphics/projectile.h"
         )
@@ -74,7 +76,7 @@ set(Source_Files
         "src/units_factory.cpp"
         "src/graphics/resource_holder.cpp"
         "src/core/damage_handler.cpp"
-        "src/core/unit_damage_type.cpp"
+        "src/core/unit_state.cpp"
         "src/graphics/explosion_effects.cpp"
         "src/graphics/projectile.cpp"
         )

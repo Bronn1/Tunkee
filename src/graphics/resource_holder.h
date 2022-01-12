@@ -38,7 +38,7 @@ public:
 	void load(const Identifier& id,const  std::string_view filename) {
 		std::unique_ptr<Resource> resource(std::make_unique<Resource>());
 		if (!(*resource).loadFromFile(filename.data()))
-			std::runtime_error("ResourceHolder::load - Failed to load " );
+			throw std::runtime_error("ResourceHolder::load - Failed to load " );
 
 		(*resource).setSmooth(true);
 		m_holder.insert({ id, std::move(resource) });

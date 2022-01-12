@@ -25,22 +25,25 @@ namespace core {
 
     struct UnitPart
     {
-        enum class Condition
+        enum class State
         {
             Damaged,
-            Fully,
+            Normal,
             Ideal
         };
 
         bool m_isVisible{ false };
         bool m_missingNextTurn{ false };
-        Condition m_condition{ Condition::Fully };
+        State m_state{ State::Normal };
     };
 
     /**
-     * @brief TODO add documentation
+     * @brief Class represents interface to get internal unit state . Unit parts in this class or derived classes can
+     * be damaged or have some special states which may affect gaming process(moving, shooting, action states, etc). 
+     * Because different type of units can differ sevirely and damage system is a big part of the game so any type of 
+     * unit can have this interface as a base class and implemet his own parts, states, crew number and etc.
     */
-    class UnitCondition
+    class UnitState
     {
     public:
         void applyDamage(const std::string_view damageType);
@@ -50,9 +53,9 @@ namespace core {
         virtual bool   canMove() const = 0;
         virtual bool   canShot() const = 0;
         void setCrew(const Crew& crew) { m_crew = crew; }
-        virtual ~UnitCondition() = default;
-        UnitPart::Condition getScopeCondition() const { return  m_scope.m_condition; }
-        void setIdealScope() { m_scope.m_condition = UnitPart::Condition::Ideal; }
+        virtual ~UnitState() = default;
+        UnitPart::State getScopeState() const { return  m_scope.m_state; }
+        void setIdealScope() { m_scope.m_state = UnitPart::State::Ideal; }
     protected:
         Crew m_crew;
         std::unordered_map< DamageType, std::function<void()>> m_applyDamage{};
@@ -60,7 +63,7 @@ namespace core {
     };
 }
 
-namespace tank_damage_system 
+namespace tank_state_system 
 {
     using namespace core;
     constexpr std::string_view kBurning = "Burning";
@@ -78,19 +81,21 @@ namespace tank_damage_system
     constexpr std::string_view kCrewKilled = "CrewKilled";
     constexpr std::string_view kTrackDamaged = "TrackDamaged";
     constexpr std::string_view kCrewShellShocked = "CrewShellShocked";
+    constexpr std::string_view kRicochet = "Ricochet";
+    constexpr std::string_view kMissed = "Missed";
 
-    constexpr std::array<std::string_view, 15> kTankDamageTypes = { kBurning, kExploded,
+    constexpr std::array<std::string_view, 16> kTankDamageTypes = { kBurning, kExploded,
                                                                   kCommanderKilled, kDriverKilled,
                                                                   kChargerKilled, kGunnerKilled, kLoaderKilled, kTransmissionDestroyed,
                                                                   kEngineDestroyed, kTurretJammed,
                                                                   kGunDestroyed, kScopeDamaged ,
-                                                                  kCrewKilled, kTrackDamaged, kCrewShellShocked };
+                                                                  kCrewKilled, kTrackDamaged, kCrewShellShocked, kRicochet };
 
-    class TankCondition : public core::UnitCondition
+    class TankState : public core::UnitState
     {
     public:
-        using enum core::UnitPart::Condition;
-        TankCondition(const core::Crew& crew);
+        using enum core::UnitPart::State;
+        TankState(const core::Crew& crew);
         TileDistance getMoveDistanceWithFine(const TileDistance movement) const override;
         Shots  getRateOfFireWithFine(const Shots rateOfFire) const override;
         int    amountOfActionCanDo() const override;

@@ -50,11 +50,16 @@ constexpr unsigned int kMaxArmorFronatal = 6;
 constexpr unsigned int kMaxSide = 6;
 
 struct Armor {
-	unsigned int m_frontal;
-	unsigned int m_side;
+	int m_frontal;
+	int m_side;
 	//bool operator==(const RateOfFire&) const = default;
 	auto operator<=>(const Armor&) const = default;
 	Armor(const unsigned frontal, const unsigned side) : m_frontal(frontal % kMaxArmorFronatal), m_side(side % kMaxSide) {}
+};
+
+struct Attack {
+	 int attack;
+	auto operator<=>(const Attack&) const = default;
 };
 
 struct Angle {

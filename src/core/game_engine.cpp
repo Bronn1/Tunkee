@@ -6,6 +6,7 @@ core::GameEngine::GameEngine(const GameBoard& board, UnitManagerPtr unitMng, con
 	m_gameRules = std::move(std::make_unique<GameRulesBasic>());
 	m_gameRules->setUnitManager(m_unitManager.get());
 	m_gameRules->setStage(GameRulesInterface::GameStage::Setup);
+	m_damageCalculator.initProbabilityTables();
 }
 
 void core::GameEngine::moveUnit(MoveToAction* action)
@@ -17,7 +18,7 @@ void core::GameEngine::moveUnit(MoveToAction* action)
 		auto moveInfo  = MoveUnitInfo(movePath, unit.value()->getID());
 		notify(moveInfo);
 		auto moveAreaQuery{ std::make_shared<GetMoveAreaQuery>(action->m_playerID, action->m_unitID) };
-		auto moveArea = m_board.getMoveAreaForUnit(moveAreaQuery.get(), unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
 		notify(moveArea);
 	}
 	else
@@ -75,7 +76,7 @@ void core::GameEngine::requestMoveArea(GetMoveAreaQuery* moveAreaQuery)
 	auto unit = m_unitManager->getUnitIfExist(moveAreaQuery->m_unitID);
 	if (unit)
 	{
-		auto moveArea = m_board.getMoveAreaForUnit(moveAreaQuery, unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
 		notify(moveArea);
 	}
 }
@@ -89,7 +90,7 @@ void core::GameEngine::selectUnit(const SelectUnitQuery* selectUnitQuery)
 	if (unit)
 	{
 		auto moveAreaQuery{ std::make_shared<GetMoveAreaQuery>(selectUnitQuery->m_playerID, selectUnitQuery->m_unitID) };
-		auto moveArea = m_board.getMoveAreaForUnit(moveAreaQuery.get(), unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
 		notify(moveArea);
 	}
 }

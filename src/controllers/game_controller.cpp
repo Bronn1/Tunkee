@@ -55,7 +55,7 @@ void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
 	m_gameEngine->finishActionPhase(finishActionPhase.get());
 	
 	// TODO for test
-	auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{1}) };
+	//auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{1}) };
 	//m_gameEngine->selectUnit(selectUnitQuery.get());
 	finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
 	m_gameEngine->finishActionPhase(finishActionPhase.get());

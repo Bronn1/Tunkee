@@ -38,6 +38,7 @@ namespace graphics {
 		void informationMsgRecieved(const GameInfoMessage& msgInfo) override;
 		void moveAreaRecieved(const MoveAreaInfo& moveArea) override;
 		void moveUnitRecieved(const MoveUnitInfo& moveUnit) override;
+		void shotUnitRecieved(const ShootUnitInfo& shotUnit) override;
 		void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitsSetupView.setUnitSetupController(std::move(controller)); }
 		friend class ::GameBuilder;
 	private:

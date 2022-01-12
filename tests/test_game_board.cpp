@@ -18,7 +18,7 @@ using namespace core;
 class MockUnit7Distance : public Unit {
 public:
     MockUnit7Distance(UnitIdentifier id) : Unit(id, TileDistance{ 7 }, Shots{ 3 }) {
-        m_actionState.setConditionSystem(std::make_unique<tank_damage_system::TankCondition>(Crew{ 5, 3 }));
+        m_actionState.setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
     }
     MOCK_CONST_METHOD0(isAlive, bool());
 };

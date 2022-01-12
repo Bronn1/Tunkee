@@ -360,14 +360,14 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
 	TileDistance expectedMoveLeft = { 0 };
 	Shots expectedShotleft = { 0 };
 	GameTile expectedPosition = GameTile(0, 0);
-	unit.applyDamage(tank_damage_system::kCommanderKilled);
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kGunnerKilled);
-	unit.applyDamage(tank_damage_system::kChargerKilled);
-	unit.applyDamage(tank_damage_system::kChargerKilled);
-	unit.applyDamage(tank_damage_system::kChargerKilled);
-	unit.applyDamage(tank_damage_system::kLoaderKilled);
+	unit.applyDamage(tank_state_system::kCommanderKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kGunnerKilled);
+	unit.applyDamage(tank_state_system::kChargerKilled);
+	unit.applyDamage(tank_state_system::kChargerKilled);
+	unit.applyDamage(tank_state_system::kChargerKilled);
+	unit.applyDamage(tank_state_system::kLoaderKilled);
 	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
 	unit.moveTo(firstActionPath);
 
@@ -385,12 +385,12 @@ TEST_F(UnitFixture, TankGunCrewKilled)
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 5 };
 	Shots expectedShotleft = { 1 };
-	//unit.applyDamage(tank_damage_system::kCommanderKilled);
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kGunnerKilled);
-	unit.applyDamage(tank_damage_system::kLoaderKilled);
-	//.applyDamage(tank_damage_system::kLO);
+	//unit.applyDamage(tank_state_system::kCommanderKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kGunnerKilled);
+	unit.applyDamage(tank_state_system::kLoaderKilled);
+	//.applyDamage(tank_state_system::kLO);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -406,9 +406,9 @@ TEST_F(UnitFixture, TankGunCrewHalfKilled)
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 5 };
 	Shots expectedShotleft = { 1 };
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kDriverKilled);
-	unit.applyDamage(tank_damage_system::kLoaderKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kDriverKilled);
+	unit.applyDamage(tank_state_system::kLoaderKilled);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -423,8 +423,8 @@ TEST_F(UnitFixture, TankGun1fKilled)
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 5 };
 	Shots expectedShotleft = { 2 };
-	unit.applyDamage(tank_damage_system::kLoaderKilled);
-	unit.applyDamage(tank_damage_system::kLoaderKilled);
+	unit.applyDamage(tank_state_system::kLoaderKilled);
+	unit.applyDamage(tank_state_system::kLoaderKilled);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedShootLeft);

@@ -168,7 +168,6 @@ void graphics::UnitView::showTooltip(const sf::Vector2f& mouse_pos)
 graphics::SceneNodePtr graphics::UnitView::shot(const sf::Vector2f& destination)  
 {
 	const float projectileScale = 0.3f;
-	sf::Vector2f offset(0.3f * m_bodySprite.getGlobalBounds().width, 0.3f * m_bodySprite.getGlobalBounds().height);
 	float midCoordinatesX = m_bodySprite.getOrigin().x - (m_bodySprite.getLocalBounds().width / 2.f);//std::sin(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
 	float midCoordinatesY = m_bodySprite.getOrigin().y - (m_bodySprite.getLocalBounds().height / 2.f);//std::cos(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
 	auto projectile = std::make_unique<Projectile>(getTransform().transformPoint({ midCoordinatesX, midCoordinatesY}), destination, this, m_textures.get(textures::ID::Missile));

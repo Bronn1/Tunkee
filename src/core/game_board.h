@@ -19,7 +19,7 @@ namespace core {
 		GameBoard() = default;
 		GameBoard(std::vector<GameTileType> tiles, int width, int height);
 
-		MoveAreaInfo getMoveAreaForUnit(const GetMoveAreaQuery* getAreaCmd, Unit* unit);
+		MoveAreaInfo getMoveAreaForUnit(Unit *unit);
 		std::vector<GameTile> moveTo(const MoveToAction* moveToCmd, Unit* unit);
 		std::vector<GameTile> getStraightLine(const GameTile & from, const GameTile & to);
 		
@@ -42,9 +42,7 @@ namespace core {
 		
 		void printBoardTest();
 		
-		~GameBoard() {
-			//printBoardTest();
-		}
+		~GameBoard() = default;
 	private:
 		int m_height{0};
 		int m_width{ 0 };

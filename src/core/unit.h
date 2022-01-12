@@ -3,7 +3,7 @@
 #include "data_types.h"
 #include "events.h"
 #include "game_tile.h"
-#include "unit_damage_type.h"
+#include "unit_state.h"
 
 namespace core 
 {
@@ -22,7 +22,7 @@ namespace core
 	class UnitActionState
 	{
 	public:
-		using UnitConditionPtr = std::unique_ptr< UnitCondition>;
+		using UnitStatePtr = std::unique_ptr< UnitState>;
 		enum class ActionState{
 			NoActionsPerformed,
 			MovePerformed,
@@ -37,15 +37,15 @@ namespace core
 		TileDistance getRemainingMoveInFirstHalf() const;
 		//TileDistance getFullMovePoints() const { return m_fullMovePoints; }
 		TileDistance getHalfMovePointsRoundedUp() const;
-		TileDistance getHalfMovePoints() const { return TileDistance{ m_condition->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
+		TileDistance getHalfMovePoints() const { return TileDistance{ m_state->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
 
 		Shots getHalfShotsRoundedUp() const;
-		Shots getHalfShots() const { return Shots{ m_condition->getRateOfFireWithFine(m_rateOfFire).shots / 2 };} 
+		Shots getHalfShots() const { return Shots{ m_state->getRateOfFireWithFine(m_rateOfFire).shots / 2 };} 
 		//Shots getRemainingShots() const { return m_remainingShots; }
 		//Shots getRateOfFire() const { return m_rateOfFire; }
 		void changeStateByMovement(const TileDistance& distance);
 		void changeStateByShooting(const Shots& shots);
-		void setConditionSystem(UnitConditionPtr condition) { m_condition = std::move(condition); }
+		void setStateSystem(UnitStatePtr state) { m_state = std::move(state); }
 
 		friend class Unit;
 	private:
@@ -54,7 +54,7 @@ namespace core
 		TileDistance m_remainingMovePoints;
 		Shots m_remainingShots;
 		ActionState m_actionState{ NoActionsPerformed };
-		UnitConditionPtr m_condition;
+		UnitStatePtr m_state;
 	};
 
 	/*class TankLifeSupportModel
@@ -92,18 +92,21 @@ namespace core
 		inline TileDistance getHalfMovePointsRoundedUp() const  { return m_actionState.getHalfMovePointsRoundedUp(); }
 		TileDistance getRemainingMovement() const  { return m_actionState.m_remainingMovePoints; }
 		TileDistance getRemainingMovementInFirstHalf() const { return m_actionState.getRemainingMoveInFirstHalf(); }
-		TileDistance getFullMovement() const { return m_actionState.m_condition->getMoveDistanceWithFine(m_actionState.m_fullMovePoints); }
-		inline bool canMove() const { return (getRemainingMovement() > TileDistance{ 0 } && m_actionState.m_condition->canMove()) ? true : false; }
-		inline bool canShoot() const { return ( getRemainingShots() > Shots{ 0 } && m_actionState.m_condition->canShot()) ? true : false; }
+		TileDistance getFullMovement() const { return m_actionState.m_state->getMoveDistanceWithFine(m_actionState.m_fullMovePoints); }
+		inline bool canMove() const { return (getRemainingMovement() > TileDistance{ 0 } && m_actionState.m_state->canMove()) ? true : false; }
+		inline bool canShoot() const { return ( getRemainingShots() > Shots{ 0 } && m_actionState.m_state->canShot()) ? true : false; }
 		bool hasActionLeft() const { return canMove() || canShoot(); }
 
-		Shots getRateOfFire() const { return m_actionState.m_condition->getRateOfFireWithFine(m_actionState.m_rateOfFire); }
+		Shots getRateOfFire() const { return m_actionState.m_state->getRateOfFireWithFine(m_actionState.m_rateOfFire); }
 		Shots getRemainingShots() const { return m_actionState.m_remainingShots; }
 		Shots getHalfShotsRoundedUp() const { return m_actionState.getHalfShotsRoundedUp(); }
 		bool isUnitHaveFullActionState() const;
 		void setActionState(const ActionStateStatus state) { m_actionState.setState(state); }
 		inline PlayerIdentifier getOwnerID() const { return m_owner; }
 		bool isAlive() const;
+		int getArmor(const Angle& attackingAngle) const;
+		Attack getAttack() const { return m_attack; }
+		UnitPart::State getScopeState() const {  return m_actionState.m_state->getScopeState(); }
 
 		void applyDamage(const std::string_view damageType);
 		/** Move to destination with adjustment by available movement.
@@ -115,6 +118,8 @@ namespace core
 		inline void setOwner(const PlayerIdentifier id) { m_owner = id; }
 		inline void setPosition(const GameTile& pos) { m_position = pos; }
 		inline void setUnitID(const UnitIdentifier id) { m_id = id; }
+		inline void setArmor(const Armor armor) { m_armor = armor; }
+		inline void setAttack(const Attack attack) { m_attack = attack; }
 		virtual ~Unit() = default;
 
 
@@ -132,7 +137,8 @@ namespace core
 		Angle m_bodyRotation{ 0 };
 		Angle m_gunRotation{ 0 };
 		TileDistance m_rangeOfFire{ 20 };
-		Armor m_armor{ 6, 6 };
+		Armor m_armor{ 4, 2 };
+		Attack m_attack{ 3 };
 
 
 		// is turret rotateable
@@ -144,7 +150,7 @@ namespace core
 		NullUnit() : Unit(UnitIdentifier{ 0 }, TileDistance{ 0 }, Shots{ 1 }) {
 			setOwner(PlayerIdentifier{ 0 });
 			m_actionState.setState(ActionStateStatus::empty);
-			m_actionState.setConditionSystem(std::make_unique< tank_damage_system::TankCondition>(Crew{ 5, 3 }));
+			m_actionState.setStateSystem(std::make_unique< tank_state_system::TankState>(Crew{ 5, 3 }));
 		}
 		bool hasActionLeft() const  { return  false; }
 

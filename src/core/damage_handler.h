@@ -1,17 +1,22 @@
 #pragma once
 
-#include "unit_damage_type.h"
+#include "unit_state.h"
 
 #include <unordered_map>
 #include <functional>
+#include <numeric>
 
 namespace core {
 	constexpr  int kMaxLevel = 3;
 	constexpr  int kMinLevel = -3;
 
+	/**
+    * @brief Level is a difference between shot power of attacking unit
+    * and armor of defending unit
+    */
 	struct ThreatLevel
 	{
-		ThreatLevel(int lvl)
+		explicit ThreatLevel(int lvl)
 		{
 			if (lvl > kMaxLevel) lvl = kMaxLevel;
 			if (lvl < kMinLevel) lvl = kMinLevel;
@@ -25,8 +30,11 @@ namespace core {
 		int level;
 	};
 
+	using UnitDamageType = std::string_view;
+
 	struct Probability {
-		float probability;
+		UnitDamageType type;
+		int probability;
 	};
 
 	struct ThreatLevelHasher
@@ -37,33 +45,18 @@ namespace core {
 		}
 	};
 
-	/**
-	 * @brief Holds information about probabilites of taking damage under
-	 * different levels. Level is a difference between shot power of attacking unit
-	 * and armor of defending unit
-	*/
-	struct ProbabilitiesOfDamage {
-	public:
-		//ProbabilitiesOfDamage() { std::cout << "damageDDDDDD\n"; }
-		Probability getProbability(const ThreatLevel& lvl);
-		void setProbability(const ThreatLevel& lvl, const Probability& probability);
-	private:
-		std::unordered_map<ThreatLevel, Probability, ThreatLevelHasher> m_damageProbabilites{};
-	};
-
-	using UnitDamageType = std::string_view;
-	class DamageHandler {
+	
+	using ProbabilitesVec = std::vector<Probability> ;
+	
+	class DamageProbabilityTable {
 	public:
 		void loadProbabilitiesFromFile(std::string_view filename);
 		void calcEvent(const ThreatLevel& lvl);
-		virtual ~DamageHandler() = default;
+		int getOverallProbabilitySize(const ThreatLevel& lvl) const;
+		std::string_view getDestroyedPart(const ThreatLevel& lvl, int rolledProbability) const;
+		void fillTankTableWithoutFile();
 	protected:
-		std::unordered_map<UnitDamageType, ProbabilitiesOfDamage> m_damageProbabilities;
+		std::unordered_map<ThreatLevel, ProbabilitesVec, ThreatLevelHasher> m_damageProbabilities;
 
-	};
-
-	class TankDamageHandler : public DamageHandler {
-	public:
-		TankDamageHandler();
 	};
 }
