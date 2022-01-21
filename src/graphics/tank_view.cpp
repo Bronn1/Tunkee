@@ -3,6 +3,7 @@
 //
 
 #include "tank_view.h"
+#include "src/core/unit_state.h"
 
 #include <numbers>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -18,22 +19,24 @@ constexpr float moveTargetEps = 0.f;
 
 graphics::UnitView::UnitView(UnitIdentifier id, Type type, TextureHolder& textures) :
 	m_type(type), m_bodySprite(textures.get(textures::ID::T34TankBody)),
-	m_turretSprite(textures.get(textures::ID::T34TankTurret)), m_explosion(textures.get(textures::ID::Explosion)), m_explosion2(textures.get(textures::ID::Explosion)),
+	m_turretSprite(textures.get(textures::ID::T34TankTurret)), m_explosion(textures.get(textures::ID::Explosion)), m_buriningAnimation(textures.get(textures::ID::Explosion)),
 	m_textures(textures), m_moveFrame(moveOffsetPerFrame, sf::Time::Zero, moveTargetEps)
 {
 	m_id = id;
+	// TODO after we'll have full animation support get rid of magic numbers here
 	m_explosion.setFrameSize(sf::Vector2i(256, 256));
 	m_explosion.setNumFrames(16);
-	m_explosion.setDuration(sf::seconds(1.f));
+	m_explosion.setDuration(sf::seconds(1.5f));
 	m_explosion.centerOrigin();
-	m_explosion.setScale({ 2.f,2.f });
+	m_explosion.setScale({ 2.4f,2.4f });
 
+	m_buriningAnimation.setFrameSize(sf::Vector2i(256, 256));
+	m_buriningAnimation.setNumFrames(4);
+	m_buriningAnimation.setDuration(sf::seconds(0.5f));
+	m_buriningAnimation.centerOrigin();
+	m_buriningAnimation.setScale({ 0.5f, 0.5f });
+	m_buriningAnimation.setRepeating(true);
 
-	m_explosion2.setFrameSize(sf::Vector2i(256, 256));
-	m_explosion2.setNumFrames(2);
-	m_explosion2.setDuration(sf::seconds(0.8f));
-	m_explosion2.centerOrigin();
-	m_explosion2.setScale({ 1.8f,2.3f });
 
 	sf::FloatRect bounds = m_bodySprite.getLocalBounds();
 	sf::FloatRect turretBounds = m_turretSprite.getLocalBounds();
@@ -43,6 +46,7 @@ graphics::UnitView::UnitView(UnitIdentifier id, Type type, TextureHolder& textur
 	auto [x, y] = m_bodySprite.getPosition();
 	m_turretSprite.setPosition(x, y);
 	m_tooltipDescription.setParentBounds(bounds);
+	m_buriningAnimation.move({bounds.width / 3, bounds.height / 4, });
 
 	setRotation(kDefaultUnitRotation);
 	setScale(kDefaultUnitScale, kDefaultUnitScale);
@@ -64,15 +68,17 @@ void graphics::UnitView::drawCurrent(sf::RenderTarget& target, sf::RenderStates 
 	else
 	{
 		target.draw(m_bodySprite, states);
-		//target.draw(m_explosion2, states);
+		//target.draw(m_buriningAnimation, states);
 		target.draw(m_explosion, states);
 	}
+
+	if(m_isBurning) target.draw(m_buriningAnimation, states);
 }
 
 void graphics::UnitView::updateCurrent(sf::Time dt)
 {
 	m_moveFrame.elapsedTime += dt;
-	
+	// TODO work on hotpath a bit, branch prediction
 	if (!m_movementPath.empty())
 	{
 		if ( m_moveFrame.fullPath - m_moveFrame.distancePassedPercent > 0 )
@@ -95,15 +101,16 @@ void graphics::UnitView::updateCurrent(sf::Time dt)
 			{
 				markAsSelected();
 				m_isPerformingAction = false;
+				rotateTo(getPosition(), m_currentRotationPoint);
 				std::cout << getRotation() << "  GYI\n";
 			}
 		}
 	}
-
+	m_buriningAnimation.update(dt);
 	if (m_isDestroyed && !m_explosion.isFinished())
 	{
 		m_explosion.update(dt);
-		m_explosion2.update(dt);	
+			
 	}
 		
 }
@@ -165,15 +172,29 @@ void graphics::UnitView::showTooltip(const sf::Vector2f& mouse_pos)
 	}
 }
 
-graphics::SceneNodePtr graphics::UnitView::shot(const sf::Vector2f& destination)  
+inline void graphics::UnitView::showDamage(std::string_view damageType)
+{
+	// get rid of if else if blocks, come up with smth more brilliant
+	if (damageType == tank_state_system::kExploded)
+	{
+		m_isDestroyed = true;
+		m_buriningAnimation.setScale({ 0.9f, 0.9f });
+	}
+	if (damageType == tank_state_system::kBurning)
+		m_isBurning = true;
+}
+
+graphics::SceneNodePtr graphics::UnitView::shot(SceneNode* target, std::string_view damageType)
 {
 	const float projectileScale = 0.3f;
 	float midCoordinatesX = m_bodySprite.getOrigin().x - (m_bodySprite.getLocalBounds().width / 2.f);//std::sin(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
 	float midCoordinatesY = m_bodySprite.getOrigin().y - (m_bodySprite.getLocalBounds().height / 2.f);//std::cos(m_turretSprite.getRotation()) + m_turretSprite.getLocalBounds().width;
-	auto projectile = std::make_unique<Projectile>(getTransform().transformPoint({ midCoordinatesX, midCoordinatesY}), destination, this, m_textures.get(textures::ID::Missile));
+	auto projectile = std::make_unique<Projectile>(getTransform().transformPoint({ midCoordinatesX, midCoordinatesY}), target->getPosition(), this, m_textures.get(textures::ID::Missile));
 	projectile->setScale({ projectileScale, projectileScale });
-	projectile->setTarget(destination);
+	projectile->setTarget(target->getPosition());
+	projectile->setDamageType(damageType);
 	projectile->setRotation(Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) }.angle);
+	projectile->setTargetUnit(target);
 
 	return projectile;
 }

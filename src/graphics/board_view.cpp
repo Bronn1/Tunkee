@@ -58,6 +58,7 @@ sf::Vector2f graphics::BoardView::getPositionByTileCoordinates(const core::GameT
 {
     if (m_tiles.contains(coordinates))
     {
+      // std::cout << m_tiles.at(coordinates).getPoint(1) << "\n";
        return m_tiles.at(coordinates).getPosition();
     }
 }

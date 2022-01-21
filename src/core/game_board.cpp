@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <algorithm>
+#include <ranges>
+
+namespace views = std::views;
+namespace ranges = std::ranges;
 
 core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int height) : m_width(width-1), m_height(height-1)
 {
@@ -23,28 +27,24 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 
 MoveAreaInfo core::GameBoard::getMoveAreaForUnit(Unit *unit)
 {
-	// full distance and half distance should be printed with different colors in game
 	TileDistance halfMovement = unit->getHalfMovePointsRoundedUp();
 	TileDistance remainingMovement = unit->getRemainingMovement();
-	TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
 	std::vector<GameTile> moveArea = {};
 	int firstLayerSize = 0;
 
-	if (remainingMovement >= halfMovement ) 
-	{
-		moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovementInFirstHalf);
+	// full Movement and half Movement should be showed with different colors in game
+	if (remainingMovement >= halfMovement ) {
+		TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
+		moveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovementInFirstHalf, unit->getUnitVertexRotation());
 		firstLayerSize = std::size(moveArea);
-		auto  fullMoveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
+		auto  fullMoveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovement, unit->getUnitVertexRotation());
 		for (auto& tile : fullMoveArea)
-		{
-			//v2.insert(v2.end(), std::make_move_iterator(v1.begin() + 7), std::make_move_iterator(v1.end()));
 			// add only new(unique) tiles
-			if (std::ranges::find(moveArea, tile) == std::end(moveArea))
+			if (std::ranges::find(moveArea, tile) == std::end(moveArea)) 
 				moveArea.push_back(tile);
-		}
 	}
 	else {
-		moveArea = pathfinding::getAvailableArea(*this, unit->getPosition(), remainingMovement);
+		moveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovement, unit->getUnitVertexRotation());
 		firstLayerSize = 0;
 	}
 	return MoveAreaInfo{ std::move(moveArea), firstLayerSize };//moveArea;
@@ -52,21 +52,45 @@ MoveAreaInfo core::GameBoard::getMoveAreaForUnit(Unit *unit)
 
 std::vector<core::GameTile> core::GameBoard::moveTo(const MoveToAction* moveToCmd, Unit* unit)
 {
-	auto currentPlayer = getCurrentPlayerId();
+	rotateToDestination(moveToCmd, unit);
 
-	if (unit->getOwnerID() == currentPlayer)
+	GameTile currentPos = unit->getPosition();
+	auto pathVec = pathfinding::getShortestPath(*this, currentPos, getTile(moveToCmd->m_destination));
+	auto adjustedPathVec = unit->moveTo(pathVec);
+	if (std::size(adjustedPathVec) > 0)
 	{
-		GameTile currentPos = unit->getPosition();
-		auto pathVec = pathfinding::getShortestPath(*this, currentPos, getTile(moveToCmd->m_destination));
-		auto adjustedPathVec = unit->moveTo(pathVec);
-		if (std::size(adjustedPathVec) > 0)
-		{
-			setTileAccessible(currentPos, true);
-			setTileAccessible(adjustedPathVec.back(), false);
-			return adjustedPathVec;
-		}
+		setTileAccessible(currentPos, true);
+		setTileAccessible(adjustedPathVec.back(), false);
+		return adjustedPathVec;
 	}
+
 	return std::vector<core::GameTile>();
+}
+
+
+void core::GameBoard::rotateToDestination(const MoveToAction* moveToCmd, Unit* unit)
+{
+	auto vertex = unit->getUnitVertexRotation();
+	HexVertexNumber curVertex{ vertex.vertexNum + 5 }; // left vertex to cur
+	GameTile currentPos = unit->getPosition();
+	int distance = pathfinding::getDistance(currentPos, moveToCmd->m_destination);
+	for (int i : views::iota(1, 7))
+	{
+		auto tilesInfrontVec = pathfinding::getLineOfSightWithoutBarriers(*this, currentPos, TileDistance{ (unsigned)distance + 5 }, curVertex);
+		if (ranges::find(tilesInfrontVec, moveToCmd->m_destination) != end(tilesInfrontVec))
+		{
+			if (i > 3) // if unit rotated more than one vertex
+				unit->rotateToVertex(curVertex);
+
+			unit->setUnitVertexRotation(curVertex);
+			return;
+		}
+		curVertex = HexVertexNumber{ curVertex.vertexNum + 1 };
+	}
+	
+	// TODO could be good to do refactor here, cuz we shouldn't be there ,unit should be able to find his proper rotation
+	// if we have  reached this part something is very wrong!
+	// throw std::runtime_error("pzd\n");
 }
 
 std::vector<GameTile> core::GameBoard::getStraightLine(const GameTile& from, const GameTile& to)

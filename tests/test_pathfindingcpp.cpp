@@ -97,7 +97,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement1) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 1 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected) ;
 }
@@ -116,7 +116,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement3) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 3 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected);
 }
@@ -141,7 +141,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement3MoreBlocked) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 3 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected);
 }
@@ -159,7 +159,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement2) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 2 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected);
 }
@@ -182,7 +182,7 @@ TEST_F(pathfindingFixture, getAvailableAreaWithMovement4) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 4 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected);
 }
@@ -200,7 +200,7 @@ TEST_F(pathfindingFixture, getAvailableAreaEmpty) {
     auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 1 });
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
     EXPECT_EQ(resultToSet, expected);
 }
@@ -231,7 +231,7 @@ TEST_F(pathfindingFixture, getShortestPath15) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -260,7 +260,7 @@ TEST_F(pathfindingFixture, getShortestPath15TwoDiffPaths) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -288,7 +288,7 @@ TEST_F(pathfindingFixture, getShortestPath9) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -318,7 +318,7 @@ TEST_F(pathfindingFixture, getShortestPath1150) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }*/
 
@@ -349,7 +349,7 @@ TEST_F(pathfindingFixture, getShortestPath13) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -362,7 +362,7 @@ TEST_F(pathfindingFixture, getShortestPath4StraightLine) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -379,7 +379,7 @@ TEST_F(pathfindingFixture, getShortestPathUnaccessible) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -391,7 +391,7 @@ TEST_F(pathfindingFixture, getShortestPath1) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -403,7 +403,7 @@ TEST_F(pathfindingFixture, getShortestPath0) {
     auto result = pathfinding::getShortestPath(testableBoard, source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -417,7 +417,7 @@ TEST_F(pathfindingFixture, getStrightLine) {
     auto result = pathfinding::drawLine( source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -432,7 +432,7 @@ TEST_F(pathfindingFixture, getLongLine) {
     auto result = pathfinding::drawLine(source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -447,7 +447,7 @@ TEST_F(pathfindingFixture, getLine7) {
     auto result = pathfinding::drawLine(source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -461,7 +461,7 @@ TEST_F(pathfindingFixture, getLine2) {
     auto result = pathfinding::drawLine(source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -475,7 +475,7 @@ TEST_F(pathfindingFixture, getLine1) {
     auto result = pathfinding::drawLine(source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
@@ -489,10 +489,155 @@ TEST_F(pathfindingFixture, getLineZero) {
     auto result = pathfinding::drawLine(source, destination);
     int size = result.size();
 
-    ASSERT_EQ(result.size(), expected.size()) << " result and expected are of unequal length";
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
     EXPECT_EQ(result, expected);
 }
 
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt0_2) {
+    auto source = GameTile(0, 2);
+    std::unordered_set < GameTile> expected = { GameTile(0,3),GameTile(1,2), GameTile(0,4), GameTile(1,3), GameTile(2,2),
+                                               GameTile(0,5), GameTile(1,4), GameTile(2,3), GameTile(3,2) };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 2 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt6_1) {
+    auto source = GameTile(6, 1);
+    std::unordered_set < GameTile> expected = { GameTile(5,1),GameTile(5,2), GameTile(4,1), GameTile(4,2), GameTile(4,3),
+                                               GameTile(3,1), GameTile(3,2), GameTile(3,3), GameTile(3,4) , GameTile(2,1),
+                                               GameTile(2,2),GameTile(2,3), GameTile(2,4), GameTile(2,5), GameTile(1,1),
+                                               GameTile(1,2), GameTile(1,3), GameTile(1,4), GameTile(1,5) , GameTile(1,6) };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 4 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt3_1) {
+    auto source = GameTile(3, 1);
+    std::unordered_set < GameTile> expected = { GameTile(2,2),GameTile(3,2), GameTile(1,3), GameTile(2,3), GameTile(3,3),
+                                               GameTile(0,4), GameTile(1,4), GameTile(2,4), GameTile(3,4) };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 3  });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt0_3) {
+    auto source = GameTile(0, 3);
+    std::unordered_set < GameTile> expected = { GameTile(1,2),GameTile(1,3), GameTile(2,1), GameTile(2,2), GameTile(2,3),
+                                               GameTile(3,0), GameTile(3,1), GameTile(3,2), GameTile(3,3),
+                                               GameTile(4,0), GameTile(4,1), GameTile(4,2), GameTile(4,3), };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 4 }, HexVertexNumber{ 1 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt1_4) {
+    auto source = GameTile(1, 4);
+    std::unordered_set < GameTile> expected = { GameTile(1,3),GameTile(2,3), GameTile(1,2), GameTile(2,2), GameTile(3,2),
+                                               GameTile(1,1), GameTile(2,1), GameTile(3,1), GameTile(4,1),
+                                               GameTile(1,0), GameTile(2,0), GameTile(3,0), GameTile(4,0), GameTile(5,0), };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 0 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt4_3) {
+    auto source = GameTile(4, 3);
+    std::unordered_set < GameTile> expected = { GameTile(3,3),GameTile(4,2), GameTile(2,3), GameTile(3,2), GameTile(4,1),
+                                               GameTile(1,3), GameTile(2,2), GameTile(3,1), GameTile(4,0) };
+
+
+    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{3 }, HexVertexNumber{ 5 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getAvailableAreaWithMovement3ROTATION) {
+    auto source = GameTile(2, 2);
+    std::unordered_set <GameTile> expected = { GameTile(-1,2), GameTile(0,2),GameTile(1,2), GameTile(3,2), GameTile(4,2), GameTile(5,2),
+                                              GameTile(0,3), GameTile(1,3), GameTile(2,3), GameTile(3,3), GameTile(4,3),
+                                               GameTile(0,4), GameTile(1,4), GameTile(2,4), GameTile(3,4), GameTile(2,5),
+                                                GameTile(2,1), GameTile(3,1),  GameTile(1,1), GameTile(4,1),
+                                                GameTile(2,0),  GameTile(3,0), GameTile(4,0) };
+    testableBoard.setTileType(GameTile(-1, 3), GameTileType::Water); //
+    testableBoard.setTileType(GameTile(-1, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(0, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(1, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(1, 5), GameTileType::Water);
+
+    auto result = pathfinding::getAvailableAreaWithRotation(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 3 });
+    //auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 3 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, getAvailableAreaWithMovement1ROTATION) {
+    auto source = GameTile(4, 2);
+    std::unordered_set <GameTile> expected = { GameTile(3,2), GameTile(3,3),GameTile(4,3), GameTile(5,2),  };
+
+    auto result = pathfinding::getAvailableAreaWithRotation(testableBoard, source, TileDistance{ 1 }, HexVertexNumber{ 3  });
+    //auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 3 });
+    int size = result.size();
+
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
+
+TEST_F(pathfindingFixture, ROTATIONgetAvailableAreaWithMovement3) {
+    auto source = GameTile(1, 3);
+    std::unordered_set <GameTile> expected = { GameTile(3,3), GameTile(2,2), GameTile(2,3), GameTile(2,4),
+                                              GameTile(1,2), GameTile(1,4), GameTile(0,2), GameTile(0,3), GameTile(0,4),
+                                               GameTile(0,5), GameTile(-1,3), GameTile(-1,4), GameTile(- 1,5) };
+    testableBoard.setTileType(GameTile(1, 2), GameTileType::Test3); //
+    testableBoard.setTileType(GameTile(2, 1), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(1, 4), GameTileType::Test3);
+    testableBoard.setTileType(GameTile(2, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 1), GameTileType::Water);
+
+    auto result = pathfinding::getAvailableAreaWithRotation(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 1 });
+    //auto result = pathfinding::getAvailableArea(testableBoard, source, TileDistance{ 3 });
+    int size = result.size();
+    //
+    ASSERT_EQ(result.size(), expected.size()) << "  result and expected should have same length";
+    std::unordered_set < GameTile> resultToSet(std::begin(result), std::end(result));
+    EXPECT_EQ(resultToSet, expected);
+}
 
 
 

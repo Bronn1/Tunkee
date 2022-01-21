@@ -33,7 +33,7 @@ namespace core {
 		GameTile() : m_q(0), m_r(0), m_s(0), m_type(GameTileType::Grass), isAccessible{ true } {}
 
 		GameTile(int q, int r) : m_q(q), m_r(r), m_s(-q - r), m_type(GameTileType::Grass) { assert(m_q + m_r + m_s == 0); }
-		inline int staticCastTypeToInt() const { return static_cast<int>(m_type); }
+		inline int travelCost() const { return static_cast<int>(m_type); }
 
 		// operators to work with tile coordinates
 		auto operator == (const GameTile& b) const {
@@ -80,6 +80,8 @@ namespace core {
 	};
 
 	std::ostream& operator<<(std::ostream& os, const GameTile& gt);
+
+	GameTile NullTile();
 }
 
 namespace std {

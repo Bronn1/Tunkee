@@ -14,8 +14,8 @@ graphics::PostEffect::~PostEffect()
 void graphics::PostEffect::applyShader(const sf::Shader& shader, sf::RenderTarget& output)
 {
 	sf::Vector2f outputSize = static_cast<sf::Vector2f>(output.getSize());
-
-	sf::VertexArray vertices(sf::TrianglesStrip, 4);
+	const int vertexCount = 4;
+	sf::VertexArray vertices(sf::TrianglesStrip, vertexCount);
 	vertices[0] = sf::Vertex(sf::Vector2f(0, 0), sf::Vector2f(0, 1));
 	vertices[1] = sf::Vertex(sf::Vector2f(outputSize.x, 0), sf::Vector2f(1, 1));
 	vertices[2] = sf::Vertex(sf::Vector2f(0, outputSize.y), sf::Vector2f(0, 0));
@@ -45,8 +45,10 @@ graphics::Animation::Animation(const sf::Texture& texture):
 	m_sprite(texture), m_frameSize(),
 	m_numFrames(0), m_currentFrame(0), 
 	m_duration(sf::Time::Zero), 
-	m_elapsedTime(sf::Time::Zero) , m_repeat(true)
+	m_elapsedTime(sf::Time::Zero) , m_repeat(false)
 {
+	sf::IntRect textureRect = sf::IntRect(0, 0, m_frameSize.x, m_frameSize.y);
+	m_sprite.setTextureRect(textureRect);
 }
 
 void graphics::Animation::centerOrigin()

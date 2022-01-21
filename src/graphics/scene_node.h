@@ -37,7 +37,7 @@ namespace graphics
 		virtual void  rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint){}
 		virtual sf::FloatRect getBoundingRect() const { return sf::FloatRect(); }
 		virtual void  drawAsSelected() {}
-		virtual inline void markAsDestoyed(){}
+		virtual inline void showDamage(std::string_view damageType){}
 		bool isPerformingAction()  const { return m_isPerformingAction; }
 		void setPerformAction(const bool actionState) { m_isPerformingAction = actionState; }
 		virtual bool isDestoyed()  const { return false; }

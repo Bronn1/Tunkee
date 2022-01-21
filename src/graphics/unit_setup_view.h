@@ -41,7 +41,7 @@ namespace graphics
 		//virtual ~UnitSetupView() = default;
 		void setCenter(const sf::Vector2f& pos);
 		void setDragDropUnitView(const sf::Vector2f& mousePos);
-		inline void moveDragDropUnit(const sf::Vector2f mousePos) { (*m_unitDragDropView).setPosition(mousePos); }
+		inline void moveDragDropUnit(const sf::Vector2f& mousePos) { m_unitDragDropView->setPosition(mousePos); }
 		void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitSetupController = std::move(controller); }
 		void resetPickedUnit();
 

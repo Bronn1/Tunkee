@@ -57,7 +57,7 @@ namespace core {
         UnitPart::State getScopeState() const { return  m_scope.m_state; }
         void setIdealScope() { m_scope.m_state = UnitPart::State::Ideal; }
     protected:
-        Crew m_crew;
+        Crew m_crew{0, 0};
         std::unordered_map< DamageType, std::function<void()>> m_applyDamage{};
         UnitPart m_scope;
     };
@@ -70,7 +70,7 @@ namespace tank_state_system
     constexpr std::string_view kExploded = "Exploded";
     constexpr std::string_view kCommanderKilled = "CommanderKilled";
     constexpr std::string_view kDriverKilled = "DriverKilled";
-    constexpr std::string_view kChargerKilled = "ChargerKilled";
+    constexpr std::string_view kRadiomanKilled = "RadiomanKilled";//radioman
     constexpr std::string_view kGunnerKilled = "GunnerKilled";
     constexpr std::string_view kLoaderKilled = "LoaderKilled";
     constexpr std::string_view kTransmissionDestroyed = "TransmissionDestroyed";
@@ -84,12 +84,12 @@ namespace tank_state_system
     constexpr std::string_view kRicochet = "Ricochet";
     constexpr std::string_view kMissed = "Missed";
 
-    constexpr std::array<std::string_view, 16> kTankDamageTypes = { kBurning, kExploded,
-                                                                  kCommanderKilled, kDriverKilled,
-                                                                  kChargerKilled, kGunnerKilled, kLoaderKilled, kTransmissionDestroyed,
-                                                                  kEngineDestroyed, kTurretJammed,
-                                                                  kGunDestroyed, kScopeDamaged ,
-                                                                  kCrewKilled, kTrackDamaged, kCrewShellShocked, kRicochet };
+    constexpr std::array<std::string_view, 16> kTankDamageTypes = {kBurning, kExploded,
+                                                                   kCommanderKilled, kDriverKilled,
+                                                                   kRadiomanKilled, kGunnerKilled, kLoaderKilled, kTransmissionDestroyed,
+                                                                   kEngineDestroyed, kTurretJammed,
+                                                                   kGunDestroyed, kScopeDamaged ,
+                                                                   kCrewKilled, kTrackDamaged, kCrewShellShocked, kRicochet };
 
     class TankState : public core::UnitState
     {
@@ -106,7 +106,7 @@ namespace tank_state_system
         bool m_isExploded{ false };
         UnitPart m_driver;
         UnitPart m_commander;
-        UnitPart m_charger;
+        UnitPart m_radioman;
         UnitPart m_gunner;
         UnitPart m_loader;
         UnitPart m_transmission;

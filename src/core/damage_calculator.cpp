@@ -1,7 +1,6 @@
 
 #include "damage_calculator.h"
 
-#include <random>
 
 namespace ranges =  std::ranges;
 
@@ -13,18 +12,11 @@ bool core::DamageCalculator::isTargerReachable(const Unit* sourceUnit, const Uni
 	return ranges::all_of(lineOfFire, [](const GameTile& tile) { return tile.isShootableThrough(); });
 }
 
-int core::DamageCalculator::rollDiceWithFaces(int amountOfFaces) const
+int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const int rangeTo)
 {
-	return generateUniformRandNumber(kMinHitThreshold, amountOfFaces);
-}
-
-int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const int rangeTo) const
-{
-	std::random_device randomDevice;
-	std::mt19937 generator(randomDevice());
 	std::uniform_int_distribution  distribution(rangeFrom, rangeTo);
 
-	return distribution(generator);
+	return distribution(m_generator);
 }
 
 void core::DamageCalculator::initProbabilityTables()
@@ -33,9 +25,9 @@ void core::DamageCalculator::initProbabilityTables()
 	m_damageHandlers[typeid(TankUnit)].fillTankTableWithoutFile();
 }
 
-ShootUnitInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const
+UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire) 
 {
-	ShootUnitInfo info{ sourceUnit->getID(), targetUnit->getID() };
+	UnitShootInfo info{ sourceUnit->getID(), targetUnit->getID() };
 	info.m_damageDone = tank_state_system::kMissed;
 
 	if(!isTargerReachable(sourceUnit, targetUnit, lineOfFire))

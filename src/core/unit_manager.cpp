@@ -92,7 +92,7 @@ UnitIdentifier core::UnitManager::addUnit(UnitPtr unit)
 {
 	auto& promise = m_generatorHandle.promise();
 	m_generatorHandle();
-	unit.get()->setUnitID(UnitIdentifier{ promise.m_value });
+    unit->setUnitID(UnitIdentifier{ promise.m_value });
 	std::cout << "Unit added: " << unit.get()->getID().identifier << "\n";
 	m_units.insert({ unit.get()->getID(), std::move(unit) });
 	return UnitIdentifier{ promise.m_value };

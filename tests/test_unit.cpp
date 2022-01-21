@@ -364,9 +364,9 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
 	unit.applyDamage(tank_state_system::kDriverKilled);
 	unit.applyDamage(tank_state_system::kDriverKilled);
 	unit.applyDamage(tank_state_system::kGunnerKilled);
-	unit.applyDamage(tank_state_system::kChargerKilled);
-	unit.applyDamage(tank_state_system::kChargerKilled);
-	unit.applyDamage(tank_state_system::kChargerKilled);
+	unit.applyDamage(tank_state_system::kRadiomanKilled);
+	unit.applyDamage(tank_state_system::kRadiomanKilled);
+	unit.applyDamage(tank_state_system::kRadiomanKilled);
 	unit.applyDamage(tank_state_system::kLoaderKilled);
 	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
 	unit.moveTo(firstActionPath);

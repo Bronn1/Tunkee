@@ -3,10 +3,6 @@
 #include "core/unit.h"
 #include "core/player.h"
 
-GameBuilder::GameBuilder()
-{
-}
-
 void GameBuilder::reset()
 {
 	//m_boardModel.reset();

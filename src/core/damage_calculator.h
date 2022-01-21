@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
+#include <random>
+
 
 
 namespace core {
@@ -32,16 +34,19 @@ namespace core {
 	{
 	public:
 		void initProbabilityTables();
-		ShootUnitInfo shot( Unit* source,  Unit* target, const std::vector<GameTile>& lineOfFire) const ;
+		UnitShootInfo shot( Unit* source,  Unit* target, const std::vector<GameTile>& lineOfFire);
 		HitThreshold calculateHitThreshold(const Unit* sourceUnit, const Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const;
 		bool isTargerReachable(const Unit* sourceUnit, const Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const;
-		int generateUniformRandNumber(const int rangeFrom, const int rangeTo) const ;
-		int rollDiceWithFaces(int amountOfFaces = kMaxHitThreshold) const;
+		// this function isn't const cuz it uses m_generator(class attribute). 
+		// Initialize generator once increase performance with 1M random values from 9.8 sec to 0.161 sec
+		int generateUniformRandNumber(const int rangeFrom, const int rangeTo);
+		inline int rollDiceWithFaces(int amountOfFaces = kMaxHitThreshold)  { return generateUniformRandNumber(kMinHitThreshold, amountOfFaces); }
 	private:
 		
 		/** @brief holds Probability tables of damgage based on unit type */
 		std::unordered_map<std::type_index, DamageProbabilityTable> m_damageHandlers;
 		HitThreshold m_defaultHitThreshold{ 2 };
+		std::mt19937 m_generator{ (std::random_device())() };
 	};
 }
 

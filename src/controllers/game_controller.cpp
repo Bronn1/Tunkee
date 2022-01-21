@@ -1,5 +1,7 @@
 #include "game_controller.h"
-#include "../core/game_command.h"
+#include "src/core/game_command.h"
+
+#include <ranges>
 
 
 

@@ -36,8 +36,8 @@ void TunkeGame::run()
     while (m_window.isOpen()) {
         sf::Event event;
         m_window.clear(sf::Color::Green);
-        (*worldView).draw();
-        (*worldView).update(event);
+        worldView->draw();
+        worldView->update(event);
         // should use screen stack
         /*while (m_window.pollEvent(event)) {
             worldView.update(event.type);

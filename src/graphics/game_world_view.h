@@ -10,16 +10,17 @@
 #include <map>
 #include <memory>
 
-using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
-using ProjectilePtr = std::unique_ptr<graphics::Projectile>;
 class GameBuilder;
 
 namespace graphics {
+	using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
+	using ProjectilePtr = std::unique_ptr<graphics::Projectile>;
 	using UnitViewPtr = std::unique_ptr < graphics::UnitView>;
+
 	class GameWorldView : public events::Observer<core::GameEngine>
 	{
 	public:
-		//GameWorldView() = default;
+		// TODO make constructor private and let create only via builder
 		GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller);
 		bool addNewUnitView(UnitViewPtr unit, core::GameTile position);
 		void addNullUnit(UnitViewPtr nullUnit);
@@ -38,14 +39,14 @@ namespace graphics {
 		void informationMsgRecieved(const GameInfoMessage& msgInfo) override;
 		void moveAreaRecieved(const MoveAreaInfo& moveArea) override;
 		void moveUnitRecieved(const MoveUnitInfo& moveUnit) override;
-		void shotUnitRecieved(const ShootUnitInfo& shotUnit) override;
+		void shotUnitRecieved(const UnitShootInfo& shotUnit) override;
 		void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitsSetupView.setUnitSetupController(std::move(controller)); }
 		friend class ::GameBuilder;
 	private:
 		sf::RenderWindow& m_renderTarget;
 		BoardView m_board;
-		std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>  m_unitsGraph{};
-		std::vector< SceneNodePtr> m_projectiles;
+		std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>  m_units{};
+		std::vector< SceneNodePtr> m_views;
 		PlayerIdentifier m_playerId{ 1 };
 		UnitView*  m_selectedUnit;
 		bool m_isPerformingAction{ false };

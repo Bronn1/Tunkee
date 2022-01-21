@@ -11,14 +11,15 @@ core::GameEngine::GameEngine(const GameBoard& board, UnitManagerPtr unitMng, con
 
 void core::GameEngine::moveUnit(MoveToAction* action)
 {
-	auto unit = m_unitManager->getUnitIfExist(action->m_unitID);
 	if (m_gameRules->isMoveActionAllowed(*action))
 	{
+        auto unit = m_unitManager->getUnitIfExist(action->m_unitID);
+		GameTile startingPos = (*unit)->getPosition();
 		auto  movePath =  m_board.moveTo(action, unit.value());
-		auto moveInfo  = MoveUnitInfo(movePath, unit.value()->getID());
+		auto moveInfo  = MoveUnitInfo(movePath, startingPos, (*unit)->getID(), (*unit)->getUnitVertexRotation());
 		notify(moveInfo);
 		auto moveAreaQuery{ std::make_shared<GetMoveAreaQuery>(action->m_playerID, action->m_unitID) };
-		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(*unit);
 		notify(moveArea);
 	}
 	else
@@ -35,7 +36,8 @@ void core::GameEngine::shootUnit(ShootAction* action)
 		auto sourceUnit = m_unitManager->getUnitIfExist(action->m_unitID);
 		auto targetUnit = m_unitManager->getUnitIfExist(action->m_target);
 		auto lineOfFireVec = m_board.getStraightLine(sourceUnit.value()->getPosition(), targetUnit.value()->getPosition());
-		m_damageCalculator.shot(sourceUnit.value(), targetUnit.value(), lineOfFireVec);
+		auto unitShotInfo = m_damageCalculator.shot(sourceUnit.value(), targetUnit.value(), lineOfFireVec);
+		notify(unitShotInfo);
 	}
 	else
 	{
@@ -65,7 +67,7 @@ void core::GameEngine::finishActionPhase(FinishActionPhase* finishActionPhase)
 	// TODO should we allow to let ppl finish stage with any  action left on unit??
 	auto unit =  m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
 	if (unit)
-		unit.value()->setActionState(ActionStateStatus::empty);
+        (*unit)->setActionState(ActionStateStatus::empty);
 
 	if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::TurnEnd)
 		endOfTurn();
@@ -76,7 +78,7 @@ void core::GameEngine::requestMoveArea(GetMoveAreaQuery* moveAreaQuery)
 	auto unit = m_unitManager->getUnitIfExist(moveAreaQuery->m_unitID);
 	if (unit)
 	{
-		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(*unit);
 		notify(moveArea);
 	}
 }
@@ -90,7 +92,7 @@ void core::GameEngine::selectUnit(const SelectUnitQuery* selectUnitQuery)
 	if (unit)
 	{
 		auto moveAreaQuery{ std::make_shared<GetMoveAreaQuery>(selectUnitQuery->m_playerID, selectUnitQuery->m_unitID) };
-		auto moveArea = m_board.getMoveAreaForUnit(unit.value());
+		auto moveArea = m_board.getMoveAreaForUnit(*unit);
 		notify(moveArea);
 	}
 }
@@ -114,8 +116,8 @@ void core::GameEngine::setRotation(SetUnitRotation* rotateAction)
 	// TODO should we check everytime if somebody trying to cheat????..(checks for current player and unit owner)
 	auto unit = m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
 	if (unit)
-		(rotateAction->m_type == SetUnitRotation::Type::Body) ? unit.value()->setUnitRotation(rotateAction->m_angle) : 
-			                                                    unit.value()->setGunRotation(rotateAction->m_angle);
+		(rotateAction->m_type == SetUnitRotation::Type::Body) ? (*unit)->setUnitRotation(rotateAction->m_angle) :
+                                                                (*unit)->setGunRotation(rotateAction->m_angle);
 }
 
 void core::GameEngine::endOfTurn()

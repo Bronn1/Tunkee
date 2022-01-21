@@ -1,7 +1,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "../src/core/pathfinding.h"
-#include "../src/core/game_engine.h"
+#include "src/core/pathfinding.h"
+#include "src/core/game_engine.h"
+
+#include <ranges>
+
 
 class MyGameEngineRulesFixture : public ::testing::Test {
 public:
@@ -32,8 +35,20 @@ public:
 
 };
 
-TEST_F(MyGameEngineRulesFixture, UnitTest2) {
-    EXPECT_EQ(1, 1);
-    
-    EXPECT_TRUE(true) << "diagnostic message";;
+// generates a lot of uniforms ints in interval from 0  to 20
+// every value in this inteval should appear roughly the same amount of times
+TEST_F(MyGameEngineRulesFixture, testUnifirmDiceDistribution) {
+    DamageCalculator damageCalculator{};
+    std::vector< int> uniformDiceRes(21, 0);
+    //uniformDiceRes.reserve(20);
+    for (int i : std::views::iota(0, 1000000))
+    //for (int i = 0; i <= 1000000; i++)
+    {
+        uniformDiceRes[damageCalculator.rollDiceWithFaces(20)]++;
+    }
+
+    for(int i  = 0; i <= 20; i++)
+    {
+        std::cout << i << ": " << uniformDiceRes[i] << "\n";
+    }
 }

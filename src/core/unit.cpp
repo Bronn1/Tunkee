@@ -1,6 +1,9 @@
 #include "unit.h"
+#include "pathfinding.h"
 
 #include <ranges>
+
+namespace views = std::views;
 
 bool core::Unit::isUnitHaveFullActionState() const
 {
@@ -36,7 +39,7 @@ void core::Unit::applyDamage(const std::string_view damageType)
 	//  we arent allow players to have half active units, its either full, or empty
 	// so if unit wasnt active yet in this turn we just reset his state after taken damage
 	if(isFullActionState) 
-		m_actionState.setState(ActionStateStatus::full);
+		m_actionState.setActionState(ActionStateStatus::full);
 }
 
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
@@ -44,7 +47,7 @@ std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vect
     unsigned costSoFar = 0;
     auto [move] = getRemainingMovement();
 
-    auto rmv_if = [&costSoFar, &move](const GameTile& t) {costSoFar += t.staticCastTypeToInt(); return costSoFar > move; };
+    auto rmv_if = [&costSoFar, &move](const GameTile& t) {costSoFar += t.travelCost(); return costSoFar > move; };
     std::erase_if(pathToDest, rmv_if);
 
     return pathToDest;
@@ -54,7 +57,7 @@ std::vector<core::GameTile> core::Unit::moveTo(std::vector<GameTile>& pathToDest
 {
 	std::vector<GameTile> resultPath{};
 	auto adjustedPathVec = adjustPathByAvailableMovement(pathToDest);
-	unsigned pathSize = std::size(adjustedPathVec);
+	auto pathSize = std::size(adjustedPathVec);
 	if (pathSize > 0)
 	{
 		m_actionState.changeStateByMovement(TileDistance{ pathSize });
@@ -74,7 +77,17 @@ bool core::Unit::shots(const Shots& shots)
 	return true;
 }
 
-void core::UnitActionState::setState(const ActionStateStatus& state)
+void core::Unit::rotateToVertex(const HexVertexNumber vertex)
+{
+	auto [move] = getRemainingMovement();
+	if(move)
+	{ 
+		m_actionState.changeStateByMovement(TileDistance{ 1 });
+		m_unitRotation = vertex;
+	}
+}
+
+void core::UnitActionState::setActionState(const ActionStateStatus& state)
 {
 	if (state == ActionStateStatus::full) {
 		m_remainingMovePoints = m_state->getMoveDistanceWithFine(m_fullMovePoints);

@@ -16,7 +16,7 @@ TanksFactory::TanksFactory()
     m_textures.load(Missile, mediumMissileFilename);
 }
 
-UnitModelPtr TanksFactory::createBacisTank(const core::GameTile& pos, const Angle rotation, const  const PlayerIdentifier playerID)
+UnitModelPtr TanksFactory::createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier playerID)
 {
     TileDistance moveDistance{ 5 };
     return createTank(pos, rotation, moveDistance, playerID);
@@ -35,10 +35,12 @@ UnitViewPtr TanksFactory::createNullUnitView()
 UnitModelPtr TanksFactory::createTank(const core::GameTile& pos, const Angle rotation, const TileDistance movement, const PlayerIdentifier playerID)
 {
     UnitIdentifier unitId{ 1 };
+    HexVertexNumber vertexRotation{ 3 };
     std::unique_ptr<core::Unit> basicTank = std::make_unique<core::TankUnit>(unitId, movement, Shots{ 12 });
     basicTank->setPosition(pos);
     basicTank->setOwner(playerID);
     basicTank->setUnitRotation(rotation);
+    basicTank->setUnitVertexRotation(vertexRotation);
 
     return basicTank;
 }

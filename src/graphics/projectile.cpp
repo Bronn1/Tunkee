@@ -36,6 +36,8 @@ void graphics::Projectile::updateCurrent(sf::Time dt)
 	if (m_moveFrame.fullPath - m_moveFrame.distancePassedPercent <= m_moveFrame.targetEpsilon)
 	{
 		m_isExploded = true;
+		// TODO prob check in destructor that damage was applied to unit
+		m_targetUnit->showDamage(m_targetDamage);
 	}
 }
 

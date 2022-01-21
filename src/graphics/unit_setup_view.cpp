@@ -48,7 +48,7 @@ void graphics::UnitSetupView::draw(sf::RenderWindow& target) const
     for (const auto& [id, unit] : m_addedUnits)
     {
         target.draw(*unit);
-        (*unit).showTooltip(translated_pos);
+        unit->showTooltip(translated_pos);
     }
 }
 
@@ -69,7 +69,7 @@ void graphics::UnitSetupView::handleEvent(const sf::Event::EventType& evenType, 
             auto unitPlace = board.getCoordinatesIfValid(mousePos);
             if (unitPlace)
             {
-                auto sceneNodePtr = m_unitSetupController.addUnit(unitPlace.value());
+                auto sceneNodePtr = m_unitSetupController.addUnit(*unitPlace);
                 if (sceneNodePtr)
                 {
                     (*sceneNodePtr)->setPosition((board).getPositionByTileCoordinates(*unitPlace));

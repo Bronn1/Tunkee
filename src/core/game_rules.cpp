@@ -128,13 +128,12 @@ bool core::GameRulesBasic::isShootActionAllowed(const ShootAction& shootAction)
 		auto sourceUnit = m_unitManager->getUnitIfExist(m_selectedUnit);
 		auto targetUnit = m_unitManager->getUnitIfExist(shootAction.m_target);
 		
-		if (sourceUnit && targetUnit)
+		if (sourceUnit && targetUnit && (*targetUnit)->getOwnerID() != m_currentPlayer)
 		{
 			bool canShoot = sourceUnit.value()->canShoot();
 			m_lastError = (canShoot) ? "" : "Unit doesn't have activity to perform shooting!";
 			return canShoot;
 		}
-		//
 	}
 	else
 		m_lastError = "Shooting is not allowed because of incorrect selected unit or enemy turn\n";

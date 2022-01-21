@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../core/game_engine.h"
-#include "../core/data_types.h"
-#include "../core/game_tile.h"
-#include "../graphics/scene_node.h"
-#include "../units_factory.h"
+#include "src/core/game_engine.h"
+#include "src/core/data_types.h"
+#include "src/core/game_tile.h"
+#include "src/graphics/scene_node.h"
+#include "src/units_factory.h"
 
 #include <SFML/Graphics/Texture.hpp>
 #include <vector>
@@ -21,6 +21,8 @@ namespace controllers {
 		void onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const ;
 		void finishSetupStage(PlayerIdentifier playerId);
 		void finishActionPhase(PlayerIdentifier playerId);
+		bool isEnemyUnitId(const UnitIdentifier unitID) { return !m_ownUnits.contains(unitID); }
+		
 		void addOwnUnit(const UnitIdentifier unitId) { m_ownUnits.insert(unitId); }
 		void addEnemyUnit(const UnitIdentifier unitId) { m_ownUnits.insert(unitId); }
 		void deleteOwnUnit(const UnitIdentifier unitId) { m_ownUnits.erase(unitId); }

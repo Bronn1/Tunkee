@@ -118,7 +118,7 @@ struct GameInfoMessage {
 	std::string m_message{}; // maybe string_view better here??
 };
 
-// structs like *Info containts information which view should know about changes in game model(core)
+// structs like *Info containts information about changes performed in model
 // model should notify view with these structures
 
 struct MoveAreaInfo {
@@ -133,14 +133,16 @@ struct MoveAreaInfo {
 
 struct MoveUnitInfo {
 	MoveUnitInfo() = default;
-	MoveUnitInfo(std::vector<core::GameTile>& move, UnitIdentifier unitId) :
-		m_movePath(move), m_unitId(unitId) {}
+	MoveUnitInfo(std::vector<core::GameTile>& move, core::GameTile& unitPos, UnitIdentifier unitId, HexVertexNumber rotation) :
+		m_movePath(move), m_unitPos(unitPos), m_unitId(unitId), m_rotation(rotation) {}
 	std::vector<core::GameTile> m_movePath{};
+	HexVertexNumber m_rotation;
 	UnitIdentifier m_unitId{};
+	core::GameTile m_unitPos;
 };
 
-struct ShootUnitInfo {
-	ShootUnitInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit) :
+struct UnitShootInfo {
+	UnitShootInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit) :
 		m_srcUnit(srcUnit), m_targetUnit(targetUnit) {}
 	UnitIdentifier m_srcUnit{};
 	UnitIdentifier m_targetUnit{};

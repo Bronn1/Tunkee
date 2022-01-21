@@ -6,6 +6,38 @@
 #include <vector>
 #include <cmath>
 
+
+/**
+* @brief Represents vertex of hexagon
+* 
+*     0   
+*   /   \
+*  5     1
+*  |     |
+*  4     2
+*   \   /
+*     3 
+*/
+struct HexVertexNumber {
+	explicit HexVertexNumber(size_t vertex) : vertexNum(vertex) {
+		if (vertex > 5) vertexNum = vertex % 6;
+	}
+
+	size_t vertexNum;
+	bool operator==(const HexVertexNumber&) const = default;
+	auto operator<=>(const HexVertexNumber&) const = default;
+	//inline operator bool() const { return identifier != 0; }
+};
+
+enum class HexVertex : unsigned {
+	Vertex0 = 0,
+	Vertex1 = 1,
+	Vertex2 = 2,
+	Vertex3 = 3,
+	Vertex4 = 4,
+	Vertex5 = 5,
+};
+
 /**
 * @brief Unit Identifier for every game entity 
 */
@@ -14,10 +46,6 @@ struct UnitIdentifier {
 	bool operator==(const UnitIdentifier&) const = default;
 	auto operator<=>(const UnitIdentifier&) const = default;
 	inline operator bool() const { return identifier != 0; }
-};
-
-struct HealthPoints {
-	unsigned int points;
 };
 
 struct PlayerIdentifier {
@@ -104,3 +132,5 @@ struct Comparator {
 	}
 
 };
+
+Angle VertexToAngle(HexVertexNumber vertex);
