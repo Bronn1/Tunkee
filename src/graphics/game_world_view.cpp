@@ -13,25 +13,23 @@ graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board
     m_unitsSetupView.setSize(sf::Vector2f{ (float)height, (float)width / 4.f });
     auto [view_height, view_width] = m_view.getSize();
     m_unitsSetupView.setCenter(sf::Vector2f{ (float)view_height / 2.f, (float)view_width });
-
-    auto nullUnit = std::make_unique<NullUnitView>();
-    m_unitsGraph.insert({ UnitIdentifier{ 0 }, std::move(nullUnit) });
-    m_selectedUnit = m_unitsGraph[UnitIdentifier{ 0 }].get();
 }
 
 void graphics::GameWorldView::draw()
 {
-    (m_board).draw(m_renderTarget);
+    m_board.draw(m_renderTarget);
     if(!m_isUnitSetupViewHided)
         m_unitsSetupView.draw(m_renderTarget);
 
     auto mouse_pos = sf::Mouse::getPosition(m_renderTarget);
     auto translated_pos = m_renderTarget.mapPixelToCoords(mouse_pos);
-    for (const auto& [id, unit] : m_unitsGraph)
+    for (const auto& [id, unit] : m_units)
     {
         m_renderTarget.draw(*unit);
-        (*unit).showTooltip(translated_pos);
+        unit->showTooltip(translated_pos);
     }
+    for (const auto& view : m_views)
+        m_renderTarget.draw(*view);
 }
 
 void graphics::GameWorldView::update(sf::Event& event)
@@ -39,19 +37,27 @@ void graphics::GameWorldView::update(sf::Event& event)
     auto mousePos = sf::Mouse::getPosition(m_renderTarget);
     auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
 
-    while (m_renderTarget.pollEvent(event))
+    // actually useless anyway events are gonna be saved in poll event
+    if (!m_selectedUnit->isPerformingAction())
     {
-        m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
-        handleEvent(event, translatedMousePos);
+        while (m_renderTarget.pollEvent(event))
+        {
+            m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
+            handleEvent(event, translatedMousePos);
+        }
     }
+
+    for (const auto& [id, unit] : m_units) unit->update(TimePerFrame);
+    for (const auto& view : m_views) view->update(TimePerFrame);
 }
 
 void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
 {
+    // TODO would be good to refactor this horrible switch with states or at least separates functions
     switch (event.type)
     {
     case sf::Event::MouseButtonReleased:
-        if (!checkIfClickedOnOwnUnit(mousePos))
+        if (!checkIfClickedOnUnit(mousePos))
         {
             onBoardClicked(mousePos);
         }
@@ -74,16 +80,16 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
         {
             m_gameController.finishSetupStage(m_playerId);
-            m_unitsGraph.merge(m_unitsSetupView.getAddedUnitRef());
+            m_units.merge(m_unitsSetupView.getAddedUnitRef());
             endSetupStage();
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) // TODO only for tests of swtiching action phase
         {
-            // TODO only for tests of swtiching action phase
-            m_selectedUnit->drawAsSelected();
+            m_selectedUnit->markAsSelected();
             clearMoveArea();
-            m_selectedUnit = m_unitsGraph[UnitIdentifier{ 0 }].get();
+            m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
             m_gameController.finishActionPhase(m_playerId);
+            std::erase_if(m_views,  [](const auto& value) {return value->isDestoyed() == true; });
         }
         break;
     case sf::Event::Closed:
@@ -111,35 +117,56 @@ void graphics::GameWorldView::moveView(const sf::Event& event, const sf::Vector2
     }
 }
 
-bool graphics::GameWorldView::checkIfClickedOnOwnUnit(const sf::Vector2f& mousePos)
+bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
 {
-    for (const auto& [id, unit] : m_unitsGraph) 
+    for (const auto& [id, unit] : m_units) 
     {
-        if ((*unit).getBoundingRect().contains(mousePos)) 
+        if (unit->getBoundingRect().contains(mousePos)) 
         {
-            m_selectedUnit->drawAsSelected();
-            m_selectedUnit = m_unitsGraph[UnitIdentifier{ 0 }].get();
-            clearMoveArea();
-            m_gameController.onUnitClicked((*unit).getId());
+            if (m_gameController.isEnemyUnitId(unit->getId()))
+            {
+                auto tileCenter = m_board.getTileCenterIfValid(mousePos);
+                if (!tileCenter) {
+                    std::cout << "Unit: " << unit->getId() << " has invalid position\n";
+                    return false; // this means unit outside of the board maybe throw?
+                }
+                // TODO here we should first ask model if we can rotate turret and unit in line of sight
+                Angle gunRotation = m_selectedUnit->rotateGunTo(m_selectedUnit->getPosition(), tileCenter.value());
+                m_gameController.onChangeUnitRotation(m_selectedUnit->getId(), gunRotation, SetUnitRotation::Type::Gun);
+            }
+            m_gameController.onUnitClicked(m_selectedUnit->getId(), unit->getId());
+            return true;
         }
     }
-
     return false;
 }
 
 void graphics::GameWorldView::onBoardClicked(const sf::Vector2f& mousePos)
 {
-    auto unit = m_selectedUnit;
+    //auto unit = m_selectedUnit;
     m_gameController.moveUnit(m_selectedUnit->getId(), (m_board).getSelectorTileCoordinates());
-    //m_selectedUnit->rotateTurretTo(m_selectedUnit->getPosition(), mousePos);
+
+    //auto tileCenter =  m_board.getTileCenterIfValid(mousePos);
+    //if (tileCenter)
+    //{
+   //     Angle gunRotation = m_selectedUnit->rotateGunTo(m_selectedUnit->getPosition(), tileCenter.value());
+  //      m_gameController.onChangeUnitRotation(m_selectedUnit->getId(), gunRotation, SetUnitRotation::Type::Gun);
+   // }
 }
 
 void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
 {
-    if (m_unitsGraph.contains(unitInfo.m_unitId))
+    if (unitInfo.m_unitId == m_selectedUnit->getId())
+        return;
+
+    if (m_units.contains(unitInfo.m_unitId))
     {
-        m_selectedUnit = m_unitsGraph[unitInfo.m_unitId].get();
-        m_unitsGraph[unitInfo.m_unitId]->drawAsSelected();
+        m_selectedUnit->markAsSelected();
+        //m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
+        clearMoveArea();
+
+        m_selectedUnit = m_units[unitInfo.m_unitId].get();
+        m_selectedUnit->markAsSelected();
     }
 }
 
@@ -154,27 +181,32 @@ void graphics::GameWorldView::moveAreaRecieved(const MoveAreaInfo& moveArea)
 
 void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
 {
-    m_unitsGraph[moveUnit.m_unitId]->drawAsSelected();
-    float prevRotation = m_unitsGraph[moveUnit.m_unitId]->getRotation();
-    auto movementVector = m_board.getVectorPositionsByTiles(moveUnit.m_movePath);
-    for (const auto& targetPoint : movementVector)
-    {
-        auto curPoint = m_unitsGraph[moveUnit.m_unitId]->getPosition();
-        m_unitsGraph[moveUnit.m_unitId]->rotateTo(curPoint, targetPoint);
 
-        sf::Clock clock;
-        sf::Time timer = clock.getElapsedTime();
-        while (timer.asMilliseconds() <= 1000)
-        {
-            timer = clock.getElapsedTime();
-            float  speed  = timer.asMilliseconds() / 1000.f;
-            m_unitsGraph[moveUnit.m_unitId]->setPosition(m_unitsGraph[moveUnit.m_unitId]->interpolateWithFactor(curPoint, targetPoint, speed));
-            draw();
-            m_renderTarget.display();
-        }
-    }
-    m_unitsGraph[moveUnit.m_unitId]->setRotation(prevRotation);
-    m_unitsGraph[moveUnit.m_unitId]->drawAsSelected();
+    assert(moveUnit.m_unitId == m_selectedUnit->getId());
+    // TODO how to make sure player havent picked other unit during waiting response from server with high ping??
+    // in case of multiplayer game if player clicked on other unit;
+    //if(moveUnit.m_unitId != m_selectedUnit->getId())
+    //    for(const auto& unit: m_units)
+    //        if (moveUnit.m_unitId == m_selectedUnit->getId())
+
+    core::GameTile dest = moveUnit.m_unitPos;
+    if (size(moveUnit.m_movePath)) dest = moveUnit.m_movePath.back();
+    auto rotationPoint = m_board.getTileVertex(dest, moveUnit.m_rotation);
+    m_units[moveUnit.m_unitId]->rotateTo(m_units[moveUnit.m_unitId]->getPosition(), rotationPoint);
+    m_units[moveUnit.m_unitId]->setCurrentRotationPoint(rotationPoint);
+
+    auto movementPath = m_board.getBulkPositionsByTiles(moveUnit.m_movePath);
+    if (size(movementPath) == 0) return;
+
+    m_units[moveUnit.m_unitId]->setMovementState(std::move(movementPath));
+    //m_isPerformingAction = true;
+}
+
+void graphics::GameWorldView::shotUnitRecieved(const UnitShootInfo& shotUnit)
+{
+    if (shotUnit.m_damageDone == tank_state_system::kMissed)
+        return;
+    m_views.push_back(m_units[shotUnit.m_srcUnit]->shot(m_units[shotUnit.m_targetUnit].get(), shotUnit.m_damageDone));
 }
 
 void graphics::GameWorldView::clearMoveArea()
@@ -188,13 +220,15 @@ void graphics::GameWorldView::endSetupStage()
     m_isUnitSetupViewHided = true;
 }
 
-/*unused for now*/
-bool graphics::GameWorldView::addNewUnitView(SceneNodePtr unit, core::GameTile position)
+bool graphics::GameWorldView::addNewUnitView(UnitViewPtr unit, core::GameTile position)
 {
-    //auto is_tile_exists = [&position](TileView tile) { return  tile.getCoordinates() == position; };
-    //if (auto result = std::ranges::find_if(m_tiles, is_tile_exists); result != m_tiles.end())
-    m_gameController.addOwnUnit((*unit).getId());
-    unit->setPosition((m_board).getPositionByTileCoordinates(position));
-     m_unitsGraph.insert({ (*unit).getId(), std::move(unit) });
+    unit->setPosition(m_board.getPositionByTileCoordinates(position));
+    m_units.insert({ unit->getId(), std::move(unit) });
     return true;
+}
+
+void graphics::GameWorldView::addNullUnit(UnitViewPtr nullUnit)
+{
+    m_units.insert({ UnitIdentifier{ 0 }, std::move(nullUnit) });
+    m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
 }

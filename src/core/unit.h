@@ -3,11 +3,11 @@
 #include "data_types.h"
 #include "events.h"
 #include "game_tile.h"
-#include "unit_damage_type.h"
+#include "unit_state.h"
 
 namespace core 
 {
-	/** Contains logic of possible action unit can do in
+	/** @brief Contains logic of possible action unit can do in
 	* a current turn. Unit has two possible types  of action
 	* move and shot, so at every turn unit can do either move-move
 	* or move-shot or shot-shot. Odd numbers in move and shot in a half size
@@ -22,19 +22,26 @@ namespace core
 	class UnitActionState
 	{
 	public:
+		using UnitStatePtr = std::unique_ptr< UnitState>;
+		enum class ActionState{
+			NoActionsPerformed,
+			MovePerformed,
+			ShotPerformed,
+			BothActionsPerformed,
+		};
+		using enum ActionState;
 		UnitActionState(const  TileDistance movePts, const Shots fireRate)
 			: m_fullMovePoints(movePts), m_rateOfFire(fireRate), m_remainingMovePoints(movePts), m_remainingShots(fireRate) {}
-		void setState(const ActionStateStatus& state);
-		//TileDistance getRemainingMovePoints() const { return m_remainingMovePoints; }
 		TileDistance getRemainingMoveInFirstHalf() const;
-		//TileDistance getFullMovePoints() const { return m_fullMovePoints; }
-		TileDistance getHalfMovePoints() const;
+		TileDistance getHalfMovePointsRoundedUp() const;
+		TileDistance getHalfMovePoints() const { return TileDistance{ m_state->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
+		Shots getHalfShotsRoundedUp() const;
+		Shots getHalfShots() const { return Shots{ m_state->getRateOfFireWithFine(m_rateOfFire).shots / 2 };} 
 
-		Shots getHalfShots() const;
-		//Shots getRemainingShots() const { return m_remainingShots; }
-		//Shots getRateOfFire() const { return m_rateOfFire; }
 		void changeStateByMovement(const TileDistance& distance);
 		void changeStateByShooting(const Shots& shots);
+		void setStateSystem(UnitStatePtr state) { m_state = std::move(state); }
+		void setActionState(const ActionStateStatus& state);
 
 		friend class Unit;
 	private:
@@ -42,16 +49,10 @@ namespace core
 		const Shots m_rateOfFire;
 		TileDistance m_remainingMovePoints;
 		Shots m_remainingShots;
+		ActionState m_actionState{ NoActionsPerformed };
+		UnitStatePtr m_state;
 	};
 
-	/*class TankLifeSupportModel
-	{
-	public:
-		friend class Unit;
-	private:
-		std::vector<UnitDamageType> m_possibleDamage;
-	};
-	*/
 	class UnitLogger
 	{
 
@@ -63,39 +64,57 @@ namespace core
 	};
 
 
-
 	class Unit
 	{
 	public:
-		Unit() = default;
 		Unit(const UnitIdentifier unitID, const  TileDistance movePts, const Shots fireRate) : m_id(unitID), m_actionState(movePts, fireRate) {}
 		inline UnitIdentifier getID() const { return m_id; }
 		UnitType getType() const { return m_type; }
 		inline GameTile getPosition() const { return m_position; }
-		inline TileDistance getHalfMovePoints() const  { return m_actionState.getHalfMovePoints(); }
+		inline Angle getBodyRotation() const { return m_bodyRotation; }
+		inline Angle getGunRotation() const { return m_gunRotation; }
+		inline void setUnitRotation(const Angle& angle) { m_bodyRotation = angle; m_gunRotation = angle ; std::cout << m_bodyRotation.angle << " " << m_gunRotation.angle << " model\n";};
+		inline void setGunRotation(const Angle& angle) { m_gunRotation = angle; std::cout << m_bodyRotation.angle << " " << m_gunRotation.angle << " model2\n"; }
+
+		inline TileDistance getHalfMovePointsRoundedUp() const  { return m_actionState.getHalfMovePointsRoundedUp(); }
 		TileDistance getRemainingMovement() const  { return m_actionState.m_remainingMovePoints; }
 		TileDistance getRemainingMovementInFirstHalf() const { return m_actionState.getRemainingMoveInFirstHalf(); }
-		TileDistance getFullMovement() const { return m_actionState.m_fullMovePoints; }
-		inline bool canMove() const { return (getRemainingMovement() > TileDistance{ 0 }) ? true : false; }
-		bool hasActionLeft() const { return canMove() || (getRemainingShots() > Shots{ 0 }) ? true : false; }
+		TileDistance getFullMovement() const { return m_actionState.m_state->getMoveDistanceWithFine(m_actionState.m_fullMovePoints); }
+		inline bool canMove() const { return (getRemainingMovement() > TileDistance{ 0 } && m_actionState.m_state->canMove()) ? true : false; }
+		inline bool canShoot() const { return ( getRemainingShots() > Shots{ 0 } && m_actionState.m_state->canShot()) ? true : false; }
+		bool hasActionLeft() const { return canMove() || canShoot(); }
 
-		Shots getRateOfFire() const { return m_actionState.m_rateOfFire; }
+		Shots getRateOfFire() const { return m_actionState.m_state->getRateOfFireWithFine(m_actionState.m_rateOfFire); }
 		Shots getRemainingShots() const { return m_actionState.m_remainingShots; }
-		Shots getHalfShots() const { return m_actionState.getHalfShots(); }
+		Shots getHalfShotsRoundedUp() const { return m_actionState.getHalfShotsRoundedUp(); }
 		bool isUnitHaveFullActionState() const;
-		void setActionState(const ActionStateStatus state) { m_actionState.setState(state); }
+		void setActionState(const ActionStateStatus state) { m_actionState.setActionState(state); }
 		inline PlayerIdentifier getOwnerID() const { return m_owner; }
+		bool isAlive() const;
+		int getArmor(const Angle& attackingAngle) const;
+		Attack getAttack() const { return m_attack; }
+		UnitPart::State getScopeState() const {  return m_actionState.m_state->getScopeState(); }
 
+		void applyDamage(const std::string_view damageType);
 		/** Move to destination with adjustment by available movement.
 		* returns adjusted path
 		*/
 		virtual std::vector<core::GameTile> moveTo(std::vector<GameTile>& pathToDest);
+		bool shots(const Shots& shots);
+		void rotateToVertex(const HexVertexNumber vertex);
 		//inline void setActivityState(const ActionStateStatus& state) { m_status = state;  }
 		inline void setOwner(const PlayerIdentifier id) { m_owner = id; }
 		inline void setPosition(const GameTile& pos) { m_position = pos; }
 		inline void setUnitID(const UnitIdentifier id) { m_id = id; }
+		inline void setArmor(const Armor armor) { m_armor = armor; }
+		inline void setAttack(const Attack attack) { m_attack = attack; }
+		void setUnitVertexRotation(const HexVertexNumber rotation) { m_unitRotation = rotation; }
+		HexVertexNumber getUnitVertexRotation() const  { return m_unitRotation; }
 		virtual ~Unit() = default;
 
+
+		TileDistance getRangeOfFire() const { return m_rangeOfFire; }
+		void  setRangeOfFire(const TileDistance shootingDistance) { m_rangeOfFire = shootingDistance; }
 	protected:
 		std::vector<GameTile>& adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest);
 
@@ -104,10 +123,14 @@ namespace core
 		PlayerIdentifier m_owner{0};
 		UnitActionState m_actionState;
 		UnitType m_type;
-		// TODO or maybe make sense to add damage here only when unit actually take it 
-		// or maybe switch to unordered map
-		// 
-		std::vector<UnitDamageType> m_possibleDamage;
+		// TODO add restrictions to rotation in case of possible damage to turret
+		Angle m_bodyRotation{ 0 };
+		Angle m_gunRotation{ 0 };
+		HexVertexNumber m_unitRotation{ 1 };
+		TileDistance m_rangeOfFire{ 20 };
+		Armor m_armor{ 4, 2 };
+		Attack m_attack{ 3 };
+
 
 		// is turret rotateable
 		// line of sight, arc of fire 120 deg  by the edge of hex
@@ -117,15 +140,19 @@ namespace core
 	public:
 		NullUnit() : Unit(UnitIdentifier{ 0 }, TileDistance{ 0 }, Shots{ 1 }) {
 			setOwner(PlayerIdentifier{ 0 });
-			m_actionState.setState(ActionStateStatus::empty);
+			m_actionState.setActionState(ActionStateStatus::empty);
+			m_actionState.setStateSystem(std::make_unique< tank_state_system::TankState>(Crew{ 5, 3 }));
 		}
 		bool hasActionLeft() const  { return  false; }
 
+
 	};
+
+	using DamageTypename = std::string_view;
 
 	class TankUnit : public core::Unit {
 	public:
-		TankUnit(UnitIdentifier id, TileDistance dis);
+		TankUnit(UnitIdentifier id, TileDistance movePoints, Shots rateOfFire);
 
 	};
 

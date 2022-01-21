@@ -2,55 +2,79 @@
 
 #include "entity_view.h"
 #include "game_tooltip.h"
+#include "explosion_effects.h"
+#include "resource_holder.h"
+#include "projectile.h"
 
-#include "SFML/Graphics/Sprite.hpp"
-#include "SFML/Graphics/RectangleShape.hpp"
-#include "SFML/Graphics/Text.hpp"
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <stack>
 
 namespace graphics
 {
-	constexpr int   kBasicVelocity = 40;
-	constexpr float kTurrentCenterPointDividerX = 1.25;
+	using SceneNodePtr = std::unique_ptr<SceneNode>;
 
-	class TankView : public EntityView
+	class UnitView : public EntityView
 	{
 	public:
-		enum Type
+		enum class Type
 		{
 			Basic
 		};
-
 	public:
-		TankView(UnitIdentifier id, Type type, const sf::Texture& textures, const sf::Texture& turrretTexture);
+		UnitView(UnitIdentifier id, Type type, TextureHolder& textures);
 		sf::FloatRect       getBoundingRect() const;
 
-		void  rotateTurretTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override;
+		virtual Angle  rotateGunTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint);
+		sf::Vector2f getGunPeakPosition();
 		void  rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override;
-		void  drawAsSelected();
+		void  markAsSelected();
 		void  showTooltip(const sf::Vector2f& mouse_pos);
 		inline void setTooltipText(const std::string& text) { m_tooltipDescription.setText(text); }
+		inline void showDamage(std::string_view damageType) override;
+		virtual SceneNodePtr shot(SceneNode* target, std::string_view damageType);
+		void setPositionBeforeMovement(const sf::Vector2f& position) { m_posBeforeMovement = position; }
+		void setMovementState(std::stack < sf::Vector2f> path);
+		void setCurrentRotationPoint(const sf::Vector2f& point) { m_currentRotationPoint = point; }
+
+		virtual ~UnitView() = default;
 		//UnitIdentifier getNodeByCoordinatesIfExists(const sf::Vector2f& clickedPos) const override final;
 	private:
 		void drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
+		void updateCurrent(sf::Time dt) override;
 
 
 	private:
 		Type m_type;
 		sf::Sprite	m_bodySprite;
-
 		sf::Sprite m_turretSprite;
+		Animation  m_explosion;
+		Animation  m_buriningAnimation;
+		// TODO change all damage type to Unit parts 
+		bool m_isDestroyed{ false };
+		bool m_isBurning{ false };
 		bool m_isSelected{ false };
 		GameTooltip m_tooltipDescription;
+		TextureHolder& m_textures;
+		GraphicMovementFrame m_moveFrame;
+
+		std::stack<sf::Vector2f> m_movementPath{};
+		sf::Vector2f m_posBeforeMovement{ 0.f, 0.f };
+		sf::Vector2f m_currentRotationPoint{ 0.f, 0.f };
 		
 	};
 
-	class NullUnitView : public EntityView
+	class NullUnitView : public UnitView
 	{
 	public:
-		NullUnitView() { m_id = UnitIdentifier{ 0 }; }
+		NullUnitView(TextureHolder& textures) : m_emptyTexture(), UnitView(UnitIdentifier{ 0 }, Type::Basic, textures) {  }
 	private:
 		void drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override {}
-		void  rotateTurretTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override {}
+		Angle  rotateGunTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override { return Angle{ 0 }; }
 		void  rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override {}
+		SceneNodePtr shot(SceneNode* target, std::string_view damageType) override { return std::make_unique<Projectile>(getPosition(), getPosition(), this, m_emptyTexture); }
+
+		sf::Texture m_emptyTexture;
 	};
 }

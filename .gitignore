@@ -30,9 +30,11 @@
 *.exe
 *.out
 *.app
+*.PVS-Studio.*
 
 # build paths
 /out
 /.idea
 /.vs
 /cmake-build-debug
+/.PVS-Studio

@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "../src/core/unit.h"
-#include "../src/core/unit_manager.h"
-#include "../src/core/game_rules.h"
-#include "../src/core/game_command.h"
-#include "../src/core/data_types.h"
+#include "src/core/unit.h"
+#include "src/core/unit_manager.h"
+#include "src/core/game_rules.h"
+#include "src/core/game_command.h"
+#include "src/core/data_types.h"
 
 #include <ranges>
 #include <memory>
@@ -17,10 +17,10 @@ using UnitManagerPtr = std::unique_ptr<core::UnitManager>;
 class GameBasicRulesFixture : public ::testing::Test {
 public:
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
-    std::unique_ptr<Unit> unitFirst{ std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{7}) };
-    std::unique_ptr<Unit> unitSecond{ std::make_unique<TankUnit>(UnitIdentifier{ 2 }, TileDistance{7}) };
-    std::unique_ptr<Unit> unitThird{ std::make_unique<TankUnit>(UnitIdentifier{ 3 }, TileDistance{7}) };
-    std::unique_ptr<Unit> unitFourth{ std::make_unique<TankUnit>(UnitIdentifier{ 4 }, TileDistance{7}) };
+    std::unique_ptr<Unit> unitFirst{ std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{7}, Shots{3}) };
+    std::unique_ptr<Unit> unitSecond{ std::make_unique<TankUnit>(UnitIdentifier{ 2 }, TileDistance{7}, Shots{3}) };
+    std::unique_ptr<Unit> unitThird{ std::make_unique<TankUnit>(UnitIdentifier{ 3 }, TileDistance{7}, Shots{3}) };
+    std::unique_ptr<Unit> unitFourth{ std::make_unique<TankUnit>(UnitIdentifier{ 4 }, TileDistance{7}, Shots{3}) };
     Unit* unitPtrFirst;
     Unit* unitPtrSecond;
     Unit* unitPtrThird;
@@ -63,19 +63,11 @@ public:
         m_gameRules.setStage(GameRulesInterface::GameStage::ActionPhase);
         m_gameRules.setActiveUnits(PlayerIdentifier{ 1 });
         m_gameRules.setActiveUnits(PlayerIdentifier{ 2 });
-        // initialization or some code to run before each test
     }
 
-    void TearDown() {
-        // code to run after each test;
-        // can be used instead of a destructor,
-        // but exceptions can be handled in this function only
-    }
+    void TearDown() {}
 
-    ~GameBasicRulesFixture() {
-        //resources cleanup, no exceptions allowed
-    }
-
+    ~GameBasicRulesFixture() {}
 };
 
 TEST_F(GameBasicRulesFixture, selectFirstUnit) {

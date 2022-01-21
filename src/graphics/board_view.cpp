@@ -58,17 +58,20 @@ sf::Vector2f graphics::BoardView::getPositionByTileCoordinates(const core::GameT
 {
     if (m_tiles.contains(coordinates))
     {
+      // std::cout << m_tiles.at(coordinates).getPoint(1) << "\n";
        return m_tiles.at(coordinates).getPosition();
     }
 }
 
-std::vector<sf::Vector2f> graphics::BoardView::getVectorPositionsByTiles(const std::vector<core::GameTile>& coordinates) const
+std::stack<sf::Vector2f> graphics::BoardView::getBulkPositionsByTiles(const std::vector<core::GameTile>& coordinates) const
 {
-    std::vector<sf::Vector2f> positions{};
-    for (const auto& tile : coordinates)
+    std::stack<sf::Vector2f> positions{};
+    for (auto it = std::rbegin(coordinates); it != std::rend(coordinates); it++)
     {
-        auto position = getPositionByTileCoordinates(tile);
-        positions.push_back(position);
+        auto position = getPositionByTileCoordinates(*it);
+        //if(it == std::rbegin(coordinates))
+        //    positions.push(position);
+        positions.push(position);
     }
 
     return positions;
@@ -77,12 +80,17 @@ std::vector<sf::Vector2f> graphics::BoardView::getVectorPositionsByTiles(const s
 std::optional<core::GameTile> graphics::BoardView::getCoordinatesIfValid(const sf::Vector2f& pos) const
 {
     for (auto& [coordinates, tile] : m_tiles)
-    {
         if (tile.getGlobalBounds().contains(pos))
-        {
             return { tile.getCoordinates() };
-        }
-    }
+
+    return std::nullopt;
+}
+
+std::optional<sf::Vector2f> graphics::BoardView::getTileCenterIfValid(const sf::Vector2f& pos) const
+{
+    for (auto& [coordinates, tile] : m_tiles)
+        if (tile.getGlobalBounds().contains(pos))
+            return { tile.getPosition() };
 
     return std::nullopt;
 }

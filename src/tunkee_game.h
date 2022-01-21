@@ -8,8 +8,8 @@ class TunkeGame
 {
 public:
 	TunkeGame();
-	void        run();
+	void run();
 
 private:
-	sf::RenderWindow       m_window;
+	sf::RenderWindow m_window;
 };

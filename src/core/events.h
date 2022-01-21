@@ -18,14 +18,16 @@ namespace events {
 	class Observer
 	{
 	public:
-		virtual void newUnitSelected(const UnitSelectedInfo& unitInfo) = 0;
-		virtual void informationMsgRecieved(const GameInfoMessage& msgInfo) = 0;
-		virtual void moveAreaRecieved(const MoveAreaInfo& moveArea) = 0;
-		virtual void moveUnitRecieved(const MoveUnitInfo& moveUnit) = 0;
+		virtual void newUnitSelected(const UnitSelectedInfo& unitInfo) {}
+		virtual void informationMsgRecieved(const GameInfoMessage& msgInfo) {}
+		virtual void moveAreaRecieved(const MoveAreaInfo& moveArea) {}
+		virtual void moveUnitRecieved(const MoveUnitInfo& moveUnit) {}
+		virtual void shotUnitRecieved(const UnitShootInfo&  shotUnit) {}
 		void operator ()(const UnitSelectedInfo& unitInfo) { newUnitSelected(unitInfo); }
 		void operator ()(const GameInfoMessage& msgInfo) { informationMsgRecieved(msgInfo); }
 		void operator ()(const MoveAreaInfo& moveArea) { moveAreaRecieved(moveArea); }
 		void operator ()(const MoveUnitInfo& moveUnit) { moveUnitRecieved(moveUnit); }
+		void operator ()(const UnitShootInfo& shotUnit) { shotUnitRecieved(shotUnit); }
 		void operator ()(std::monostate) { }
 		virtual ~Observer() = default;
 	};
@@ -39,7 +41,7 @@ namespace events {
 	class Events
 	{
 	public:
-		using GameInfoVariant = std::variant<UnitSelectedInfo, GameInfoMessage, MoveAreaInfo, MoveUnitInfo>;
+		using GameInfoVariant = std::variant<UnitSelectedInfo, GameInfoMessage, MoveAreaInfo, MoveUnitInfo, UnitShootInfo>;
 		void subscribe(Observer<Notifier>* obs)
 		{
 			m_observers.push_back(obs);

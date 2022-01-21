@@ -1,32 +1,35 @@
 #pragma once
 
-#include "scene_node.h"
+#include "tank_view.h"
 #include "board_view.h"
 #include "../src/core/data_types.h"
 #include "../controllers/game_controller.h"
 #include "unit_setup_view.h"
+#include "projectile.h"
 
 #include <map>
 #include <memory>
 
-using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
-
 class GameBuilder;
 
 namespace graphics {
+	using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
+	using ProjectilePtr = std::unique_ptr<graphics::Projectile>;
+	using UnitViewPtr = std::unique_ptr < graphics::UnitView>;
 
 	class GameWorldView : public events::Observer<core::GameEngine>
 	{
 	public:
-		//GameWorldView() = default;
+		// TODO make constructor private and let create only via builder
 		GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller);
-		bool addNewUnitView(SceneNodePtr unit, core::GameTile position);
+		bool addNewUnitView(UnitViewPtr unit, core::GameTile position);
+		void addNullUnit(UnitViewPtr nullUnit);
 		void draw();
 		void update(sf::Event& event);
 	private:
 		void handleEvent(const sf::Event& event, const sf::Vector2f& mousePos);
 		void moveView(const sf::Event& event, const sf::Vector2f& mousePos);
-		bool checkIfClickedOnOwnUnit(const sf::Vector2f& mousePos);
+		bool checkIfClickedOnUnit(const sf::Vector2f& mousePos);
 		void onBoardClicked(const sf::Vector2f& mousePos);
 		void clearMoveArea();
 		void endSetupStage();
@@ -36,14 +39,17 @@ namespace graphics {
 		void informationMsgRecieved(const GameInfoMessage& msgInfo) override;
 		void moveAreaRecieved(const MoveAreaInfo& moveArea) override;
 		void moveUnitRecieved(const MoveUnitInfo& moveUnit) override;
+		void shotUnitRecieved(const UnitShootInfo& shotUnit) override;
 		void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitsSetupView.setUnitSetupController(std::move(controller)); }
 		friend class ::GameBuilder;
 	private:
 		sf::RenderWindow& m_renderTarget;
 		BoardView m_board;
-		std::map<UnitIdentifier, SceneNodePtr, Comparator<UnitIdentifier>>  m_unitsGraph{};
+		std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>  m_units{};
+		std::vector< SceneNodePtr> m_views;
 		PlayerIdentifier m_playerId{ 1 };
-		SceneNode*  m_selectedUnit;
+		UnitView*  m_selectedUnit;
+		bool m_isPerformingAction{ false };
 		controllers::GameController m_gameController;
 
 		UnitSetupView m_unitsSetupView;

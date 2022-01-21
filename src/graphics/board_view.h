@@ -5,6 +5,7 @@
 
 #include <unordered_map>
 #include <optional>
+#include <stack>
 
 
 namespace graphics {
@@ -21,8 +22,10 @@ namespace graphics {
 		core::GameTile getSelectorTileCoordinates() const { return m_tileSelectorCoordinates;  }
 		sf::Vector2f getTileSelectorPosition() const { return m_tileSelector.getPosition(); }
 		sf::Vector2f getPositionByTileCoordinates(const core::GameTile& coordinates) const;
-		std::vector<sf::Vector2f> getVectorPositionsByTiles(const std::vector < core::GameTile>& coordinates) const;
+		std::stack<sf::Vector2f> getBulkPositionsByTiles(const std::vector < core::GameTile>& coordinates) const;
 		std::optional<core::GameTile> getCoordinatesIfValid(const sf::Vector2f& pos) const;
+		std::optional<sf::Vector2f>  getTileCenterIfValid(const sf::Vector2f& pos) const;
+		sf::Vector2f getTileVertex(const core::GameTile& coordinates, HexVertexNumber vertex) const { return m_tiles.at(coordinates).getPointGlobal(vertex.vertexNum); }
 
 		void resetMoveArea(std::vector<core::GameTile> moveArea, int firstLayerSize);
 	private:

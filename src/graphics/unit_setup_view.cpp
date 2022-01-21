@@ -22,7 +22,7 @@ graphics::UnitSetupView::UnitSetupView()
 
 void graphics::UnitSetupView::setAvailableUnits()
 {
-    float rotation = 90.f;
+    Angle rotation{ 90.f };
     float scalePreview = 0.2f;
     auto tmpTankView = m_tankFactory.createBacisTankView(UnitIdentifier{ 0 }, rotation, scalePreview);
 
@@ -48,7 +48,7 @@ void graphics::UnitSetupView::draw(sf::RenderWindow& target) const
     for (const auto& [id, unit] : m_addedUnits)
     {
         target.draw(*unit);
-        (*unit).showTooltip(translated_pos);
+        unit->showTooltip(translated_pos);
     }
 }
 
@@ -69,7 +69,7 @@ void graphics::UnitSetupView::handleEvent(const sf::Event::EventType& evenType, 
             auto unitPlace = board.getCoordinatesIfValid(mousePos);
             if (unitPlace)
             {
-                auto sceneNodePtr = m_unitSetupController.addUnit(unitPlace.value());
+                auto sceneNodePtr = m_unitSetupController.addUnit(*unitPlace);
                 if (sceneNodePtr)
                 {
                     (*sceneNodePtr)->setPosition((board).getPositionByTileCoordinates(*unitPlace));
@@ -108,15 +108,15 @@ void graphics::UnitSetupView::setCenter(const sf::Vector2f& pos)
     m_background.setPosition(pos);
     auto parentPos = m_background.getPosition();
     // damn..
-    (*m_availableUnits.back()).setPosition(parentPos.x, parentPos.y - (m_background.getSize().y / 2.f));
+    m_availableUnits.back()->setPosition(parentPos.x, parentPos.y - (m_background.getSize().y / 2.f));
 }
 
 void graphics::UnitSetupView::setDragDropUnitView(const sf::Vector2f& mousePos)
 {
-    float rotation = 90.f;
+    Angle rotation{ 90.f };
     float scalePreview = 0.17f;
     m_unitDragDropView = m_tankFactory.createBacisTankView(UnitIdentifier{ 0 }, rotation, scalePreview);
-    (*m_unitDragDropView).setPosition(mousePos);
+    m_unitDragDropView->setPosition(mousePos);
 }
 
 void graphics::UnitSetupView::hide()

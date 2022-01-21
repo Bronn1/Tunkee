@@ -24,7 +24,7 @@ public:
 
 private:
 	friend class graphics::GameWorldView;
-	GameBuilder();
+	GameBuilder() = default;
 	std::vector<core::GameTileType> generateMinimalTileset() { return std::vector<core::GameTileType>(kTestMapSize); }
 	void reset();
 private:

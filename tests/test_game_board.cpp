@@ -17,12 +17,15 @@ using namespace core;
 
 class MockUnit7Distance : public Unit {
 public:
-    MockUnit7Distance(UnitIdentifier id) : Unit(id, TileDistance{ 7 }, Shots{ 3 }) {}
+    MockUnit7Distance(UnitIdentifier id) : Unit(id, TileDistance{ 7 }, Shots{ 3 }) {
+        m_actionState.setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
+    }
+    MOCK_CONST_METHOD0(isAlive, bool());
 };
 
 class gameBoardFixture : public ::testing::Test {
 public:
-    std::vector<core::GameTileType> testTypes{ core::GameTileType::grass, core::GameTileType::grass };
+    std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
     std::unique_ptr<Unit> unit{ std::make_unique<MockUnit7Distance>(UnitIdentifier{ 1 } )};
@@ -80,17 +83,17 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0) {
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo2_1) {
-    testableBoard.setTileType(GameTile(1, 0), GameTileType::water);
-    testableBoard.setTileType(GameTile(0, 1), GameTileType::water);
-    testableBoard.setTileType(GameTile(-1, 2), GameTileType::water);
-    testableBoard.setTileType(GameTile(0, 2), GameTileType::water);
-    testableBoard.setTileType(GameTile(1, 1), GameTileType::water);
-    testableBoard.setTileType(GameTile(2, 0), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 4), GameTileType::water);
-    testableBoard.setTileType(GameTile(4, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(5, 3), GameTileType::water);
-    testableBoard.setTileType(GameTile(3, 5), GameTileType::water);
+    testableBoard.setTileType(GameTile(1, 0), GameTileType::Water);
+    testableBoard.setTileType(GameTile(0, 1), GameTileType::Water);
+    testableBoard.setTileType(GameTile(-1, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(0, 2), GameTileType::Water);
+    testableBoard.setTileType(GameTile(1, 1), GameTileType::Water);
+    testableBoard.setTileType(GameTile(2, 0), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 4), GameTileType::Water);
+    testableBoard.setTileType(GameTile(4, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(5, 3), GameTileType::Water);
+    testableBoard.setTileType(GameTile(3, 5), GameTileType::Water);
 
     auto cmdMove{ std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };
@@ -104,8 +107,8 @@ TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo2_1) {
 }
 
 TEST_F(gameBoardFixture, MoveUnitTo1_0WithAdjustmentTo1_1) {
-    testableBoard.setTileType(GameTile(1, 0), GameTileType::water);
-    testableBoard.setTileType(GameTile(0, 1), GameTileType::water);
+    testableBoard.setTileType(GameTile(1, 0), GameTileType::Water);
+    testableBoard.setTileType(GameTile(0, 1), GameTileType::Water);
 
     auto cmdMove{ std::make_shared<MoveToAction>() };
     cmdMove.get()->m_unitID = { 1 };

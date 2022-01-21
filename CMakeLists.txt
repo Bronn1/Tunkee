@@ -5,9 +5,11 @@ set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml/SFML-2.5.1)
 set(CMAKE_CXX_STANDARD 20)
 
+
+
 #add_executable(Tunkee main.cpp)
 add_subdirectory(src)
-
+include_directories(.)
 source_group("" FILES ${no_group_source_files})
 
 set(Header_Files
@@ -39,7 +41,9 @@ set(Header_Files
         "src/units_factory.h"
         "src/graphics/resource_holder.h"
         "src/core/damage_handler.h"
-        "src/core/unit_damage_type.h"
+        "src/core/unit_state.h"
+        "src/graphics/explosion_effects.h"
+        "src/graphics/projectile.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -72,12 +76,15 @@ set(Source_Files
         "src/units_factory.cpp"
         "src/graphics/resource_holder.cpp"
         "src/core/damage_handler.cpp"
+        "src/core/unit_state.cpp"
+        "src/graphics/explosion_effects.cpp"
+        "src/graphics/projectile.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES})
+add_executable(Tunkee ${ALL_FILES}   )
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

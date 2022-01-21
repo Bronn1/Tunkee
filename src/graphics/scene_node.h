@@ -19,6 +19,8 @@ namespace sf {
 
 namespace graphics 
 {
+	
+	//class Projectile;
 	/** Base class for every grahic node(unit) on the board
 	* 
 	*/
@@ -32,12 +34,13 @@ namespace graphics
 		void  update(sf::Time dt);
 		UnitIdentifier  getId() const { return m_id; }
 		virtual void  showTooltip(const sf::Vector2f& mouse_pos) {}
-		// since not all units have ability to rotate turret, maybe better to change name check Line of view
-		// and units with ability to rotate will do it in their own implementation 
-		virtual void  rotateTurretTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) = 0;
-		virtual void  rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) = 0;
+		virtual void  rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint){}
 		virtual sf::FloatRect getBoundingRect() const { return sf::FloatRect(); }
 		virtual void  drawAsSelected() {}
+		virtual inline void showDamage(std::string_view damageType){}
+		bool isPerformingAction()  const { return m_isPerformingAction; }
+		void setPerformAction(const bool actionState) { m_isPerformingAction = actionState; }
+		virtual bool isDestoyed()  const { return false; }
 		/** finds new point beetwen start and end points on the board
 		* \param startPoint
 		* \param endPoint
@@ -56,9 +59,10 @@ namespace graphics
 		void  drawChildren(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	protected:
-		UnitIdentifier                m_id{ 0 };
+		UnitIdentifier                 m_id{ 0 };
+		SceneNode* m_parent;
+		bool m_isPerformingAction{ false };
 	private:
 		std::vector<SceneNodePtr>		m_children;
-		SceneNode*                      m_parent;
 	};
 }
