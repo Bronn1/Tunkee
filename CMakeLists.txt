@@ -3,7 +3,7 @@ project(Tunkee)
 
 set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml/SFML-2.5.1)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 
 

@@ -57,7 +57,7 @@ std::vector<core::GameTile> core::Unit::moveTo(std::vector<GameTile>& pathToDest
 {
 	std::vector<GameTile> resultPath{};
 	auto adjustedPathVec = adjustPathByAvailableMovement(pathToDest);
-	auto pathSize = std::size(adjustedPathVec);
+	unsigned pathSize = std::size(adjustedPathVec);
 	if (pathSize > 0)
 	{
 		m_actionState.changeStateByMovement(TileDistance{ pathSize });
