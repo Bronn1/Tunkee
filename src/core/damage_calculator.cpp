@@ -6,7 +6,7 @@ namespace ranges =  std::ranges;
 
 bool core::DamageCalculator::isTargerReachable(const Unit* sourceUnit, const Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const
 {
-	if (TileDistance{ std::size(lineOfFire) } > sourceUnit->getRangeOfFire())
+	if (TileDistance{ static_cast<unsigned>(std::size(lineOfFire)) } > sourceUnit->getRangeOfFire())
 		return false;
 	
 	return ranges::all_of(lineOfFire, [](const GameTile& tile) { return tile.isShootableThrough(); });

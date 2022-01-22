@@ -70,7 +70,7 @@ namespace tank_state_system
     constexpr std::string_view kExploded = "Exploded";
     constexpr std::string_view kCommanderKilled = "CommanderKilled";
     constexpr std::string_view kDriverKilled = "DriverKilled";
-    constexpr std::string_view kRadiomanKilled = "RadiomanKilled";//radioman
+    constexpr std::string_view kRadiomanKilled = "RadiomanKilled";
     constexpr std::string_view kGunnerKilled = "GunnerKilled";
     constexpr std::string_view kLoaderKilled = "LoaderKilled";
     constexpr std::string_view kTransmissionDestroyed = "TransmissionDestroyed";
