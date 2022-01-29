@@ -12,7 +12,7 @@ bool core::DamageCalculator::isTargerReachable(const Unit* sourceUnit, const Uni
 	return ranges::all_of(lineOfFire, [](const GameTile& tile) { return tile.isShootableThrough(); });
 }
 
-int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const int rangeTo)
+int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const int rangeTo) const
 {
 	std::uniform_int_distribution  distribution(rangeFrom, rangeTo);
 
@@ -21,14 +21,14 @@ int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const
 
 void core::DamageCalculator::initProbabilityTables()
 {
-	m_damageHandlers.insert({ typeid(TankUnit),  DamageProbabilityTable() });
-	m_damageHandlers[typeid(TankUnit)].fillTankTableWithoutFile();
+	m_damageTables.insert({ typeid(TankUnit),  DamageProbabilityTable() });
+	m_damageTables[typeid(TankUnit)].fillTankTableWithoutFile();
 }
 
-UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire) 
+UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire)  const
 {
 	UnitShootInfo info{ sourceUnit->getID(), targetUnit->getID() };
-	info.m_damageDone = tank_state_system::kMissed;
+	info.m_damageDone = core::kShotMissed;
 
 	if(!isTargerReachable(sourceUnit, targetUnit, lineOfFire))
 	{
@@ -44,17 +44,18 @@ UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
 	if (rolledNumber >= currentThreshold) // if rolled number is higher then targetUnit is hit
 	{
 		std::type_index typeIndx = std::type_index(typeid(*targetUnit));
-		if (!m_damageHandlers.contains(typeIndx))
+		if (!m_damageTables.contains(typeIndx))
 			std::cout << "ERRROR\n";// TODO throw custom exception
 		
 		Attack unitAttack = sourceUnit->getAttack();
 		auto armor = targetUnit->getArmor(sourceUnit->getGunRotation());
 		ThreatLevel threat{ unitAttack.attack  - armor };
-		int overallProbabilitySize = m_damageHandlers.at(typeIndx).getOverallProbabilitySize(threat);
+		int overallProbabilitySize = m_damageTables.at(typeIndx).getOverallProbabilitySize(threat);
 		int rolledNumber = rollDiceWithFaces(overallProbabilitySize);
-		std::string_view destoyed_part = m_damageHandlers.at(typeIndx).getDestroyedPart(threat, rolledNumber);
-		info.m_damageDone = destoyed_part;
-		std::cout << "Threat lvl: " << threat.level << ", RolledNumber: " << rolledNumber << ", DAMAGE TYPE: " << destoyed_part << "\n";
+		std::string_view destoyedPart = m_damageTables.at(typeIndx).getDestroyedPart(threat, rolledNumber);
+		targetUnit->applyDamage(destoyedPart);
+		info.m_damageDone = destoyedPart;
+		std::cout << "Threat lvl: " << threat.level << ", RolledNumber: " << rolledNumber << ", DAMAGE TYPE: " << destoyedPart << "\n";
 	}
 	else
 	{
@@ -68,7 +69,7 @@ UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
 core::HitThreshold core::DamageCalculator::calculateHitThreshold(const Unit* source, const Unit* target, const std::vector<GameTile>& lineOfFire) const
 {
 	// TODO create smarter handler for tile types which effects Hit Threshold number(it's gonna be tough to handle a lot of different tile types also violates solid)
-	// TODO a lot of forfeits are missed rn, add all from the game rules
+	// TODO a lot of fine are missed rn, add all from the game rules
 	auto isTileEffectsHitThreshold = [](const auto& tile) { return (tile.m_type == GameTileType::Shrub) ? true : false; };
 	short obstaclesCount = ranges::count_if(begin(lineOfFire), end(lineOfFire) - 1, isTileEffectsHitThreshold);
 	short finePerDistance = 5;

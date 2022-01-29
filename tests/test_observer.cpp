@@ -46,7 +46,7 @@ public:
 class MockUnit : public Unit {
 public:
     MockUnit(UnitIdentifier id, TileDistance dis) : Unit(id, TileDistance{ dis }, Shots{ 3 }) {
-        m_actionState.setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
+        setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
     }
     MOCK_CONST_METHOD0(isAlive, bool());
 

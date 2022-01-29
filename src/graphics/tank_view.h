@@ -10,6 +10,7 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <stack>
+#include <unordered_map>
 
 namespace graphics
 {
@@ -43,17 +44,18 @@ namespace graphics
 	private:
 		void drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;
 		void updateCurrent(sf::Time dt) override;
+		void updateMovement(sf::Time dt);
 
 
 	private:
 		Type m_type;
 		sf::Sprite	m_bodySprite;
 		sf::Sprite m_turretSprite;
+		// later on after full animation support add maybe in array and remove after animation is done
 		Animation  m_explosion;
 		Animation  m_buriningAnimation;
 		// TODO change all damage type to Unit parts 
 		bool m_isDestroyed{ false };
-		bool m_isBurning{ false };
 		bool m_isSelected{ false };
 		GameTooltip m_tooltipDescription;
 		TextureHolder& m_textures;

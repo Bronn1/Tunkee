@@ -51,10 +51,10 @@ public:
         unitFourth.get()->setOwner(PlayerIdentifier{ 2 });
         unitPtrFourth = unitFourth.get();
 
-        (*unitMng).addUnit(std::move(unitFirst));
-        (*unitMng).addUnit(std::move(unitSecond));
-        (*unitMng).addUnit(std::move(unitThird));
-        (*unitMng).addUnit(std::move(unitFourth));
+        unitMng->addUnit(std::move(unitFirst));
+        unitMng->addUnit(std::move(unitSecond));
+        unitMng->addUnit(std::move(unitThird));
+        unitMng->addUnit(std::move(unitFourth));
         
         m_gameRules.setUnitManager(unitMng.get());
         m_gameRules.setCurrentPlayer(PlayerIdentifier{ 1 });
@@ -71,17 +71,18 @@ public:
 };
 
 TEST_F(GameBasicRulesFixture, selectFirstUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     auto result = m_gameRules.selectUnit(selectUnitQuery.get());
     UnitIdentifier expected = { 1 };
     EXPECT_EQ(expected, result) << "Can not select first unit  \n";
 }
 
+// we should be able to select another unit until we have used some activity on one unit
 TEST_F(GameBasicRulesFixture, selectNewUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
 
-    auto selectAnotherUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectAnotherUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     auto result = m_gameRules.selectUnit(selectAnotherUnitQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -89,13 +90,14 @@ TEST_F(GameBasicRulesFixture, selectNewUnit) {
     EXPECT_EQ(resultUnitId, expectedUnitId) << "Incorrect selected unit ID  \n";
 }
 
+// game shouldn't allow us to change unit after one has been used(used some of his action state moving, shooting , rotation)
 TEST_F(GameBasicRulesFixture, disallowNewUnitSelectionAfterAnotherUsed) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1} };
     unitPtrFirst->moveTo(path);
 
-    auto selectAnotherUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectAnotherUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectAnotherUnitQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -104,10 +106,10 @@ TEST_F(GameBasicRulesFixture, disallowNewUnitSelectionAfterAnotherUsed) {
 }
 
 TEST_F(GameBasicRulesFixture, diselectUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
 
-    auto diselectQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto diselectQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     auto result = m_gameRules.selectUnit(diselectQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -116,13 +118,13 @@ TEST_F(GameBasicRulesFixture, diselectUnit) {
 }
 
 TEST_F(GameBasicRulesFixture, selectAfterDiselectUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
 
-    auto diselectQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto diselectQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(diselectQuery.get());
 
-    auto selectSecondUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     auto result = m_gameRules.selectUnit(selectSecondUnitQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -131,16 +133,16 @@ TEST_F(GameBasicRulesFixture, selectAfterDiselectUnit) {
 }
 
 TEST_F(GameBasicRulesFixture, diselectSecondUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
 
-    auto diselectQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto diselectQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(diselectQuery.get());
 
-    auto selectSecondUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectSecondUnitQuery.get());
 
-    auto diselectSecondUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto diselectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     auto result = m_gameRules.selectUnit(diselectSecondUnitQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -149,18 +151,18 @@ TEST_F(GameBasicRulesFixture, diselectSecondUnit) {
 }
 
 TEST_F(GameBasicRulesFixture, disallowDiselectSecondUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
 
-    auto diselectQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto diselectQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(diselectQuery.get());
 
-    auto selectSecondUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectSecondUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrSecond->moveTo(path);
 
-    auto diselectSecondUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto diselectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     auto result = m_gameRules.selectUnit(diselectSecondUnitQuery.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -168,13 +170,14 @@ TEST_F(GameBasicRulesFixture, disallowDiselectSecondUnit) {
     EXPECT_EQ(resultUnitId, expectedUnitId) << "Incorrect selected unit ID  \n";
 }
 
+// player made some actions in game and decided to end up his phase of a turn 
 TEST_F(GameBasicRulesFixture, switchFirstPLayerPhase) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
 
@@ -191,14 +194,14 @@ TEST_F(GameBasicRulesFixture, switchFirstPLayerPhase) {
     EXPECT_EQ(resultUnitId, expectedUnitId) << "Incorrect selected unit ID  \n";
 }
 
-//basicly here we will use all units to make end of current turn
+// here we will use all units to make end of current turn
 TEST_F(GameBasicRulesFixture, endOFTurn) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
@@ -222,12 +225,12 @@ TEST_F(GameBasicRulesFixture, endOFTurn) {
 }
 
 TEST_F(GameBasicRulesFixture, switchSecondPLayerPhase) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
@@ -247,15 +250,15 @@ TEST_F(GameBasicRulesFixture, switchSecondPLayerPhase) {
 }
 
 TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterPhaseSwitch) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
-    auto selectUnitQuery2{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{3}) };
+    auto selectUnitQuery2{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{3}) };
     m_gameRules.selectUnit(selectUnitQuery2.get());
     std::vector<core::GameTile> path2{ {8,4}, {8,5} };
     unitPtrThird->moveTo(path2);
@@ -270,12 +273,12 @@ TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterPhaseSwitch) {
 }
 
 TEST_F(GameBasicRulesFixture, disallowSelectUnitAfterPhaseSwitch) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     m_gameRules.selectUnit(selectUnitQuery.get());
@@ -286,15 +289,15 @@ TEST_F(GameBasicRulesFixture, disallowSelectUnitAfterPhaseSwitch) {
 }
 
 TEST_F(GameBasicRulesFixture, disallowSelectUnitWithWrongPlayerId) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
-    auto selectUnitQuery2{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectUnitQuery2{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectUnitQuery2.get());
 
     auto resultUnitId = m_gameRules.getSelectedUnit();
@@ -303,17 +306,17 @@ TEST_F(GameBasicRulesFixture, disallowSelectUnitWithWrongPlayerId) {
 }
 
 TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterTwoPhaseSwitch) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
-    auto selectUnitQuery2{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
+    auto selectUnitQuery2{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectUnitQuery2.get());
     std::vector<core::GameTile> path2{ {8,4}, {8,5} };
     unitPtrThird->moveTo(path2);
@@ -328,12 +331,12 @@ TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterTwoPhaseSwitch) {
 }
 
 TEST_F(GameBasicRulesFixture, TryToSelectUsedUnit) {
-    auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
+    auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
     std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
     unitPtrFirst->moveTo(path);
 
-    auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+    auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };

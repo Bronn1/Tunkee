@@ -116,8 +116,7 @@ void core::GameEngine::setRotation(SetUnitRotation* rotateAction)
 	// TODO should we check everytime if somebody trying to cheat????..(checks for current player and unit owner)
 	auto unit = m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
 	if (unit)
-		(rotateAction->m_type == SetUnitRotation::Type::Body) ? (*unit)->setUnitRotation(rotateAction->m_angle) :
-                                                                (*unit)->setGunRotation(rotateAction->m_angle);
+		(*unit)->setGunRotation(rotateAction->m_angle);
 }
 
 void core::GameEngine::endOfTurn()

@@ -34,7 +34,7 @@ MoveAreaInfo core::GameBoard::getMoveAreaForUnit(Unit *unit)
 
 	// full Movement and half Movement should be showed with different colors in game
 	if (remainingMovement >= halfMovement ) {
-		TileDistance remainingMovementInFirstHalf = unit->getRemainingMovementInFirstHalf();
+		TileDistance remainingMovementInFirstHalf = unit->getRemainingMoveInFirstHalf();
 		moveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovementInFirstHalf, unit->getUnitVertexRotation());
 		firstLayerSize = std::size(moveArea);
 		auto  fullMoveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovement, unit->getUnitVertexRotation());
