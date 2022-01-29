@@ -25,10 +25,7 @@ int core::Unit::getArmor(const Angle& attackingAngle) const
 	// TODO not tested yet
 	const Angle kFrontalArmorAngleFrom = Angle{ 210 };
 	const Angle kFrontalArmorAngleTo = Angle{ 330 };
-	float a =  VertexToAngle(m_unitRotation).angle - attackingAngle.angle ;
-	Angle resultAngle{ a };
-	std::cout << "before: " << a << ", after: " << resultAngle.angle << "\n";
-	
+	Angle resultAngle = VertexToAngle(m_unitRotation) - attackingAngle;
 	if (resultAngle >= kFrontalArmorAngleFrom && resultAngle <= kFrontalArmorAngleTo)
 		return m_armor.m_frontal;
 	else
