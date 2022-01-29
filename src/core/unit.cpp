@@ -25,7 +25,10 @@ int core::Unit::getArmor(const Angle& attackingAngle) const
 	// TODO not tested yet
 	const Angle kFrontalArmorAngleFrom = Angle{ 210 };
 	const Angle kFrontalArmorAngleTo = Angle{ 330 };
-	Angle resultAngle = m_bodyRotation - attackingAngle;
+	float a =  VertexToAngle(m_unitRotation).angle - attackingAngle.angle ;
+	Angle resultAngle{ a };
+	std::cout << "before: " << a << ", after: " << resultAngle.angle << "\n";
+	
 	if (resultAngle >= kFrontalArmorAngleFrom && resultAngle <= kFrontalArmorAngleTo)
 		return m_armor.m_frontal;
 	else
@@ -35,11 +38,11 @@ int core::Unit::getArmor(const Angle& attackingAngle) const
 void core::Unit::applyDamage(const std::string_view damageType)
 {
 	bool isFullActionState = isUnitHaveFullActionState();
-	m_actionState.m_state->applyDamage(damageType); m_actionState.m_state->canMove();
+	m_state->applyDamage(damageType); m_state->canMove();
 	//  we arent allow players to have half active units, its either full, or empty
 	// so if unit wasnt active yet in this turn we just reset his state after taken damage
 	if(isFullActionState) 
-		m_actionState.setActionState(ActionStateStatus::full);
+		setActionState(ActionStateStatus::full);
 }
 
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
@@ -60,7 +63,7 @@ std::vector<core::GameTile> core::Unit::moveTo(std::vector<GameTile>& pathToDest
 	unsigned pathSize = std::size(adjustedPathVec);
 	if (pathSize > 0)
 	{
-		m_actionState.changeStateByMovement(TileDistance{ pathSize });
+		changeStateByMovement(TileDistance{ pathSize });
 		resultPath = std::move(adjustedPathVec);
 		m_position = resultPath.back();
 		return resultPath;
@@ -70,10 +73,10 @@ std::vector<core::GameTile> core::Unit::moveTo(std::vector<GameTile>& pathToDest
 
 bool core::Unit::shots(const Shots& shots)
 {
-	if (m_actionState.m_remainingShots <= Shots{ 0 })
+	if (m_remainingShots <= Shots{ 0 })
 		return false;
 
-	m_actionState.changeStateByShooting(shots);
+	changeStateByShooting(shots);
 	return true;
 }
 
@@ -82,7 +85,7 @@ void core::Unit::rotateToVertex(const HexVertexNumber vertex)
 	auto [move] = getRemainingMovement();
 	if(move)
 	{ 
-		m_actionState.changeStateByMovement(TileDistance{ 1 });
+		changeStateByMovement(TileDistance{ 1 });
 		m_unitRotation = vertex;
 	}
 }
@@ -172,11 +175,5 @@ core::TankUnit::TankUnit(UnitIdentifier id, TileDistance dis, Shots rateOfFire)
 {
 	m_type = UnitType::Tank;
 
-	m_actionState.setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
-	//applyDamage("Burning");
-
-	//for (const auto& type : kTankDamageTypes)
-	//	m_possibleDamage.push_back(UnitPart{type});
-
-	//m_fatalDamage.push_back(UnitPart{ kTankDamageTypes[1] });
+	setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
 }

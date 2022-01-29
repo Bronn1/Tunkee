@@ -20,9 +20,8 @@ namespace sf {
 namespace graphics 
 {
 	
-	//class Projectile;
-	/** Base class for every grahic node(unit) on the board
-	* 
+	/**
+	 * @brief Base class for every grahic nodeon the board
 	*/
 	class SceneNode : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
 	{

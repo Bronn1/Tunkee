@@ -59,6 +59,8 @@ void graphics::Animation::centerOrigin()
 
 void graphics::Animation::update(sf::Time dt)
 {
+	if (!m_isActive || isFinished()) return;
+
 	sf::Time timePerFrame = m_duration / static_cast<float>(m_numFrames);
 	m_elapsedTime += dt;
 
@@ -102,6 +104,8 @@ void graphics::Animation::update(sf::Time dt)
 
 void graphics::Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+	if (!m_isActive || isFinished()) return;
+
 	states.transform *= getTransform();
 	target.draw(m_sprite, states);
 }

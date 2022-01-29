@@ -51,7 +51,8 @@ namespace graphics {
 		bool isRepeating() const { return m_repeat; }
 
 		void restart() { m_currentFrame = 0; }
-		bool isFinished() const { return m_currentFrame >= m_numFrames; }
+		bool isFinished() const { return !isRepeating() && m_currentFrame >= m_numFrames; }
+		void startAnimation() { m_isActive = true; }
 
 		void centerOrigin();
 
@@ -71,5 +72,6 @@ namespace graphics {
 		sf::Time 				m_duration;
 		sf::Time 				m_elapsedTime;
 		bool 					m_repeat;
+		bool                    m_isActive{ false };
 	};
 }

@@ -39,7 +39,7 @@ UnitModelPtr TanksFactory::createTank(const core::GameTile& pos, const Angle rot
     std::unique_ptr<core::Unit> basicTank = std::make_unique<core::TankUnit>(unitId, movement, Shots{ 12 });
     basicTank->setPosition(pos);
     basicTank->setOwner(playerID);
-    basicTank->setUnitRotation(rotation);
+    basicTank->setGunRotation(rotation);
     basicTank->setUnitVertexRotation(vertexRotation);
 
     return basicTank;

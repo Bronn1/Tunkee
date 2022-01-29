@@ -1,4 +1,4 @@
-#include "damage_handler.h"
+#include "damage_probability_table.h"
 
 void core::DamageProbabilityTable::loadProbabilitiesFromFile(std::string_view filename)
 {

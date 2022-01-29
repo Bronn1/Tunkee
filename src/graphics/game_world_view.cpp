@@ -204,7 +204,7 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
 
 void graphics::GameWorldView::shotUnitRecieved(const UnitShootInfo& shotUnit)
 {
-    if (shotUnit.m_damageDone == tank_state_system::kMissed)
+    if (shotUnit.m_damageDone == core::kShotMissed)
         return;
     m_views.push_back(m_units[shotUnit.m_srcUnit]->shot(m_units[shotUnit.m_targetUnit].get(), shotUnit.m_damageDone));
 }

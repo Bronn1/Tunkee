@@ -66,22 +66,27 @@ void graphics::UnitView::drawCurrent(sf::RenderTarget& target, sf::RenderStates 
 		target.draw(m_tooltipDescription.getTextToRender(), states);
 	}
 	else
-	{
 		target.draw(m_bodySprite, states);
-		//target.draw(m_buriningAnimation, states);
-		target.draw(m_explosion, states);
-	}
 
-	if(m_isBurning) target.draw(m_buriningAnimation, states);
+	target.draw(m_explosion, states);
+	target.draw(m_buriningAnimation, states);
 }
 
 void graphics::UnitView::updateCurrent(sf::Time dt)
 {
+	updateMovement(dt);
+
+	m_buriningAnimation.update(dt);
+	m_explosion.update(dt);
+}
+
+void graphics::UnitView::updateMovement(sf::Time dt)
+{
 	m_moveFrame.elapsedTime += dt;
-	// TODO work on hotpath a bit, branch prediction
+
 	if (!m_movementPath.empty())
 	{
-		if ( m_moveFrame.fullPath - m_moveFrame.distancePassedPercent > 0 )
+		if (m_moveFrame.fullPath - m_moveFrame.distancePassedPercent > 0)
 		{
 			auto targetPoint = m_movementPath.top();
 			setPosition(interpolateWithFactor(m_posBeforeMovement, targetPoint, m_moveFrame.distancePassedPercent));
@@ -92,7 +97,7 @@ void graphics::UnitView::updateCurrent(sf::Time dt)
 			m_moveFrame.distancePassedPercent = 0.f;
 			m_posBeforeMovement = getPosition();
 			m_movementPath.pop();
-			if (!m_movementPath.empty()) 
+			if (!m_movementPath.empty())
 			{
 				auto newTargetPoint = m_movementPath.top();
 				rotateTo(m_posBeforeMovement, newTargetPoint);
@@ -106,13 +111,6 @@ void graphics::UnitView::updateCurrent(sf::Time dt)
 			}
 		}
 	}
-	m_buriningAnimation.update(dt);
-	if (m_isDestroyed && !m_explosion.isFinished())
-	{
-		m_explosion.update(dt);
-			
-	}
-		
 }
 
 sf::FloatRect graphics::UnitView::getBoundingRect() const
@@ -174,14 +172,15 @@ void graphics::UnitView::showTooltip(const sf::Vector2f& mouse_pos)
 
 inline void graphics::UnitView::showDamage(std::string_view damageType)
 {
-	// get rid of if else if blocks, come up with smth more brilliant
+	// get rid of if else if blocks, come up with smth more brilliant(needed first full understanding how many animation we'll have)
 	if (damageType == tank_state_system::kExploded)
 	{
 		m_isDestroyed = true;
 		m_buriningAnimation.setScale({ 0.9f, 0.9f });
+		m_explosion.startAnimation();
 	}
 	if (damageType == tank_state_system::kBurning)
-		m_isBurning = true;
+		m_buriningAnimation.startAnimation();
 }
 
 graphics::SceneNodePtr graphics::UnitView::shot(SceneNode* target, std::string_view damageType)
