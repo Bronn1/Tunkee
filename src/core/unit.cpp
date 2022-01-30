@@ -23,9 +23,19 @@ bool core::Unit::isAlive() const
 int core::Unit::getArmor(const Angle& attackingAngle) const
 {
 	// TODO not tested yet
-	const Angle kFrontalArmorAngleFrom = Angle{ 210 };
-	const Angle kFrontalArmorAngleTo = Angle{ 330 };
+	const Angle kFrontalArmorAngleFrom = Angle{ 180-60 };
+	const Angle kFrontalArmorAngleTo = Angle{ 180+60 };
 	Angle resultAngle = VertexToAngle(m_unitRotation) - attackingAngle;
+	resultAngle.angle = int(resultAngle.angle + 0.5);
+
+	//Angle unitRotationAngle = VertexToAngle(m_unitRotation);
+	// std::cout << "attackingAngle = " << attackingAngle.angle << " \n";
+	// std::cout << "attackingAngleShifted = " << attackingAngleShifted << " \n";
+	// std::cout << "kFrontalArmorAngleFrom = " << kFrontalArmorAngleFrom.angle << " \n";
+	// std::cout << "kFrontalArmorAngleTo = " << kFrontalArmorAngleTo.angle << " \n";
+	// std::cout << "unitRotationAngle = " << unitRotationAngle.angle << " \n";
+	// std::cout << "resultAngle = " << resultAngle.angle << " \n";
+
 	if (resultAngle >= kFrontalArmorAngleFrom && resultAngle <= kFrontalArmorAngleTo)
 		return m_armor.m_frontal;
 	else
