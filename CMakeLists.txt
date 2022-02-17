@@ -41,7 +41,7 @@ set(Header_Files
         "src/units_factory.h"
         "src/graphics/resource_holder.h"
         "src/core/damage_probability_table.h"
-        "src/core/unit_state.h"
+        "src/core/unit_damage_system_strategy.h"
         "src/graphics/explosion_effects.h"
         "src/graphics/projectile.h"
         )
@@ -76,7 +76,7 @@ set(Source_Files
         "src/units_factory.cpp"
         "src/graphics/resource_holder.cpp"
         "src/core/damage_probability_table.cpp"
-        "src/core/unit_state.cpp"
+        "src/core/unit_damage_system_strategy.cpp"
         "src/graphics/explosion_effects.cpp"
         "src/graphics/projectile.cpp"
         )

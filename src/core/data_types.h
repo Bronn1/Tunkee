@@ -19,11 +19,12 @@
 *     3 
 */
 struct HexVertexNumber {
-	explicit HexVertexNumber(size_t vertex) : vertexNum(vertex) {
+	explicit HexVertexNumber(int vertex) : vertexNum(vertex) {
 		if (vertex > 5) vertexNum = vertex % 6;
+		if (vertex < 0) vertexNum = 6 - (vertex % 6);
 	}
 
-	size_t vertexNum;
+	int vertexNum;
 	bool operator==(const HexVertexNumber&) const = default;
 	auto operator<=>(const HexVertexNumber&) const = default;
 	//inline operator bool() const { return identifier != 0; }
@@ -117,10 +118,10 @@ struct Angle {
 	}
 };
 
-enum class ActionStateStatus
+enum class ActionStatus
 {
-	empty = 1,
-	full
+	empty = 0 ,
+	full = 1
 };
 
 template< typename T>
@@ -133,4 +134,5 @@ struct Comparator {
 
 };
 
-Angle VertexToAngle(HexVertexNumber vertex);
+Angle VertexToAngle(HexVertexNumber vertex); 
+HexVertexNumber AngleToClosestVertex(Angle angle);

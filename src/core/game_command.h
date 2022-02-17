@@ -2,6 +2,7 @@
 
 #include "data_types.h"
 #include "game_tile.h"
+#include "unit_damage_system_strategy.h"
 
 #include <stack>
 #include <memory>
@@ -72,14 +73,14 @@ struct ShootAction : GameAction
 	std::string_view  m_damageDone;
 };
 
-struct SetUnitRotation : GameAction
+struct RotateUnitActiom : GameAction
 {
 	enum class Type
 	{
 		Body,
 		Gun
 	};
-	SetUnitRotation(const Angle& angle, Type type) : GameAction(ActionTypes::moveUnit, "Rotation"), m_angle(angle), m_type(type) {}
+	RotateUnitActiom(const Angle& angle, Type type) : GameAction(ActionTypes::moveUnit, "Rotation"), m_angle(angle), m_type(type) {}
 	Angle m_angle;
 	Type m_type;
 };
@@ -141,12 +142,19 @@ struct MoveUnitInfo {
 	core::GameTile m_unitPos;
 };
 
-struct UnitShootInfo {
-	UnitShootInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit) :
-		m_srcUnit(srcUnit), m_targetUnit(targetUnit) {}
+struct RotateGunInfo {
+	RotateGunInfo(Angle gunRotation, UnitIdentifier id) : m_gunRotation(gunRotation), m_unitId(id) {}
+	Angle m_gunRotation;
+	UnitIdentifier m_unitId{};
+};
+
+struct UnitStateInfo {
+	UnitStateInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit, core::UnitPart::State state) :
+		m_srcUnit(srcUnit), m_targetUnit(targetUnit), m_damageState(state) {}
 	UnitIdentifier m_srcUnit{};
 	UnitIdentifier m_targetUnit{};
-	std::string_view m_damageDone;
+	std::string_view m_damageTypeName;
+	core::UnitPart::State m_damageState;
 };
 
 

@@ -28,6 +28,6 @@ namespace pathfinding {
 	inline float _lerp(const float a, const float b, const float t);
 	std::tuple<float, float, float> _cubeLerp(const GameTile& a, const GameTile& b, const float t);
 	std::vector<GameTile> drawLine(const GameTile& source, const GameTile& destination);
-	std::vector<GameTile> getLineOfSightWithoutBarriers(const GameBoard& board, const GameTile& startingPos, const TileDistance layersAmount, HexVertexNumber point);
+	std::vector<GameTile> getLineOfSightWithoutObstacles(const GameBoard& board, const GameTile& startingPos, const TileDistance layersAmount, HexVertexNumber point);
 	std::tuple<int, int, int, int> _getLineOfSightLayerCoordinates(HexVertexNumber point, int layer);
 }

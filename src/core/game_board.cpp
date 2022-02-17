@@ -25,77 +25,17 @@ core::GameBoard::GameBoard(std::vector<GameTileType> tiles, int width, int heigh
 	}
 }
 
-MoveAreaInfo core::GameBoard::getMoveAreaForUnit(Unit *unit)
-{
-	TileDistance halfMovement = unit->getHalfMovePointsRoundedUp();
-	TileDistance remainingMovement = unit->getRemainingMovement();
-	std::vector<GameTile> moveArea = {};
-	int firstLayerSize = 0;
-
-	// full Movement and half Movement should be showed with different colors in game
-	if (remainingMovement >= halfMovement ) {
-		TileDistance remainingMovementInFirstHalf = unit->getRemainingMoveInFirstHalf();
-		moveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovementInFirstHalf, unit->getUnitVertexRotation());
-		firstLayerSize = std::size(moveArea);
-		auto  fullMoveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovement, unit->getUnitVertexRotation());
-		for (auto& tile : fullMoveArea)
-			// add only new(unique) tiles
-			if (std::ranges::find(moveArea, tile) == std::end(moveArea)) 
-				moveArea.push_back(tile);
-	}
-	else {
-		moveArea = pathfinding::getAvailableAreaWithRotation(*this, unit->getPosition(), remainingMovement, unit->getUnitVertexRotation());
-		firstLayerSize = 0;
-	}
-	return MoveAreaInfo{ std::move(moveArea), firstLayerSize };//moveArea;
-}
-
-std::vector<core::GameTile> core::GameBoard::moveTo(const MoveToAction* moveToCmd, Unit* unit)
-{
-	rotateToDestination(moveToCmd, unit);
-
-	GameTile currentPos = unit->getPosition();
-	auto pathVec = pathfinding::getShortestPath(*this, currentPos, getTile(moveToCmd->m_destination));
-	auto adjustedPathVec = unit->moveTo(pathVec);
-	if (std::size(adjustedPathVec) > 0)
-	{
-		setTileAccessible(currentPos, true);
-		setTileAccessible(adjustedPathVec.back(), false);
-		return adjustedPathVec;
-	}
-
-	return std::vector<core::GameTile>();
-}
-
-
-void core::GameBoard::rotateToDestination(const MoveToAction* moveToCmd, Unit* unit)
-{
-	auto vertex = unit->getUnitVertexRotation();
-	HexVertexNumber curVertex{ vertex.vertexNum + 5 }; // left vertex to cur
-	GameTile currentPos = unit->getPosition();
-	int distance = pathfinding::getDistance(currentPos, moveToCmd->m_destination);
-	for (int i : views::iota(1, 7))
-	{
-		auto tilesInfrontVec = pathfinding::getLineOfSightWithoutBarriers(*this, currentPos, TileDistance{ (unsigned)distance + 5 }, curVertex);
-		if (ranges::find(tilesInfrontVec, moveToCmd->m_destination) != end(tilesInfrontVec))
-		{
-			if (i > 3) // if unit rotated more than one vertex
-				unit->rotateToVertex(curVertex);
-
-			unit->setUnitVertexRotation(curVertex);
-			return;
-		}
-		curVertex = HexVertexNumber{ curVertex.vertexNum + 1 };
-	}
-	
-	// TODO could be good to do refactor here, cuz we shouldn't be there ,unit should be able to find his proper rotation
-	// if we have  reached this part something is very wrong!
-	// throw std::runtime_error("pzd\n");
-}
-
-std::vector<GameTile> core::GameBoard::getStraightLine(const GameTile& from, const GameTile& to)
+std::vector<GameTile> core::GameBoard::getStraightLine(const GameTile& from, const GameTile& to) const
 {
 	return pathfinding::drawLine(from, to);
+}
+
+std::vector<GameTile> core::GameBoard::getLineOfSightWithoutObstacles(const Unit* unit, const GameTile& dest) const
+{
+	int distance = pathfinding::getDistance(unit->getPosition(), dest);
+	// so after one turret rotation in unit we should disallow rotation to more than 120
+	// if turret cant rotate then check if destination inside line of sight(120degree), make angleToclosestVertex;
+	return pathfinding::getLineOfSightWithoutObstacles(*this, unit->getPosition(), TileDistance{ (unsigned)distance + 5 }, AngleToClosestVertex( unit->getGunRotation()));
 }
 
 void core::GameBoard::printBoardTest()

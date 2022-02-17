@@ -130,9 +130,8 @@ bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
                     std::cout << "Unit: " << unit->getId() << " has invalid position\n";
                     return false; // this means unit outside of the board maybe throw?
                 }
-                // TODO here we should first ask model if we can rotate turret and unit in line of sight
-                Angle gunRotation = m_selectedUnit->rotateGunTo(m_selectedUnit->getPosition(), tileCenter.value());
-                m_gameController.onChangeUnitRotation(m_selectedUnit->getId(), gunRotation, SetUnitRotation::Type::Gun);
+                Angle gunRotation = m_selectedUnit->calculateGunRotation(m_selectedUnit->getPosition(), *tileCenter);
+                m_gameController.onChangeUnitRotation(m_selectedUnit->getId(), gunRotation, RotateUnitActiom::Type::Gun);
             }
             m_gameController.onUnitClicked(m_selectedUnit->getId(), unit->getId());
             return true;
@@ -143,15 +142,7 @@ bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
 
 void graphics::GameWorldView::onBoardClicked(const sf::Vector2f& mousePos)
 {
-    //auto unit = m_selectedUnit;
     m_gameController.moveUnit(m_selectedUnit->getId(), (m_board).getSelectorTileCoordinates());
-
-    //auto tileCenter =  m_board.getTileCenterIfValid(mousePos);
-    //if (tileCenter)
-    //{
-   //     Angle gunRotation = m_selectedUnit->rotateGunTo(m_selectedUnit->getPosition(), tileCenter.value());
-  //      m_gameController.onChangeUnitRotation(m_selectedUnit->getId(), gunRotation, SetUnitRotation::Type::Gun);
-   // }
 }
 
 void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
@@ -202,11 +193,23 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
     //m_isPerformingAction = true;
 }
 
-void graphics::GameWorldView::shotUnitRecieved(const UnitShootInfo& shotUnit)
+void graphics::GameWorldView::ChangeUnitStateRecieved(const UnitStateInfo& unitState)
 {
-    if (shotUnit.m_damageDone == core::kShotMissed)
+    if (unitState.m_damageTypeName == core::kShotMissed)
         return;
-    m_views.push_back(m_units[shotUnit.m_srcUnit]->shot(m_units[shotUnit.m_targetUnit].get(), shotUnit.m_damageDone));
+
+    if (unitState.m_damageState == core::UnitPart::State::Damaged)
+        if (unitState.m_srcUnit != UnitIdentifier{ 0 })
+            m_views.push_back(m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName));
+        else
+            m_units[unitState.m_targetUnit]->showDamage(unitState.m_damageTypeName);
+    else
+        m_units[unitState.m_targetUnit]->resetUnitState(unitState.m_damageTypeName);
+}
+
+void graphics::GameWorldView::rotateGunRecieved(const RotateGunInfo& rotateUnitGun)
+{
+    m_units[rotateUnitGun.m_unitId]->setGunRotation(rotateUnitGun.m_gunRotation);
 }
 
 void graphics::GameWorldView::clearMoveArea()

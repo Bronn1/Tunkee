@@ -67,7 +67,7 @@ namespace core
 
 	private:
 		
-		//ActionStateStatus  m_playerRemainingActivity{ ActionStateStatus::full };
+		//ActionStatus  m_playerRemainingActivity{ ActionStatus::full };
 
 
 	};

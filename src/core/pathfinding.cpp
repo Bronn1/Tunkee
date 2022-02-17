@@ -73,9 +73,9 @@ std::vector<GameTile> pathfinding::getAvailableAreaWithRotation(const GameBoard&
 	std::unordered_set<GameTile> visited{};
 
 	// finding all area in the front that doesnt require rotation
-	auto tileInFront = pathfinding::getLineOfSightWithoutBarriers(board, startingPos, movement, unitRotation);
-	auto  neighborsLeft = pathfinding::getLineOfSightWithoutBarriers(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 5 });
-	auto  neighborsRight = pathfinding::getLineOfSightWithoutBarriers(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 1 });
+	auto tileInFront = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, unitRotation);
+	auto  neighborsLeft = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 5 });
+	auto  neighborsRight = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 1 });
 	// TODO return unordered_sets or sets instead of additional allocation
 	std::unordered_set < GameTile> tilesWithoutRotation(begin(tileInFront), end(tileInFront));
 	tilesWithoutRotation.insert(begin(neighborsLeft), end(neighborsLeft));
@@ -232,7 +232,7 @@ std::vector<GameTile> pathfinding::drawLine(const GameTile& source, const GameTi
 	return resultPath;
 }
 
-std::vector<GameTile> pathfinding::getLineOfSightWithoutBarriers(const GameBoard& board, const GameTile& startingPos, const TileDistance layersAmount, HexVertexNumber point)
+std::vector<GameTile> pathfinding::getLineOfSightWithoutObstacles(const GameBoard& board, const GameTile& startingPos, const TileDistance layersAmount, HexVertexNumber point)
 {
 	std::vector<GameTile> lineOfSigh{};
 	for (int curLayer : views::iota(1, (int)layersAmount.distance + 1))

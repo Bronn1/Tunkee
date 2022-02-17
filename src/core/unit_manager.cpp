@@ -56,15 +56,17 @@ int core::UnitManager::countActiveUnitsOwnedBy(const PlayerIdentifier& playerId)
 	return  std::ranges::count_if(m_units, isOwnedByAndActive);
 }
 
-void core::UnitManager::calculateAliveUnitsOnNextTurn()
+void core::UnitManager::passNextTurnToUnits()
 {
 	for (const auto& [id, unit] : m_units)
 	{
+		unit->nextTurn();
+		//setUnitsActions
 		std::cout << "Calculating alive units...\n";
 	}
 }
 
-void core::UnitManager::setUnitsActions(const ActionStateStatus state)
+void core::UnitManager::setUnitsActions(const ActionStatus state)
 {
 	for (const auto& [id, unit] : m_units)
 		unit->setActionState(state);

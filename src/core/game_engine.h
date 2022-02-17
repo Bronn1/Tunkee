@@ -27,7 +27,7 @@ namespace core {
 		void requestMoveArea(GetMoveAreaQuery* moveAreaQuery);
 		void selectUnit(const SelectUnitQuery* selectUnitQuery);
 		UnitIdentifier addNewUnit(std::unique_ptr<core::Unit> unit);
-		void setRotation(SetUnitRotation* rotateAction);
+		void rotateUnitGun(RotateUnitActiom* rotateAction);
 
 		void finishSetupStage(FinishSetupStage* finishSetupStageAction);
 		void finishActionPhase(FinishActionPhase* finishActionPhase);

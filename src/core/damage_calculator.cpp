@@ -19,16 +19,55 @@ int core::DamageCalculator::generateUniformRandNumber(const int rangeFrom, const
 	return distribution(m_generator);
 }
 
+std::vector<UnitStateInfo> core::DamageCalculator::nextTurn()
+{
+	std::vector<UnitStateInfo> changedUnitStates;
+	std::set<Unit*> tmp{};
+	//move these constans later, better to make them constexpr
+	const int kChanceToStopBurning = 5;
+	const int kChanceToExplode = 8;
+	const int kChanceToKeepBurning = 10;
+	for (auto& unit : m_burningUnits)
+	{
+		int rolledNumber = rollDiceWithFaces(kChanceToKeepBurning);
+		if (rolledNumber <= kChanceToStopBurning)
+		{
+			UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), UnitPart::State::Normal };
+			info.m_damageTypeName = tankDamageSystem::kBurning;
+			unit->setDamageState(tankDamageSystem::kBurning, UnitPart::State::Normal);
+			changedUnitStates.push_back(info);
+		}
+		else if (rolledNumber <= kChanceToExplode)
+		{
+			UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), UnitPart::State::Damaged };
+			info.m_damageTypeName = tankDamageSystem::kExploded;
+			changedUnitStates.push_back(info);
+			unit->applyDamage(tankDamageSystem::kExploded);
+		}
+		else
+			tmp.insert(unit);
+	}
+	m_burningUnits = std::move(tmp);
+
+	return changedUnitStates;
+}
+
+void core::DamageCalculator::saveTempDamage(Unit* targetUnit, const DamageType damageType)
+{
+	if (damageType == tankDamageSystem::kBurning)
+		m_burningUnits.insert(targetUnit);
+}
+
 void core::DamageCalculator::initProbabilityTables()
 {
 	m_damageTables.insert({ typeid(TankUnit),  DamageProbabilityTable() });
 	m_damageTables[typeid(TankUnit)].fillTankTableWithoutFile();
 }
 
-UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire)  const
+UnitStateInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire)
 {
-	UnitShootInfo info{ sourceUnit->getID(), targetUnit->getID() };
-	info.m_damageDone = core::kShotMissed;
+	UnitStateInfo info{ sourceUnit->getID(), targetUnit->getID(), UnitPart::State::Damaged };
+	info.m_damageTypeName = core::kShotMissed;
 
 	if(!isTargerReachable(sourceUnit, targetUnit, lineOfFire))
 	{
@@ -37,7 +76,7 @@ UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
 	}
 
 	Shots amountOfShots{ 1 };
-	sourceUnit->shots(amountOfShots);
+	sourceUnit->shoot(amountOfShots);
 	HitThreshold currentThreshold = calculateHitThreshold(sourceUnit, targetUnit, lineOfFire);
 	auto rolledNumber = HitThreshold{ rollDiceWithFaces() };
 	std::cout << "Threshold: " << currentThreshold.hitThreshold << ", rolled: " << rolledNumber.hitThreshold << "\n";
@@ -54,7 +93,8 @@ UnitShootInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
 		int rolledNumber = rollDiceWithFaces(overallProbabilitySize);
 		std::string_view destoyedPart = m_damageTables.at(typeIndx).getDestroyedPart(threat, rolledNumber);
 		targetUnit->applyDamage(destoyedPart);
-		info.m_damageDone = destoyedPart;
+		info.m_damageTypeName = destoyedPart;
+		saveTempDamage(targetUnit, destoyedPart);
 		std::cout << "Threat lvl: " << threat.level << ", RolledNumber: " << rolledNumber << ", DAMAGE TYPE: " << destoyedPart << "\n";
 	}
 	else

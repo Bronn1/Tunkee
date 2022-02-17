@@ -17,7 +17,7 @@ namespace controllers {
 	public:
 		GameController(core::GameEngine* engine, const PlayerIdentifier player);
 		void moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const;
-		void onChangeUnitRotation(const UnitIdentifier unitID, const Angle rotation, const SetUnitRotation::Type rotationType);
+		void onChangeUnitRotation(const UnitIdentifier unitID, const Angle& rotation, const RotateUnitActiom::Type rotationType);
 		void onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const ;
 		void finishSetupStage(PlayerIdentifier playerId);
 		void finishActionPhase(PlayerIdentifier playerId);

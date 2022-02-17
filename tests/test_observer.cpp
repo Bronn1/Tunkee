@@ -43,15 +43,6 @@ public:
 
 };
 
-class MockUnit : public Unit {
-public:
-    MockUnit(UnitIdentifier id, TileDistance dis) : Unit(id, TileDistance{ dis }, Shots{ 3 }) {
-        setStateSystem(std::make_unique<tank_state_system::TankState>(Crew{ 5, 3 }));
-    }
-    MOCK_CONST_METHOD0(isAlive, bool());
-
-};
-
 
 class MockObserver : public events::Observer<GameEngine> {
 public:
@@ -67,7 +58,7 @@ TEST_F(observerFixture, observerMoveArea18_6) {
     int expectedHalf = 6;
 
 
-    auto unit = std::make_unique<MockUnit>(UnitIdentifier{ 1 }, TileDistance{ 2 });
+    auto unit = std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{ 2 }, Shots{ 3 });
 
     unit.get()->setPosition(GameTile(2, 2));
     unit.get()->setOwner(PlayerIdentifier{ 1 });
@@ -93,7 +84,7 @@ TEST_F(observerFixture, observerMoveArea9_5) {
     cmd.get()->m_unitID = { 1 };
     cmd.get()->m_playerID = { 1 };
 
-    auto unit = std::make_unique<MockUnit>(UnitIdentifier{ 1 }, TileDistance{ 3 });
+    auto unit = std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{ 3 }, Shots{ 3 });
 
     unit.get()->setPosition(GameTile(0, 0));
     unit.get()->setOwner(PlayerIdentifier{ 1 });

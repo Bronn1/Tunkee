@@ -3,7 +3,9 @@
 
 
 #include "src/core/unit.h"
+#include "src/core/unit.cpp"
 #include "src/core/game_tile.h"
+#include "src/core/game_board.h"
 
 using namespace core;
 
@@ -13,6 +15,9 @@ public:
 	// So unit can do per turn  either 5 move or 3 shots or 2 shots and 3 move
 	TankUnit unit{ UnitIdentifier{ 1 }, TileDistance{5}, Shots{3} };
 	TankUnit unitWithEvenaction{ UnitIdentifier{ 1 }, TileDistance{4}, Shots{6} };
+	std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
+	core::GameBoard testableBoard{ testTypes, 40,  40 };
+
 	UnitFixture()
 	{
 	}
@@ -22,6 +27,7 @@ public:
 		GameTile pos(0,0);
 		unit.setPosition(pos);
 		unitWithEvenaction.setPosition(pos);
+		unit.setUnitRotation(HexVertexNumber{ 3 });
 	}
 
 
@@ -35,10 +41,14 @@ public:
 
 TEST_F(UnitFixture, zeroActionsAfterMoveMove)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2), GameTile(0,3) };
-	unit.moveTo(firstActionPath);
-	std::vector<GameTile> secondActionPath{ GameTile(1,3), GameTile(2,3), GameTile(3,3) }; // only 2 steps left
-	unit.moveTo(secondActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 3);
+	unit.moveTo(cmdMove.get(), testableBoard);
+	cmdMove->m_destination = GameTile(3, 3);
+	//std::vector<GameTile> secondActionPath{ GameTile(1,3), GameTile(2,3), GameTile(3,3) }; // only 2 steps left
+	unit.moveTo(cmdMove.get(), testableBoard);
 	GameTile expectedPosition = GameTile(2, 3);
 	bool expectedActionsLeft = false;
 	TileDistance expectedMoveLeft = { 0 };
@@ -53,8 +63,12 @@ TEST_F(UnitFixture, zeroActionsAfterMoveMove)
 
 TEST_F(UnitFixture, 1ActionAfterMove)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2), GameTile(0,3) };
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 3);
+	unit.moveTo(cmdMove.get(), testableBoard);
+
 	GameTile expectedPosition = GameTile(0, 3);
 	bool expectedActionsLeft = true;
 	TileDistance expectedMoveLeft = { 2 };
@@ -70,8 +84,11 @@ TEST_F(UnitFixture, 1ActionAfterMove)
 
 TEST_F(UnitFixture, 1ActionAndMove1AfterMove2Tiles)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2) };
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 2);
+	unit.moveTo(cmdMove.get(), testableBoard);
 	GameTile expectedPosition = GameTile(0, 2);
 	bool expectedActionsLeft = true;
 	TileDistance expectedMoveLeft = { 3 };
@@ -87,10 +104,13 @@ TEST_F(UnitFixture, 1ActionAndMove1AfterMove2Tiles)
 
 TEST_F(UnitFixture, oneShotLeftAfterMoveShot)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2), GameTile(0,3) };
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 3);
+	unit.moveTo(cmdMove.get(), testableBoard);
 	Shots shot{ 1 };
-	unit.shots(shot);
+	unit.shoot(shot);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = false;
 	TileDistance expectedMoveLeft = { 0 };
@@ -105,10 +125,13 @@ TEST_F(UnitFixture, oneShotLeftAfterMoveShot)
 
 TEST_F(UnitFixture, move1Move1Sequentially)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
-	unit.moveTo(firstActionPath);
-	std::vector<GameTile> firstActionPath2{ GameTile(0,2) };
-	unit.moveTo(firstActionPath2);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+	cmdMove->m_destination = GameTile(0, 2);
+	unit.moveTo(cmdMove.get(), testableBoard);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 3 };
@@ -123,11 +146,15 @@ TEST_F(UnitFixture, move1Move1Sequentially)
 
 TEST_F(UnitFixture, move1Move1Move1Sequentially)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
-	unit.moveTo(firstActionPath);
-	std::vector<GameTile> firstActionPath2{ GameTile(0,2) };
-	unit.moveTo(firstActionPath2);
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+	cmdMove->m_destination = GameTile(0, 2);
+	unit.moveTo(cmdMove.get(), testableBoard);
+	cmdMove->m_destination = GameTile(0, 3);
+	unit.moveTo(cmdMove.get(), testableBoard);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 2 };
@@ -143,8 +170,8 @@ TEST_F(UnitFixture, move1Move1Move1Sequentially)
 TEST_F(UnitFixture, shot1shot1Sequentially)
 {
 	Shots shot{ 1 };
-	unit.shots(shot);
-	unit.shots(shot);
+	unit.shoot(shot);
+	unit.shoot(shot);
 
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
@@ -161,9 +188,13 @@ TEST_F(UnitFixture, shot1shot1Sequentially)
 TEST_F(UnitFixture, shot1Move1Sequentially)
 {
 	Shots shot{ 1 };
-	unit.shots(shot);
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2) };
-	unit.moveTo(firstActionPath);
+	unit.shoot(shot);
+
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 2);
+	unit.moveTo(cmdMove.get(), testableBoard);
 
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
@@ -179,10 +210,14 @@ TEST_F(UnitFixture, shot1Move1Sequentially)
 
 TEST_F(UnitFixture, zeroActionsAfterMoveShots)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2), GameTile(0,3) };
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 3);
+	unit.moveTo(cmdMove.get(), testableBoard);
+
 	Shots shot{ 2 };
-	unit.shots(shot);
+	unit.shoot(shot);
 	GameTile expectedPosition = GameTile(2, 3);
 	bool expectedActionsLeft = false;
 	bool expectedMoveAction = false;
@@ -199,7 +234,7 @@ TEST_F(UnitFixture, zeroActionsAfterMoveShots)
 TEST_F(UnitFixture, actionAfterOneShot)
 {
 	Shots shot{ 1 };
-	unit.shots(shot);
+	unit.shoot(shot);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 3 };
@@ -215,7 +250,7 @@ TEST_F(UnitFixture, actionAfterOneShot)
 TEST_F(UnitFixture, actionAfterTwoShots)
 {
 	Shots shot{ 2 };
-	unit.shots(shot);
+	unit.shoot(shot);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 3 };
@@ -231,7 +266,7 @@ TEST_F(UnitFixture, actionAfterTwoShots)
 TEST_F(UnitFixture, zeroActionsAfterFullShots)
 {
 	Shots shot{ 3 };
-	unit.shots(shot);
+	unit.shoot(shot);
 	bool expectedActionsLeft = false;
 	bool expectedMoveAction = false;
 	TileDistance expectedMoveLeft = { 0 };
@@ -244,12 +279,10 @@ TEST_F(UnitFixture, zeroActionsAfterFullShots)
 	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
 }
 
-
-
 TEST_F(UnitFixture, actionAfterTwoShotsEvenAmount)
 {
 	Shots shot{ 2 };
-	unitWithEvenaction.shots(shot);
+	unitWithEvenaction.shoot(shot);
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 2 };
@@ -262,10 +295,14 @@ TEST_F(UnitFixture, actionAfterTwoShotsEvenAmount)
 	EXPECT_EQ(unitWithEvenaction.getRemainingShots(), expectedShotleft);
 }
 
-TEST_F(UnitFixture, 1MoveAfterMoveEvenAmount)
+TEST_F(UnitFixture, OneMoveAfterMoveEvenAmount)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2), GameTile(0,3) };
-	unitWithEvenaction.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 3);
+	unitWithEvenaction.moveTo(cmdMove.get(), testableBoard);
+
 	GameTile expectedPosition = GameTile(0, 3);
 	bool expectedActionsLeft = true;
 	TileDistance expectedMoveLeft = { 1 };
@@ -279,10 +316,14 @@ TEST_F(UnitFixture, 1MoveAfterMoveEvenAmount)
 	EXPECT_EQ(unitWithEvenaction.getRemainingShots(), expectedShotleft);
 }
 
-TEST_F(UnitFixture, 1actionAfterMoveEvenAmount)
+TEST_F(UnitFixture, OneActionAfterMoveEvenAmount)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1), GameTile(0,2) };
-	unitWithEvenaction.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 2);
+	unitWithEvenaction.moveTo(cmdMove.get(), testableBoard);
+
 	GameTile expectedPosition = GameTile(0, 2);
 	bool expectedActionsLeft = true;
 	TileDistance expectedMoveLeft = { 2 };
@@ -298,10 +339,14 @@ TEST_F(UnitFixture, 1actionAfterMoveEvenAmount)
 
 TEST_F(UnitFixture, move1Move1SequentiallyEven)
 {
-	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
-	unitWithEvenaction.moveTo(firstActionPath);
-	std::vector<GameTile> firstActionPath2{ GameTile(0,2) };
-	unitWithEvenaction.moveTo(firstActionPath2);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unitWithEvenaction.moveTo(cmdMove.get(), testableBoard);
+	cmdMove->m_destination = GameTile(0, 2);
+	unitWithEvenaction.moveTo(cmdMove.get(), testableBoard);
+
 	bool expectedActionsLeft = true;
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 2 };
@@ -314,9 +359,59 @@ TEST_F(UnitFixture, move1Move1SequentiallyEven)
 	EXPECT_EQ(unitWithEvenaction.getRemainingShots(), expectedShotleft);
 }
 
-/////////////////////////
-// NEXT TESTs FOR TANK DAMAGE SYSTEm
 
+TEST_F(UnitFixture, unitGunRotationClockwise)
+{
+	unit.setUnitRotation(HexVertexNumber(2));
+	unit.setGunRotation(Angle{ 91.1 });
+	HexVertexNumber expectedVertex{ 4 };
+	Angle expectedGunAngle{ 211.1 };
+	unit.setUnitRotation(HexVertexNumber(4));
+
+	EXPECT_EQ(unit.getUnitVertexRotation(), expectedVertex);
+	EXPECT_EQ(unit.getGunRotation().angle, expectedGunAngle.angle);
+}
+
+TEST_F(UnitFixture, unitGunRotationCounterclockwise)
+{
+	unit.setUnitRotation(HexVertexNumber(3));
+	unit.setGunRotation(Angle{ 10.3 });
+	HexVertexNumber expectedVertex{ 1 };
+	Angle expectedGunAngle{ 250.3 };
+	unit.setUnitRotation(HexVertexNumber(1));
+
+	EXPECT_EQ(unit.getUnitVertexRotation(), expectedVertex);
+	EXPECT_EQ(unit.getGunRotation().angle, expectedGunAngle.angle);
+}
+
+TEST_F(UnitFixture, unitGunRotationCounterMaxRotation)
+{
+	unit.setUnitRotation(HexVertexNumber(0));
+	unit.setGunRotation(Angle{ 300 });
+	HexVertexNumber expectedVertex{ 5 };
+	Angle expectedGunAngle{ 240 };
+	unit.setUnitRotation(HexVertexNumber(5));
+
+	EXPECT_EQ(unit.getUnitVertexRotation(), expectedVertex);
+	EXPECT_EQ(unit.getGunRotation().angle, expectedGunAngle.angle);
+}
+
+TEST_F(UnitFixture, unitGunRotation3Vertices)
+{
+	unit.setUnitRotation(HexVertexNumber(2));
+	unit.setGunRotation(Angle{ 329 });
+	HexVertexNumber expectedVertex{ 5 };
+	Angle expectedGunAngle{ 149 };
+	unit.setUnitRotation(HexVertexNumber(5));
+
+	EXPECT_EQ(unit.getUnitVertexRotation(), expectedVertex);
+	EXPECT_EQ(unit.getGunRotation().angle, expectedGunAngle.angle);
+}
+
+
+///////////////////////////////////////////////////////////
+//////// NEXT TESTS FOR TANK DAMAGE SYSTEM ///////////////
+/////////////////////////////////////////////////////////
 
 TEST_F(UnitFixture, TankEngineDestroyed)
 {
@@ -341,8 +436,11 @@ TEST_F(UnitFixture, TankTransmissionDestroyed)
 	Shots expectedShotleft = { 2 };
 	GameTile expectedPosition = GameTile(0, 1);
 	unit.applyDamage("TransmissionDestroyed");
-	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
-	unit.moveTo(firstActionPath);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
@@ -360,16 +458,19 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
 	TileDistance expectedMoveLeft = { 0 };
 	Shots expectedShotleft = { 0 };
 	GameTile expectedPosition = GameTile(0, 0);
-	unit.applyDamage(tank_state_system::kCommanderKilled);
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kGunnerKilled);
-	unit.applyDamage(tank_state_system::kRadiomanKilled);
-	unit.applyDamage(tank_state_system::kRadiomanKilled);
-	unit.applyDamage(tank_state_system::kRadiomanKilled);
-	unit.applyDamage(tank_state_system::kLoaderKilled);
-	std::vector<GameTile> firstActionPath{ GameTile(0,1) };
-	unit.moveTo(firstActionPath);
+	unit.applyDamage(tankDamageSystem::kCommanderKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kGunnerKilled);
+	unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+	unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+	unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+	unit.applyDamage(tankDamageSystem::kLoaderKilled);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
@@ -379,17 +480,18 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
 	EXPECT_EQ(unit.getPosition(), expectedPosition);
 }
 
+// driver killed so unit cant move this turn
 TEST_F(UnitFixture, TankGunCrewKilled)
 {
 	bool expectedShootLeft = true;
-	bool expectedMoveAction = true;
-	TileDistance expectedMoveLeft = { 5 };
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 }; 
 	Shots expectedShotleft = { 1 };
 	//unit.applyDamage(tank_state_system::kCommanderKilled);
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kGunnerKilled);
-	unit.applyDamage(tank_state_system::kLoaderKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kGunnerKilled);
+	unit.applyDamage(tankDamageSystem::kLoaderKilled);
 	//.applyDamage(tank_state_system::kLO);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
@@ -403,12 +505,12 @@ TEST_F(UnitFixture, TankGunCrewKilled)
 TEST_F(UnitFixture, TankGunCrewHalfKilled)
 {
 	bool expectedShootLeft = true;
-	bool expectedMoveAction = true;
-	TileDistance expectedMoveLeft = { 5 };
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
 	Shots expectedShotleft = { 1 };
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kDriverKilled);
-	unit.applyDamage(tank_state_system::kLoaderKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kLoaderKilled);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -423,8 +525,8 @@ TEST_F(UnitFixture, TankGun1fKilled)
 	bool expectedMoveAction = true;
 	TileDistance expectedMoveLeft = { 5 };
 	Shots expectedShotleft = { 2 };
-	unit.applyDamage(tank_state_system::kLoaderKilled);
-	unit.applyDamage(tank_state_system::kLoaderKilled);
+	unit.applyDamage(tankDamageSystem::kLoaderKilled);
+	unit.applyDamage(tankDamageSystem::kLoaderKilled);
 
 	EXPECT_EQ(unit.canMove(), expectedMoveAction);
 	EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -432,4 +534,170 @@ TEST_F(UnitFixture, TankGun1fKilled)
 	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
 	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
 }
+
+// one gyu left so tank missing one turn and then can do either move or shoot
+TEST_F(UnitFixture, TankOneGuyLeftOnlyMove)
+{
+	bool expectedActionsLeft = false;
+	bool expectedMoveAction = true;
+	TileDistance expectedMoveLeft = { 4 };
+	Shots expectedShotleft = { 0 };
+	unit.applyDamage(tankDamageSystem::kCommanderKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kGunnerKilled);
+	unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+	unit.nextTurn();
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), true);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
+// TODO not sure if we should allow to shot in this situation
+TEST_F(UnitFixture, TankImmomobileForOneTurn)
+{
+	bool expectedActionsLeft = true;
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
+	Shots expectedShotleft = { 1 };
+	unit.applyDamage(tankDamageSystem::kCommanderKilled);
+	unit.applyDamage(tankDamageSystem::kDriverKilled);
+	unit.applyDamage(tankDamageSystem::kGunnerKilled);
+	unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), true);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
+TEST_F(UnitFixture, TankImmomobileForCurrentTurn)
+{
+	bool expectedActionsLeft = false;
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
+	Shots expectedShotleft = { 0 };
+	unit.applyDamage(tankDamageSystem::kCrewShellShocked);
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedActionsLeft);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
+// unit used some activity already so damage effect will be saved for nex turn
+TEST_F(UnitFixture, TankImmomobileForNextTurn)
+{
+	bool expectedActionsLeft = false;
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
+	Shots expectedShotleft = { 0 };
+	auto cmdMove{ std::make_unique<MoveToAction>() };
+	cmdMove->m_unitID = { unit.getID() };
+	cmdMove->m_playerID = PlayerIdentifier{ 1 };
+	cmdMove->m_destination = GameTile(0, 1);
+	unit.moveTo(cmdMove.get(), testableBoard);
+	unit.applyDamage(tankDamageSystem::kCrewShellShocked);
+	unit.nextTurn();
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedActionsLeft);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
+TEST_F(UnitFixture, TankCrewKilled)
+{
+	bool expectedActionsLeft = false;
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
+	Shots expectedShotleft = { 0 };
+	unit.applyDamage(tankDamageSystem::kCrewKilled);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedActionsLeft);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+	EXPECT_EQ(unit.isAlive(PointOfView::Enemy), true); // enemy cannot see 
+	EXPECT_EQ(unit.isAlive(PointOfView::Player), false);
+}
+
+TEST_F(UnitFixture, TankExploded)
+{
+	bool expectedActionsLeft = false;
+	bool expectedMoveAction = false;
+	TileDistance expectedMoveLeft = { 0 };
+	Shots expectedShotleft = { 0 };
+	unit.applyDamage(tankDamageSystem::kExploded);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedActionsLeft);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+	EXPECT_EQ(unit.isAlive(PointOfView::Enemy), false); // enemy cannot see 
+	EXPECT_EQ(unit.isAlive(PointOfView::Player), false);
+}
+
+TEST_F(UnitFixture, TankGunDestroyed)
+{
+	bool expectedShotsLeft = false;
+	bool expectedMoveAction = true;
+	TileDistance expectedMoveLeft = { 5 };
+	Shots expectedShotleft = { 0 };
+	unit.applyDamage(tankDamageSystem::kGunDestroyed);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedShotsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedMoveAction);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+	EXPECT_EQ(unit.isAlive(PointOfView::Enemy), true);  
+	EXPECT_EQ(unit.isAlive(PointOfView::Player), true);
+}
+
+TEST_F(UnitFixture, TankTurretJammed)
+{
+	bool expectedShotsLeft = true;
+	bool expectedMoveAction = true;
+	TileDistance expectedMoveLeft = { 5 };
+	Shots expectedShotleft = { 3 };
+	Angle angleBeforeJammed{ 270.3f };
+	unit.setGunRotation(angleBeforeJammed);
+	unit.applyDamage(tankDamageSystem::kTurretJammed);
+
+	Angle angle{ 281.3f };
+	unit.setGunRotation(angle);
+	// angle will point to closest vertex of a hex
+	Angle expectedAngle{ 270.f };
+	EXPECT_EQ(unit.getGunRotation().angle, expectedAngle.angle);
+
+	EXPECT_EQ(unit.canMove(), expectedMoveAction);
+	EXPECT_EQ(unit.canShoot(), expectedShotsLeft);
+	EXPECT_EQ(unit.hasActionLeft(), expectedMoveAction);
+	EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+	EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
 
