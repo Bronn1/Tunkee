@@ -6,6 +6,7 @@
 #include "src/core/game_rules.h"
 #include "src/core/game_command.h"
 #include "src/core/data_types.h"
+#include "src/core/game_board.h"
 
 #include <ranges>
 #include <memory>
@@ -16,6 +17,8 @@ using UnitManagerPtr = std::unique_ptr<core::UnitManager>;
 
 class GameBasicRulesFixture : public ::testing::Test {
 public:
+    std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
+    core::GameBoard testableBoard{ testTypes, 40,  40 };
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
     std::unique_ptr<Unit> unitFirst{ std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{7}, Shots{3}) };
     std::unique_ptr<Unit> unitSecond{ std::make_unique<TankUnit>(UnitIdentifier{ 2 }, TileDistance{7}, Shots{3}) };
@@ -94,8 +97,12 @@ TEST_F(GameBasicRulesFixture, selectNewUnit) {
 TEST_F(GameBasicRulesFixture, disallowNewUnitSelectionAfterAnotherUsed) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1} };
-    unitPtrFirst->moveTo(path);
+
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 1);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto selectAnotherUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectAnotherUnitQuery.get());
@@ -150,6 +157,7 @@ TEST_F(GameBasicRulesFixture, diselectSecondUnit) {
     EXPECT_EQ(resultUnitId, expectedUnitId) << "Incorrect selected unit ID  \n";
 }
 
+// we cant diselect unit after performing move
 TEST_F(GameBasicRulesFixture, disallowDiselectSecondUnit) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
@@ -159,8 +167,11 @@ TEST_F(GameBasicRulesFixture, disallowDiselectSecondUnit) {
 
     auto selectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectSecondUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrSecond->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrSecond->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrSecond->moveTo(cmdMove.get(), testableBoard);
 
     auto diselectSecondUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     auto result = m_gameRules.selectUnit(diselectSecondUnitQuery.get());
@@ -174,8 +185,11 @@ TEST_F(GameBasicRulesFixture, disallowDiselectSecondUnit) {
 TEST_F(GameBasicRulesFixture, switchFirstPLayerPhase) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -198,8 +212,11 @@ TEST_F(GameBasicRulesFixture, switchFirstPLayerPhase) {
 TEST_F(GameBasicRulesFixture, endOFTurn) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -227,8 +244,11 @@ TEST_F(GameBasicRulesFixture, endOFTurn) {
 TEST_F(GameBasicRulesFixture, switchSecondPLayerPhase) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -252,16 +272,20 @@ TEST_F(GameBasicRulesFixture, switchSecondPLayerPhase) {
 TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterPhaseSwitch) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
     m_gameRules.nextActionPhase(finishActionPhase.get());
     auto selectUnitQuery2{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{3}) };
     m_gameRules.selectUnit(selectUnitQuery2.get());
-    std::vector<core::GameTile> path2{ {8,4}, {8,5} };
-    unitPtrThird->moveTo(path2);
+    cmdMove->m_unitID = { unitPtrThird->getID() };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrThird->moveTo(cmdMove.get(), testableBoard);
 
     auto resultPlayer = m_gameRules.getCurrentPlayer();
     auto expectedPlayer = PlayerIdentifier{ 2 };
@@ -275,8 +299,11 @@ TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterPhaseSwitch) {
 TEST_F(GameBasicRulesFixture, disallowSelectUnitAfterPhaseSwitch) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -291,8 +318,11 @@ TEST_F(GameBasicRulesFixture, disallowSelectUnitAfterPhaseSwitch) {
 TEST_F(GameBasicRulesFixture, disallowSelectUnitWithWrongPlayerId) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -308,8 +338,11 @@ TEST_F(GameBasicRulesFixture, disallowSelectUnitWithWrongPlayerId) {
 TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterTwoPhaseSwitch) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };
@@ -318,8 +351,8 @@ TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterTwoPhaseSwitch) {
     m_gameRules.nextActionPhase(finishActionPhase.get());
     auto selectUnitQuery2{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{2}) };
     m_gameRules.selectUnit(selectUnitQuery2.get());
-    std::vector<core::GameTile> path2{ {8,4}, {8,5} };
-    unitPtrThird->moveTo(path2);
+    cmdMove->m_destination = GameTile(8, 5);
+    unitPtrThird->moveTo(cmdMove.get(), testableBoard);
 
     auto resultPlayer = m_gameRules.getCurrentPlayer();
     auto expectedPlayer = PlayerIdentifier{ 1 };
@@ -333,8 +366,11 @@ TEST_F(GameBasicRulesFixture, TryToSelectUnitAfterTwoPhaseSwitch) {
 TEST_F(GameBasicRulesFixture, TryToSelectUsedUnit) {
     auto selectUnitQuery{ std::make_unique<SelectUnitQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };
     m_gameRules.selectUnit(selectUnitQuery.get());
-    std::vector<core::GameTile> path{ {0,1}, {0,2}, {0,3} };
-    unitPtrFirst->moveTo(path);
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unitPtrFirst->getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 3);
+    unitPtrFirst->moveTo(cmdMove.get(), testableBoard);
 
     auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
     finishActionPhase->m_playerID = PlayerIdentifier{ 1 };

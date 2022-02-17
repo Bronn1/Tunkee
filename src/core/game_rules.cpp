@@ -11,7 +11,7 @@ bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
 		auto unitPtr = m_unitManager->getUnitIfExist(m_selectedUnit);
 		if (unitPtr)
 		{
-			bool canMove = unitPtr.value()->canMove();
+			bool canMove = unitPtr.value()->canMove();// TODO move all unit checks to unit, here only game rules checks
 			m_lastError = (canMove) ? "" : "Unit doesn't have any activity left!";
 			return canMove;
 		}
@@ -64,8 +64,8 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 		return m_emptyUnitId;
 
 	auto queryUnit = m_unitManager->getUnitIfExist(selectUnitQuery->m_unitID);
-	if (!queryUnit || queryUnit.value()->getOwnerID() != m_currentPlayer || 
-		!queryUnit.value()->isUnitHaveFullActionState())
+	if (!queryUnit || (*queryUnit)->getOwnerID() != m_currentPlayer || 
+		!bool(queryUnit.value()->isUnitHaveFullActionState()))
 		return m_selectedUnit;
 
 	// if somebody trying to cheat
@@ -85,7 +85,7 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
 	auto unitPtr = m_unitManager->getUnitIfExist(m_selectedUnit);
 	if (unitPtr)
 	{
-		bool isUnitFull = unitPtr.value()->isUnitHaveFullActionState();
+		bool isUnitFull = bool((*unitPtr)->isUnitHaveFullActionState());
 
 		if (m_selectedUnit != selectUnitQuery->m_unitID) {
 			m_selectedUnit = (isUnitFull) ? selectUnitQuery->m_unitID : m_selectedUnit;
@@ -130,6 +130,7 @@ bool core::GameRulesBasic::isShootActionAllowed(const ShootAction& shootAction)
 		
 		if (sourceUnit && targetUnit && (*targetUnit)->getOwnerID() != m_currentPlayer)
 		{
+			// TODO move all unit checks to unit, here only game rules checks
 			bool canShoot = sourceUnit.value()->canShoot();
 			m_lastError = (canShoot) ? "" : "Unit doesn't have activity to perform shooting!";
 			return canShoot;

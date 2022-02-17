@@ -500,7 +500,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt0_2) {
                                                GameTile(0,5), GameTile(1,4), GameTile(2,3), GameTile(3,2) };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 2 });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 2 });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
@@ -516,7 +516,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt6_1) {
                                                GameTile(1,2), GameTile(1,3), GameTile(1,4), GameTile(1,5) , GameTile(1,6) };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 4 });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 4 });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
@@ -530,7 +530,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt3_1) {
                                                GameTile(0,4), GameTile(1,4), GameTile(2,4), GameTile(3,4) };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 3  });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{ 3 }, HexVertexNumber{ 3  });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
@@ -545,7 +545,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt0_3) {
                                                GameTile(4,0), GameTile(4,1), GameTile(4,2), GameTile(4,3), };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 4 }, HexVertexNumber{ 1 });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{ 4 }, HexVertexNumber{ 1 });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
@@ -560,7 +560,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt1_4) {
                                                GameTile(1,0), GameTile(2,0), GameTile(3,0), GameTile(4,0), GameTile(5,0), };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 0 });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{ 5 }, HexVertexNumber{ 0 });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";
@@ -574,7 +574,7 @@ TEST_F(pathfindingFixture, getLineofSightWithoutBarriersAt4_3) {
                                                GameTile(1,3), GameTile(2,2), GameTile(3,1), GameTile(4,0) };
 
 
-    auto result = pathfinding::getLineOfSightWithoutBarriers(testableBoard, source, TileDistance{3 }, HexVertexNumber{ 5 });
+    auto result = pathfinding::getLineOfSightWithoutObstacles(testableBoard, source, TileDistance{3 }, HexVertexNumber{ 5 });
     int size = result.size();
 
     ASSERT_EQ(result.size(), expected.size()) << " result and expected should have same length";

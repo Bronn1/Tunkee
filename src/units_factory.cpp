@@ -40,7 +40,7 @@ UnitModelPtr TanksFactory::createTank(const core::GameTile& pos, const Angle rot
     basicTank->setPosition(pos);
     basicTank->setOwner(playerID);
     basicTank->setGunRotation(rotation);
-    basicTank->setUnitVertexRotation(vertexRotation);
+    basicTank->setBodyRotation(vertexRotation);
 
     return basicTank;
 }

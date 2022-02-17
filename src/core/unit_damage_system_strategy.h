@@ -17,6 +17,7 @@ namespace core
 
     using PeopleCount = int;
     using DamageType = std::string_view;
+
     struct Crew
     {
         explicit operator bool() {
@@ -41,47 +42,66 @@ namespace core
             Normal,
             Ideal
         };
+        enum class ActionEffectAfterDamage
+        {
+            None,
+            MissAction
+        };
         UnitPart() = default;
-        UnitPart(Crew crewEffectAfterDamage) : m_crewEffectAfterDamage(crewEffectAfterDamage) {}
+        UnitPart(Crew crewEffectAfterDamage, ActionEffectAfterDamage effect = ActionEffectAfterDamage::None) : m_crewEffectAfterDamage(crewEffectAfterDamage), m_actionEffectOnDamage(effect){}
         void applyDamage() { m_state = State::Damaged; }
-        Crew getCrewEffect() const;
+        Crew getAndResetCrewEffect() const;
         State getState() const { return m_state; }
         void setState(State state) { m_state = state; }
+        bool isVisibleForEnemy() const { return m_isVisibleForEnemy; }
+        void setActionMissAccordingToStatus(ActionStatus actionStatus);
+        bool isMissAction() const { return m_missAction; }
+        void resetMissActionOnNextTurn();
     private:
-        mutable Crew  m_crewEffectAfterDamage{ 0, 0 };
+        mutable Crew  m_crewEffectAfterDamage{ 0, 0 }; // applies only once 
         bool m_isVisibleForEnemy{ false };
-        bool m_missingNextTurn{ false };
+        bool m_missAction{ false };
+        bool m_missActionOnNextTurn{ false };
+        ActionEffectAfterDamage m_actionEffectOnDamage{ ActionEffectAfterDamage::None };
         State m_state{ State::Normal };
 
     };
 
-    template<typename T>
-    concept UnitStateSystem = requires(T type)
-    {
-        type.applyDamage(std::declval< const std::string_view>);
-    };
-
+    //template<typename T>
+    //concept UnitStateSystem = requires(T type)
+    //{
+     //   type.applyDamage(std::declval< const std::string_view>);
+    //};
     //template<typename T> requires UnitStateSystem<T>
 
+    enum  class PointOfView{
+        Player,
+        Enemy
+    };
+    enum class DamageSystemStrategies {
+        TankDamageSystem
+    };
     /**
-     * @brief Class represents interface to get internal unit state . Unit parts in this class or derived classes can
+     * @brief Class represents interface to get internal unit  system of damage. Unit parts in this class or derived classes can
      * be damaged or have some special states which may affect gaming process(moving, shooting, action states, etc). 
      * Because different type of units can differ sevirely and damage system is a big part of the game so any type of 
-     * unit can have this interface as a base class and implement his own parts, states, crew number and etc.
+     * unit can implement his owm strategy.
     */
-    class UnitStateInterface
+    class IDamageSystemStrategy
     {
     public:
-        virtual void applyDamage(const std::string_view damageType) = 0;
+        virtual void applyDamage(const std::string_view damageType, ActionStatus actionStatus) = 0;
         virtual TileDistance getMoveDistanceWithFine(const TileDistance movement) const = 0;
         virtual Shots  getRateOfFireWithFine(const Shots rateOfFire) const = 0;
         virtual int    amountOfActionCanDo() const = 0;
-        virtual bool   canMove() const = 0;
-        virtual bool   canShot() const = 0;
-        virtual bool   isAlive() const = 0;
-        virtual ~UnitStateInterface() = default;
-        virtual UnitPart::State getScopeState() const = 0;//{ return  m_scope.m_state; }
-        virtual void setIdealScope() = 0;//{ m_scope.m_state = UnitPart::State::Ideal; }
+        virtual bool   isMovingSystemsAlive() const = 0;
+        virtual bool   isGunsAlive() const = 0;
+        virtual bool   isGunsRotatable() const = 0;
+        virtual bool   isAlive(PointOfView pointOfView) const = 0;
+        virtual void   nextTurn() = 0;
+        virtual ~IDamageSystemStrategy() = default;
+        virtual UnitPart::State getScopeState() const = 0;
+        virtual void setDamageState(const DamageType, const  UnitPart::State  state) = 0;
         void setCrew(const Crew& crew) { m_crew = crew; }
     protected:
         Crew m_crew{0, 0};
@@ -90,11 +110,12 @@ namespace core
 }
 
 /**
- * @brief here will be specific constants for tank and tank state(or condition)
+ * @brief here will be specific constants for tank and tank damage system strategy
 */
-namespace tank_state_system 
+namespace tankDamageSystem 
 {
     using namespace core;
+    // this names also are names in tables of damage probabilities
     constexpr std::string_view kBurning = "Burning";
     constexpr std::string_view kExploded = "Exploded";
     constexpr std::string_view kCommanderKilled = "CommanderKilled";
@@ -119,23 +140,30 @@ namespace tank_state_system
                                                                    kGunDestroyed, kScopeDamaged ,
                                                                    kCrewKilled, kTrackDamaged, kCrewShellShocked, kRicochet };
 
-    class TankState : public core::UnitStateInterface
+    class TankDamageSystemStrategy final  : public core::IDamageSystemStrategy
     {
     public:
         using enum core::UnitPart::State;
-        void applyDamage(const std::string_view damageType) override;
-        TankState(const core::Crew& crew);
+        void applyDamage(const std::string_view damageType, ActionStatus actionStatus) override;
+        TankDamageSystemStrategy(const core::Crew& crew);
         TileDistance getMoveDistanceWithFine(const TileDistance movement) const override;
         Shots  getRateOfFireWithFine(const Shots rateOfFire) const override;
         int    amountOfActionCanDo() const override;
-        bool   canMove() const override;
-        bool   canShot() const override;
-        bool   isAlive() const override { return m_isAlive; }
+        bool   isMovingSystemsAlive() const override;
+        bool   isGunsAlive() const override;
+        bool   isGunsRotatable() const { return m_damageableParts.at(kTurretJammed).getState() != Damaged; }
+        bool   isAlive(PointOfView pointOfView) const override;
         UnitPart::State getScopeState() const override { return m_damageableParts.at(kScopeDamaged).getState(); }
-        void setIdealScope() override { m_damageableParts.at(kScopeDamaged).setState(UnitPart::State::Ideal); }
+        void setDamageState(const DamageType damageType, const  UnitPart::State  state) override;
+        void   nextTurn();
     private:
+        void checkAliveSystemsAfterDamage();
         std::unordered_map< DamageType, UnitPart> m_damageableParts{};
         bool m_isAlive{ true };
+        /**
+         * @brief With fog of war enemy cannot see some fatal damage(for example crew killed )
+        */
+        bool m_isAliveForEnemy{ true };
     };
 }
 

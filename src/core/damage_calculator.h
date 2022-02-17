@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 #include <random>
+#include <set>
 
 
 
@@ -34,15 +35,18 @@ namespace core {
 	{
 	public:
 		void initProbabilityTables();
-		UnitShootInfo shot( Unit* source,  Unit* target, const std::vector<GameTile>& lineOfFire) const;
+		UnitStateInfo shot( Unit* source,  Unit* target, const std::vector<GameTile>& lineOfFire);
 		HitThreshold calculateHitThreshold(const Unit* sourceUnit, const Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const;
 		bool isTargerReachable(const Unit* sourceUnit, const Unit* targetUnit, const std::vector<GameTile>& lineOfFire) const;
 		int generateUniformRandNumber(const int rangeFrom, const int rangeTo) const;
 		inline int rollDiceWithFaces(int amountOfFaces = kMaxHitThreshold) const  { return generateUniformRandNumber(kMinHitThreshold, amountOfFaces); }
+		std::vector<UnitStateInfo> nextTurn();
+		void saveTempDamage(Unit* targetUnit, const DamageType damageType);
 	private:
 		
 		/** @brief holds Probability tables of damage based on unit type */
 		std::unordered_map<std::type_index, DamageProbabilityTable> m_damageTables;
+		std::set<Unit*> m_burningUnits{};
 		HitThreshold m_defaultHitThreshold{ 2 };
 		mutable std::mt19937 m_generator{ (std::random_device())() };
 	};

@@ -1,7 +1,7 @@
 #include "entity_view.h"
 
 
-void graphics::EntityView::setVelocity(sf::Vector2f velocity)
+void graphics::EntityView::setVelocity(const sf::Vector2f& velocity)
 {
 	m_velocity = velocity;
 }

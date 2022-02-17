@@ -13,19 +13,20 @@ controllers::GameController::GameController(core::GameEngine* engine, const Play
 
 void controllers::GameController::moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const
 {
-	auto cmdMove{ std::make_shared<MoveToAction>() };
+	auto cmdMove{ std::make_unique<MoveToAction>() };
 	cmdMove->m_unitID = { unitID };
 	cmdMove->m_playerID = m_player;
 	cmdMove->m_destination = dest;
 	m_gameEngine->moveUnit(cmdMove.get());
 }
 
-void controllers::GameController::onChangeUnitRotation(const UnitIdentifier unitID, const Angle rotation, const SetUnitRotation::Type rotationType)
+void controllers::GameController::onChangeUnitRotation(const UnitIdentifier unitID, const Angle& rotation, const RotateUnitActiom::Type rotationType)
 {
-	auto rotateAction{ std::make_unique<SetUnitRotation>(rotation, rotationType) };
+	auto rotateAction{ std::make_unique<RotateUnitActiom>(rotation, rotationType) };
 	rotateAction->m_unitID = { unitID };
 	rotateAction->m_playerID = m_player;
-	m_gameEngine->setRotation(rotateAction.get());
+	// TODO maybe add replace all type of rotation to this function
+	m_gameEngine->rotateUnitGun(rotateAction.get());
 }
 
 void controllers::GameController::onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const
@@ -43,7 +44,7 @@ void controllers::GameController::onUnitClicked(const UnitIdentifier selectedUni
 
 void controllers::GameController::finishSetupStage(PlayerIdentifier playerId)
 {
-	auto finishSetupStageAction{ std::make_shared<FinishSetupStage>() };
+	auto finishSetupStageAction{ std::make_unique<FinishSetupStage>() };
 	finishSetupStageAction->m_playerID = playerId;
 	m_gameEngine->finishSetupStage(finishSetupStageAction.get()); 
 	for (auto& id : m_gameEngine->getUnitIDsForPlayer(m_player))
@@ -52,7 +53,7 @@ void controllers::GameController::finishSetupStage(PlayerIdentifier playerId)
 
 void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
 {
-	auto finishActionPhase{ std::make_shared<FinishActionPhase>() };
+	auto finishActionPhase{ std::make_unique<FinishActionPhase>() };
 	finishActionPhase->m_playerID = playerId;
 	m_gameEngine->finishActionPhase(finishActionPhase.get());
 	

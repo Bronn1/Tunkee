@@ -46,8 +46,8 @@ namespace core {
 		std::vector<UnitIdentifier> getActiveUnitsForPlayer(const PlayerIdentifier playerId) const;
 		bool hasActiveUnits(const PlayerIdentifier& playerId) const;
 		int countActiveUnitsOwnedBy(const PlayerIdentifier& playerId) const;
-		void calculateAliveUnitsOnNextTurn();
-		void setUnitsActions(const ActionStateStatus state);
+		void passNextTurnToUnits();
+		void setUnitsActions(const ActionStatus state);
 		std::vector<UnitIdentifier> getUnitIDs() const;
 		std::vector<UnitIdentifier> getUnitIDsForPlayer(const PlayerIdentifier playerId) const;
 		UnitIdentifier addUnit(UnitPtr unit);

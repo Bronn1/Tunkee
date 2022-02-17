@@ -3,7 +3,7 @@
 //
 
 #include "tank_view.h"
-#include "src/core/unit_state.h"
+#include "src/core/unit_damage_system_strategy.h"
 
 #include <numbers>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -118,21 +118,21 @@ sf::FloatRect graphics::UnitView::getBoundingRect() const
 	return getWorldTransform().transformRect(m_bodySprite.getGlobalBounds());
 }
 
-Angle graphics::UnitView::rotateGunTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
+Angle graphics::UnitView::calculateGunRotation(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) const
 {
 	float dx = curPoint.x - targetPoint.x;
 	float dy = curPoint.y - targetPoint.y;
-
-	float turretTextureOffset = 90;
-	float rotation = ((atan2(dy, dx)) * 180.f / std::numbers::pi) + (360.f - getRotation());
-	m_turretSprite.setRotation(rotation);
-	std::cout << Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) }.angle << " gyu angle\n";
-	return  Angle{ m_turretSprite.getRotation() - (360.f - getRotation()) };
+	float rotation = ((atan2(dy, dx)) * 180.f / std::numbers::pi);
+	
+	return  Angle{ rotation };
 }
 
-sf::Vector2f graphics::UnitView::getGunPeakPosition()
+void graphics::UnitView::setGunRotation(const Angle& gunRotation)
 {
-	return sf::Vector2f();
+	// here we also add texture offset so turret peak will point to correct direction: 360.f - getRotation()
+	float turretTextureOffset = 360.f - getRotation();
+	m_turretSprite.setRotation(gunRotation.angle + turretTextureOffset);
+	std::cout << Angle{ m_turretSprite.getRotation() - turretTextureOffset }.angle << " gyu angle\n";
 }
 
 void graphics::UnitView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint)
@@ -142,8 +142,8 @@ void graphics::UnitView::rotateTo(const sf::Vector2f& curPoint, const sf::Vector
 
 	float rotation = ((atan2(dy, dx)) * 180 / std::numbers::pi);
 	setRotation(rotation);
-	float turretTextureOffset = 0;
-	m_turretSprite.setRotation(turretTextureOffset);
+	//float turretTextureOffset = 0;
+	//m_turretSprite.setRotation(turretTextureOffset);
 }
 
 void graphics::UnitView::markAsSelected()
@@ -173,13 +173,13 @@ void graphics::UnitView::showTooltip(const sf::Vector2f& mouse_pos)
 inline void graphics::UnitView::showDamage(std::string_view damageType)
 {
 	// get rid of if else if blocks, come up with smth more brilliant(needed first full understanding how many animation we'll have)
-	if (damageType == tank_state_system::kExploded)
+	if (damageType == tankDamageSystem::kExploded)
 	{
 		m_isDestroyed = true;
 		m_buriningAnimation.setScale({ 0.9f, 0.9f });
 		m_explosion.startAnimation();
 	}
-	if (damageType == tank_state_system::kBurning)
+	if (damageType == tankDamageSystem::kBurning)
 		m_buriningAnimation.startAnimation();
 }
 
@@ -196,6 +196,12 @@ graphics::SceneNodePtr graphics::UnitView::shot(SceneNode* target, std::string_v
 	projectile->setTargetUnit(target);
 
 	return projectile;
+}
+
+void graphics::UnitView::resetUnitState(std::string_view damageType)
+{
+	if (damageType == tankDamageSystem::kBurning)
+		m_buriningAnimation.stopAnimation();
 }
 
 void graphics::UnitView::setMovementState(std::stack<sf::Vector2f> path)

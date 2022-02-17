@@ -19,10 +19,8 @@ namespace core {
 		GameBoard() = default;
 		GameBoard(std::vector<GameTileType> tiles, int width, int height);
 
-		MoveAreaInfo getMoveAreaForUnit(Unit *unit);
-		std::vector<GameTile> moveTo(const MoveToAction* moveToCmd, Unit* unit);
-		void rotateToDestination(const MoveToAction* moveToCmd, Unit* unit);
-		std::vector<GameTile> getStraightLine(const GameTile & from, const GameTile & to);
+		std::vector<GameTile> getStraightLine(const GameTile & from, const GameTile & to) const;
+		std::vector<GameTile> getLineOfSightWithoutObstacles(const Unit* unit, const GameTile& dest) const;
 		
 		inline GameTile getTile(const  GameTile& tile) const {
 			if (m_tiles.contains(tile)) return m_tiles.at(tile); 

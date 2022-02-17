@@ -34,53 +34,53 @@ std::string_view core::DamageProbabilityTable::getDestroyedPart(const ThreatLeve
 	if (auto resIt = std::ranges::find_if(m_damageProbabilities.at(lvl), ifRolledValueBetweenPrevAndCurrent); resIt != end(m_damageProbabilities.at(lvl)))
 		return (*resIt).type;
 	else
-		return tank_state_system::kRicochet;
+		return tankDamageSystem::kRicochet;
 }
 
 void core::DamageProbabilityTable::fillTankTableWithoutFile()
 {
 	m_damageProbabilities[ThreatLevel{ 0 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 2}, Probability{tank_state_system::kBurning, 3}, Probability{tank_state_system::kTrackDamaged, 6}, Probability{tank_state_system::kDriverKilled, 3},
-		 Probability{tank_state_system::kCommanderKilled, 3}, Probability{tank_state_system::kLoaderKilled, 1}, Probability{tank_state_system::kGunnerKilled, 3}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 2}, Probability{tank_state_system::kEngineDestroyed, 1}, Probability{tank_state_system::kTurretJammed, 4}, Probability{tank_state_system::kGunDestroyed, 4},
-		 Probability{tank_state_system::kScopeDamaged, 3}, Probability{tank_state_system::kCrewKilled, 2}, Probability{tank_state_system::kCrewShellShocked, 2}, Probability{tank_state_system::kRicochet, 15} };
+		 Probability{tankDamageSystem::kExploded, 2}, Probability{tankDamageSystem::kBurning, 3}, Probability{tankDamageSystem::kTrackDamaged, 6}, Probability{tankDamageSystem::kDriverKilled, 3},
+		 Probability{tankDamageSystem::kCommanderKilled, 3}, Probability{tankDamageSystem::kLoaderKilled, 1}, Probability{tankDamageSystem::kGunnerKilled, 3}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 2}, Probability{tankDamageSystem::kEngineDestroyed, 1}, Probability{tankDamageSystem::kTurretJammed, 4}, Probability{tankDamageSystem::kGunDestroyed, 4},
+		 Probability{tankDamageSystem::kScopeDamaged, 3}, Probability{tankDamageSystem::kCrewKilled, 2}, Probability{tankDamageSystem::kCrewShellShocked, 2}, Probability{tankDamageSystem::kRicochet, 15} };
 
 	m_damageProbabilities[ThreatLevel{ -3 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 0}, Probability{tank_state_system::kBurning, 0}, Probability{tank_state_system::kTrackDamaged, 9}, Probability{tank_state_system::kDriverKilled, 1},
-		 Probability{tank_state_system::kCommanderKilled, 2}, Probability{tank_state_system::kLoaderKilled, 0}, Probability{tank_state_system::kGunnerKilled, 1}, Probability{tank_state_system::kRadiomanKilled, 1},
-		 Probability{tank_state_system::kTransmissionDestroyed, 0}, Probability{tank_state_system::kEngineDestroyed, 0}, Probability{tank_state_system::kTurretJammed, 6}, Probability{tank_state_system::kGunDestroyed, 1},
-		 Probability{tank_state_system::kScopeDamaged, 7}, Probability{tank_state_system::kCrewKilled, 0}, Probability{tank_state_system::kCrewShellShocked, 0}, Probability{tank_state_system::kRicochet, 24} };
+		 Probability{tankDamageSystem::kExploded, 0}, Probability{tankDamageSystem::kBurning, 0}, Probability{tankDamageSystem::kTrackDamaged, 9}, Probability{tankDamageSystem::kDriverKilled, 1},
+		 Probability{tankDamageSystem::kCommanderKilled, 2}, Probability{tankDamageSystem::kLoaderKilled, 0}, Probability{tankDamageSystem::kGunnerKilled, 1}, Probability{tankDamageSystem::kRadiomanKilled, 1},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 0}, Probability{tankDamageSystem::kEngineDestroyed, 0}, Probability{tankDamageSystem::kTurretJammed, 6}, Probability{tankDamageSystem::kGunDestroyed, 1},
+		 Probability{tankDamageSystem::kScopeDamaged, 7}, Probability{tankDamageSystem::kCrewKilled, 0}, Probability{tankDamageSystem::kCrewShellShocked, 0}, Probability{tankDamageSystem::kRicochet, 24} };
 
 	m_damageProbabilities[ThreatLevel{ -2 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 0}, Probability{tank_state_system::kBurning, 1}, Probability{tank_state_system::kTrackDamaged, 8}, Probability{tank_state_system::kDriverKilled, 2},
-		 Probability{tank_state_system::kCommanderKilled, 2}, Probability{tank_state_system::kLoaderKilled, 0}, Probability{tank_state_system::kGunnerKilled, 2}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 2}, Probability{tank_state_system::kEngineDestroyed, 0}, Probability{tank_state_system::kTurretJammed, 5}, Probability{tank_state_system::kGunDestroyed, 2},
-		 Probability{tank_state_system::kScopeDamaged, 6}, Probability{tank_state_system::kCrewKilled, 0}, Probability{tank_state_system::kCrewShellShocked, 0}, Probability{tank_state_system::kRicochet, 22} };
+		 Probability{tankDamageSystem::kExploded, 0}, Probability{tankDamageSystem::kBurning, 1}, Probability{tankDamageSystem::kTrackDamaged, 8}, Probability{tankDamageSystem::kDriverKilled, 2},
+		 Probability{tankDamageSystem::kCommanderKilled, 2}, Probability{tankDamageSystem::kLoaderKilled, 0}, Probability{tankDamageSystem::kGunnerKilled, 2}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 2}, Probability{tankDamageSystem::kEngineDestroyed, 0}, Probability{tankDamageSystem::kTurretJammed, 5}, Probability{tankDamageSystem::kGunDestroyed, 2},
+		 Probability{tankDamageSystem::kScopeDamaged, 6}, Probability{tankDamageSystem::kCrewKilled, 0}, Probability{tankDamageSystem::kCrewShellShocked, 0}, Probability{tankDamageSystem::kRicochet, 22} };
 
 	m_damageProbabilities[ThreatLevel{ -1 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 1}, Probability{tank_state_system::kBurning, 2}, Probability{tank_state_system::kTrackDamaged, 7}, Probability{tank_state_system::kDriverKilled, 2},
-		 Probability{tank_state_system::kCommanderKilled, 3}, Probability{tank_state_system::kLoaderKilled, 1}, Probability{tank_state_system::kGunnerKilled, 2}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 2}, Probability{tank_state_system::kEngineDestroyed, 0}, Probability{tank_state_system::kTurretJammed, 4}, Probability{tank_state_system::kGunDestroyed, 3},
-		 Probability{tank_state_system::kScopeDamaged, 4}, Probability{tank_state_system::kCrewKilled, 4}, Probability{tank_state_system::kCrewShellShocked, 1}, Probability{tank_state_system::kRicochet, 19} };
+		 Probability{tankDamageSystem::kExploded, 1}, Probability{tankDamageSystem::kBurning, 2}, Probability{tankDamageSystem::kTrackDamaged, 7}, Probability{tankDamageSystem::kDriverKilled, 2},
+		 Probability{tankDamageSystem::kCommanderKilled, 3}, Probability{tankDamageSystem::kLoaderKilled, 1}, Probability{tankDamageSystem::kGunnerKilled, 2}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 2}, Probability{tankDamageSystem::kEngineDestroyed, 0}, Probability{tankDamageSystem::kTurretJammed, 4}, Probability{tankDamageSystem::kGunDestroyed, 3},
+		 Probability{tankDamageSystem::kScopeDamaged, 4}, Probability{tankDamageSystem::kCrewKilled, 4}, Probability{tankDamageSystem::kCrewShellShocked, 1}, Probability{tankDamageSystem::kRicochet, 19} };
 
 	m_damageProbabilities[ThreatLevel{ 1 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 3}, Probability{tank_state_system::kBurning, 4}, Probability{tank_state_system::kTrackDamaged, 5}, Probability{tank_state_system::kDriverKilled, 3},
-		 Probability{tank_state_system::kCommanderKilled, 4}, Probability{tank_state_system::kLoaderKilled, 2}, Probability{tank_state_system::kGunnerKilled, 3}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 3}, Probability{tank_state_system::kEngineDestroyed, 2}, Probability{tank_state_system::kTurretJammed, 2}, Probability{tank_state_system::kGunDestroyed, 3},
-		 Probability{tank_state_system::kScopeDamaged, 2}, Probability{tank_state_system::kCrewKilled, 3}, Probability{tank_state_system::kCrewShellShocked, 3}, Probability{tank_state_system::kRicochet, 11} };
+		 Probability{tankDamageSystem::kExploded, 3}, Probability{tankDamageSystem::kBurning, 4}, Probability{tankDamageSystem::kTrackDamaged, 5}, Probability{tankDamageSystem::kDriverKilled, 3},
+		 Probability{tankDamageSystem::kCommanderKilled, 4}, Probability{tankDamageSystem::kLoaderKilled, 2}, Probability{tankDamageSystem::kGunnerKilled, 3}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 3}, Probability{tankDamageSystem::kEngineDestroyed, 2}, Probability{tankDamageSystem::kTurretJammed, 2}, Probability{tankDamageSystem::kGunDestroyed, 3},
+		 Probability{tankDamageSystem::kScopeDamaged, 2}, Probability{tankDamageSystem::kCrewKilled, 3}, Probability{tankDamageSystem::kCrewShellShocked, 3}, Probability{tankDamageSystem::kRicochet, 11} };
 
 	m_damageProbabilities[ThreatLevel{ 2 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 4}, Probability{tank_state_system::kBurning, 5}, Probability{tank_state_system::kTrackDamaged, 4}, Probability{tank_state_system::kDriverKilled, 4},
-		 Probability{tank_state_system::kCommanderKilled, 4}, Probability{tank_state_system::kLoaderKilled, 2}, Probability{tank_state_system::kGunnerKilled, 3}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 3}, Probability{tank_state_system::kEngineDestroyed, 3}, Probability{tank_state_system::kTurretJammed, 1}, Probability{tank_state_system::kGunDestroyed, 2},
-		 Probability{tank_state_system::kScopeDamaged, 2}, Probability{tank_state_system::kCrewKilled, 4}, Probability{tank_state_system::kCrewShellShocked, 4}, Probability{tank_state_system::kRicochet, 8} };
+		 Probability{tankDamageSystem::kExploded, 4}, Probability{tankDamageSystem::kBurning, 5}, Probability{tankDamageSystem::kTrackDamaged, 4}, Probability{tankDamageSystem::kDriverKilled, 4},
+		 Probability{tankDamageSystem::kCommanderKilled, 4}, Probability{tankDamageSystem::kLoaderKilled, 2}, Probability{tankDamageSystem::kGunnerKilled, 3}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 3}, Probability{tankDamageSystem::kEngineDestroyed, 3}, Probability{tankDamageSystem::kTurretJammed, 1}, Probability{tankDamageSystem::kGunDestroyed, 2},
+		 Probability{tankDamageSystem::kScopeDamaged, 2}, Probability{tankDamageSystem::kCrewKilled, 4}, Probability{tankDamageSystem::kCrewShellShocked, 4}, Probability{tankDamageSystem::kRicochet, 8} };
 
 
 	m_damageProbabilities[ThreatLevel{ 3 }] = std::vector{
-		 Probability{tank_state_system::kExploded, 5}, Probability{tank_state_system::kBurning, 6}, Probability{tank_state_system::kTrackDamaged, 3}, Probability{tank_state_system::kDriverKilled, 4},
-		 Probability{tank_state_system::kCommanderKilled, 5}, Probability{tank_state_system::kLoaderKilled, 3}, Probability{tank_state_system::kGunnerKilled, 3}, Probability{tank_state_system::kRadiomanKilled, 2},
-		 Probability{tank_state_system::kTransmissionDestroyed, 3}, Probability{tank_state_system::kEngineDestroyed, 3}, Probability{tank_state_system::kTurretJammed, 0}, Probability{tank_state_system::kGunDestroyed, 1},
-		 Probability{tank_state_system::kScopeDamaged, 1}, Probability{tank_state_system::kCrewKilled, 5}, Probability{tank_state_system::kCrewShellShocked, 5}, Probability{tank_state_system::kRicochet, 6} };
+		 Probability{tankDamageSystem::kExploded, 5}, Probability{tankDamageSystem::kBurning, 6}, Probability{tankDamageSystem::kTrackDamaged, 3}, Probability{tankDamageSystem::kDriverKilled, 4},
+		 Probability{tankDamageSystem::kCommanderKilled, 5}, Probability{tankDamageSystem::kLoaderKilled, 3}, Probability{tankDamageSystem::kGunnerKilled, 3}, Probability{tankDamageSystem::kRadiomanKilled, 2},
+		 Probability{tankDamageSystem::kTransmissionDestroyed, 3}, Probability{tankDamageSystem::kEngineDestroyed, 3}, Probability{tankDamageSystem::kTurretJammed, 0}, Probability{tankDamageSystem::kGunDestroyed, 1},
+		 Probability{tankDamageSystem::kScopeDamaged, 1}, Probability{tankDamageSystem::kCrewKilled, 5}, Probability{tankDamageSystem::kCrewShellShocked, 5}, Probability{tankDamageSystem::kRicochet, 6} };
 
 
 

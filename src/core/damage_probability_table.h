@@ -1,6 +1,6 @@
 #pragma once
 
-#include "unit_state.h"
+#include "unit_damage_system_strategy.h"
 
 #include <unordered_map>
 #include <functional>

@@ -53,6 +53,7 @@ namespace graphics {
 		void restart() { m_currentFrame = 0; }
 		bool isFinished() const { return !isRepeating() && m_currentFrame >= m_numFrames; }
 		void startAnimation() { m_isActive = true; }
+		void stopAnimation() { m_isActive = false; }
 
 		void centerOrigin();
 
