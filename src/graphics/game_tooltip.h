@@ -15,23 +15,23 @@ constexpr int kBorderOffset = 20;
 
 namespace graphics
 {
-	class GameTooltip : public sf::RectangleShape
-	{
-	public:
+    class GameTooltip : public sf::RectangleShape
+    {
+    public:
 
-		GameTooltip();
+        GameTooltip();
 
-		void  show();
-		void  hide();
-		void  setText(const std::string& text);
-		const sf::Text& getTextToRender() const;
-		void  setParentBounds(const sf::FloatRect& parentBounds);
-		void  editTooltipSizeByText();
+        void  show();
+        void  hide();
+        void  setText(const std::string& text);
+        const sf::Text& getTextToRender() const;
+        void  setParentBounds(const sf::FloatRect& parentBounds);
+        void  editTooltipSizeByText();
 
-	private:
-		sf::Text             m_text;
-		sf::Font             m_font;
-		sf::FloatRect        m_parentBounds;
-		const sf::Color      m_backgroundColor{ kBackgroundColorR, kBackgroundColorG, kBackgroundColorB, kBackgroundColorAlpha };
-	};
+    private:
+        sf::Text             m_text;
+        sf::Font             m_font;
+        sf::FloatRect        m_parentBounds;
+        const sf::Color      m_backgroundColor{ kBackgroundColorR, kBackgroundColorG, kBackgroundColorB, kBackgroundColorAlpha };
+    };
 }

@@ -10,12 +10,12 @@ constexpr int kBoardSecondLayerColorB = 12;
 constexpr int kBackSecondColorAlpha = 250;
 
 struct GraphicMovementFrame {
-	GraphicMovementFrame(float offset, sf::Time time, float targetEps) : elapsedTime(time), movementOffset(offset), targetEpsilon(targetEps) {}
-	sf::Time elapsedTime;
-	float distancePassedPercent{ 0.f };
-	float movementOffset;
-	float targetEpsilon;
-	const float fullPath{ 1.f };
+    GraphicMovementFrame(float offset, sf::Time time, float targetEps) : elapsedTime(time), movementOffset(offset), targetEpsilon(targetEps) {}
+    sf::Time elapsedTime;
+    float distancePassedPercent{ 0.f };
+    float movementOffset;
+    float targetEpsilon;
+    const float fullPath{ 1.f };
 };
 
 //using BoardSecondLayerColor = const sf::Color::(100, 9, 12, 250);

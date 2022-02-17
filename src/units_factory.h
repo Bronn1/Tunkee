@@ -14,21 +14,21 @@ using UnitModelPtr = std::unique_ptr<core::Unit>;
 /*class UnitFactory
 {
 protected:
-	virtual UnitModelPtr createUnit(UnitIdentifier id) const = 0;
-	virtual SceneNodePtr createUnitView(UnitIdentifier id) const = 0;
+    virtual UnitModelPtr createUnit(UnitIdentifier id) const = 0;
+    virtual SceneNodePtr createUnitView(UnitIdentifier id) const = 0;
 };*/
 
 class TanksFactory 
 {
 public:
-	TanksFactory();
-	UnitModelPtr createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier);
-	UnitViewPtr createBacisTankView(const UnitIdentifier id, const Angle rotation, const  float scale);
-	UnitViewPtr createNullUnitView();
+    TanksFactory();
+    UnitModelPtr createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier);
+    UnitViewPtr createBacisTankView(const UnitIdentifier id, const Angle rotation, const  float scale);
+    UnitViewPtr createNullUnitView();
 private:
-	UnitModelPtr createTank(const core::GameTile& pos, const Angle rotation, const TileDistance movement, const PlayerIdentifier);
-	UnitViewPtr createTankView(const UnitIdentifier id, const Angle rotation, const float scale);
+    UnitModelPtr createTank(const core::GameTile& pos, const Angle rotation, const TileDistance movement, const PlayerIdentifier);
+    UnitViewPtr createTankView(const UnitIdentifier id, const Angle rotation, const float scale);
 private:
-	TextureHolder m_textures;
+    TextureHolder m_textures;
 
 };

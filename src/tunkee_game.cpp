@@ -16,7 +16,7 @@ constexpr int kResHeight = 1800;
 constexpr int kResWidth = 1000;
 
 TunkeGame::TunkeGame() :
-	m_window(sf::VideoMode(kResHeight, kResWidth), "Tunkee", sf::Style::Close | sf::Style::Titlebar | sf::Style::Resize, sf::ContextSettings(0, 0, 8))
+    m_window(sf::VideoMode(kResHeight, kResWidth), "Tunkee", sf::Style::Close | sf::Style::Titlebar | sf::Style::Resize, sf::ContextSettings(0, 0, 8))
 {
 }
 
