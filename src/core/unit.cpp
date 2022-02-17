@@ -9,9 +9,9 @@ namespace ranges = std::ranges;
 
 inline bool core::Unit::canMove() const
 {
-	if (m_damageSystemStrategy->amountOfActionCanDo() <= 1 && m_actionState == ActionState::ShotPerformed) 
+	if (m_damageSystemStrategy->amountOfActionCanDo() <= 1 && m_actionState == ActionState::ShotPerformed)
 		return false;
-	
+
 	return (getRemainingMovement() > TileDistance{ 0 } && m_damageSystemStrategy->isMovingSystemsAlive());
 }
 
@@ -29,24 +29,6 @@ void core::Unit::defaultApplyDamage(const std::string_view damageType)
 	m_damageSystemStrategy->applyDamage(damageType, actionStatus);
 	if (actionStatus == ActionStatus::full)
 		setActionState(actionStatus); // applaying new amount of move pts and shots after damage
-	// TODO not tested yet
-	const Angle kFrontalArmorAngleFrom = Angle{ 180-60 };
-	const Angle kFrontalArmorAngleTo = Angle{ 180+60 };
-	Angle resultAngle = VertexToAngle(m_unitRotation) - attackingAngle;
-	resultAngle.angle = int(resultAngle.angle + 0.5);
-
-	//Angle unitRotationAngle = VertexToAngle(m_unitRotation);
-	// std::cout << "attackingAngle = " << attackingAngle.angle << " \n";
-	// std::cout << "attackingAngleShifted = " << attackingAngleShifted << " \n";
-	// std::cout << "kFrontalArmorAngleFrom = " << kFrontalArmorAngleFrom.angle << " \n";
-	// std::cout << "kFrontalArmorAngleTo = " << kFrontalArmorAngleTo.angle << " \n";
-	// std::cout << "unitRotationAngle = " << unitRotationAngle.angle << " \n";
-	// std::cout << "resultAngle = " << resultAngle.angle << " \n";
-
-	if (resultAngle >= kFrontalArmorAngleFrom && resultAngle <= kFrontalArmorAngleTo)
-		return m_armor.m_frontal;
-	else
-		return m_armor.m_side;
 }
 
 std::vector<core::GameTile> core::Unit::defaultMoveTo(const MoveToAction* moveToCmd, GameBoard& board)
@@ -180,13 +162,13 @@ ActionStatus core::Unit::isUnitHaveFullActionState() const
 
 std::vector<core::GameTile>& core::Unit::adjustPathByAvailableMovement(std::vector<GameTile>& pathToDest)
 {
-    unsigned costSoFar = 0;
-    auto [move] = getRemainingMovement();
+	unsigned costSoFar = 0;
+	auto [move] = getRemainingMovement();
 
-    auto rmv_if = [&costSoFar, &move](const GameTile& t) {costSoFar += t.travelCost(); return costSoFar > move; };
-    std::erase_if(pathToDest, rmv_if);
+	auto rmv_if = [&costSoFar, &move](const GameTile& t) {costSoFar += t.travelCost(); return costSoFar > move; };
+	std::erase_if(pathToDest, rmv_if);
 
-    return pathToDest;
+	return pathToDest;
 }
 
 void core::Unit::rotateToVertex(const HexVertexNumber vertex)
@@ -197,7 +179,7 @@ void core::Unit::rotateToVertex(const HexVertexNumber vertex)
 	if (m_rotationCounter < kDefaultMAxRotation || vertex == m_prevRotation) return;
 
 	auto [move] = getRemainingMovement();
-	if(move)
+	if (move)
 		changeStateByMovement(TileDistance{ 1 });
 }
 
@@ -284,7 +266,7 @@ TileDistance core::UnitActionState::getHalfMovePointsRoundedUp() const
 	return TileDistance((fullMovePtsWithFine.distance % 2 == 0) ? (fullMovePtsWithFine.distance / 2) : (fullMovePtsWithFine.distance / 2) + 1);
 }
 
-void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy,  Crew crewAmount)
+void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, Crew crewAmount)
 {
 	switch (strategy)
 	{
@@ -314,10 +296,11 @@ void core::TankUnit::setGunRotation(const Angle& angle)
 	{
 		// if gun took damage and became non rotatable we'll round to closest vertex
 		HexVertexNumber vertex = AngleToClosestVertex(m_gunRotation);
-		m_gunRotation =  VertexToAngle(vertex);
+		m_gunRotation = VertexToAngle(vertex);
 	}
 	std::cout << " " << m_gunRotation.angle << " model2\n";
 }
+
 bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTile& target) const
 {
 	int distance = pathfinding::getDistance(getPosition(), target);
@@ -331,6 +314,7 @@ bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTil
 	}
 	return true;
 }
+
 MoveAreaInfo core::TankUnit::getMoveArea(const GameBoard& board) const
 {
 	return defaultGetMoveArea(board);
