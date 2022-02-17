@@ -29,6 +29,24 @@ void core::Unit::defaultApplyDamage(const std::string_view damageType)
 	m_damageSystemStrategy->applyDamage(damageType, actionStatus);
 	if (actionStatus == ActionStatus::full)
 		setActionState(actionStatus); // applaying new amount of move pts and shots after damage
+	// TODO not tested yet
+	const Angle kFrontalArmorAngleFrom = Angle{ 180-60 };
+	const Angle kFrontalArmorAngleTo = Angle{ 180+60 };
+	Angle resultAngle = VertexToAngle(m_unitRotation) - attackingAngle;
+	resultAngle.angle = int(resultAngle.angle + 0.5);
+
+	//Angle unitRotationAngle = VertexToAngle(m_unitRotation);
+	// std::cout << "attackingAngle = " << attackingAngle.angle << " \n";
+	// std::cout << "attackingAngleShifted = " << attackingAngleShifted << " \n";
+	// std::cout << "kFrontalArmorAngleFrom = " << kFrontalArmorAngleFrom.angle << " \n";
+	// std::cout << "kFrontalArmorAngleTo = " << kFrontalArmorAngleTo.angle << " \n";
+	// std::cout << "unitRotationAngle = " << unitRotationAngle.angle << " \n";
+	// std::cout << "resultAngle = " << resultAngle.angle << " \n";
+
+	if (resultAngle >= kFrontalArmorAngleFrom && resultAngle <= kFrontalArmorAngleTo)
+		return m_armor.m_frontal;
+	else
+		return m_armor.m_side;
 }
 
 std::vector<core::GameTile> core::Unit::defaultMoveTo(const MoveToAction* moveToCmd, GameBoard& board)
