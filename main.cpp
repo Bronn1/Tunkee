@@ -11,13 +11,13 @@
 
 int main()
 {
-	try
-	{
-		TunkeGame tunkee;
-		tunkee.run();
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "\nEXCEPTION: " << e.what() << std::endl;
-	}
+    try
+    {
+        TunkeGame tunkee;
+        tunkee.run();
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "\nEXCEPTION: " << e.what() << std::endl;
+    }
 }

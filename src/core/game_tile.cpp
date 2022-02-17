@@ -2,11 +2,11 @@
 
 std::ostream& core::operator<<(std::ostream& os, const GameTile& gt)
 {
-	os << "[" << gt.m_q << ", " << gt.m_r << ", " << gt.m_s << "]";
-	return os;
+    os << "[" << gt.m_q << ", " << gt.m_r << ", " << gt.m_s << "]";
+    return os;
 }
 
 core::GameTile core::NullTile()
 {
-	return GameTile(-9999, -9999);
+    return GameTile(-9999, -9999);
 }

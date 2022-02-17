@@ -6,7 +6,7 @@
 const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 
 graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller) :
-	m_renderTarget(target), m_board(std::move(board)), m_gameController(controller)
+    m_renderTarget(target), m_board(std::move(board)), m_gameController(controller)
 {
     m_view = target.getDefaultView();
     auto [height, width] = m_renderTarget.getSize();

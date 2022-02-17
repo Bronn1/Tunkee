@@ -16,23 +16,23 @@ constexpr int kTestMapSize = 30;
 class GameBuilder
 {
 public:
-	static GameBuilder  createMinimalGame(sf::RenderWindow& target, sf::Texture* texture);
-	inline core::GameBoard  getBoardModel()   { return std::move(m_boardModel); }
-	inline WorldViewPtr  getWorldView()  { return std::move(m_worldView); }
-	inline GameEnginePtr  getGameEngine() { return std::move(m_gameEngine); }
-	GameBuilder& addAi();
+    static GameBuilder  createMinimalGame(sf::RenderWindow& target, sf::Texture* texture);
+    inline core::GameBoard  getBoardModel()   { return std::move(m_boardModel); }
+    inline WorldViewPtr  getWorldView()  { return std::move(m_worldView); }
+    inline GameEnginePtr  getGameEngine() { return std::move(m_gameEngine); }
+    GameBuilder& addAi();
 
 private:
-	friend class graphics::GameWorldView;
-	GameBuilder() = default;
-	std::vector<core::GameTileType> generateMinimalTileset() { return std::vector<core::GameTileType>(kTestMapSize); }
-	void reset();
+    friend class graphics::GameWorldView;
+    GameBuilder() = default;
+    std::vector<core::GameTileType> generateMinimalTileset() { return std::vector<core::GameTileType>(kTestMapSize); }
+    void reset();
 private:
-	// TODO only for TESTS switch to pointer back BoardModelPtr m_boardModel;
-	core::GameBoard m_boardModel;
-	WorldViewPtr m_worldView;
-	GameEnginePtr m_gameEngine;
-	TanksFactory m_tankFactory;
-	
+    // TODO only for TESTS switch to pointer back BoardModelPtr m_boardModel;
+    core::GameBoard m_boardModel;
+    WorldViewPtr m_worldView;
+    GameEnginePtr m_gameEngine;
+    TanksFactory m_tankFactory;
+    
 
 };

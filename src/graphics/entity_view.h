@@ -4,18 +4,18 @@
 
 namespace graphics
 {
-	class EntityView : public SceneNode
-	{
-	public:
-		void setVelocity(const sf::Vector2f& velocity);
-		void setVelocity(float vx, float vy);
-		sf::Vector2f getVelocity() const;
+    class EntityView : public SceneNode
+    {
+    public:
+        void setVelocity(const sf::Vector2f& velocity);
+        void setVelocity(float vx, float vy);
+        sf::Vector2f getVelocity() const;
 
-	protected:
-		virtual void updateCurrent(sf::Time dt);
+    protected:
+        virtual void updateCurrent(sf::Time dt);
 
-	private:
-		sf::Vector2f m_velocity;
-	};
+    private:
+        sf::Vector2f m_velocity;
+    };
 }
 
