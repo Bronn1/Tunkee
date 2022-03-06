@@ -16,7 +16,8 @@ namespace textures
         T34TankBody,
         T34TankTurret,
         Explosion,
-        Missile
+        Missile,
+        TooltipStates
     };
 
 }
@@ -30,7 +31,13 @@ namespace fonts
 
 }
 
-template<typename Identifier, typename Resource>
+template<typename Resource>
+concept ResourceType = requires(Resource resType, const std::string& filename, const sf::IntRect rect )
+{
+    {resType.loadFromFile(filename)} ->std::convertible_to<bool>;
+};
+
+template<typename Identifier, ResourceType Resource>
 class ResourceHolder
 {
 public:

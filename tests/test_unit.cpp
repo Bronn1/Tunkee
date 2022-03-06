@@ -419,7 +419,7 @@ TEST_F(UnitFixture, TankEngineDestroyed)
     bool expectedMoveAction = false;
     TileDistance expectedMoveLeft = { 0 };
     Shots expectedShotleft = { 3 };
-    unit.applyDamage("EngineDestroyed");
+    unit.applyDamage(tankDamageSystem::kEngine);
 
     EXPECT_EQ(unit.canMove(), expectedMoveAction);
     EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
@@ -435,7 +435,7 @@ TEST_F(UnitFixture, TankTransmissionDestroyed)
     TileDistance expectedMoveLeft = { 0 };
     Shots expectedShotleft = { 2 };
     GameTile expectedPosition = GameTile(0, 1);
-    unit.applyDamage("TransmissionDestroyed");
+    unit.applyDamage(tankDamageSystem::kTransmission);
     auto cmdMove{ std::make_unique<MoveToAction>() };
     cmdMove->m_unitID = { unit.getID() };
     cmdMove->m_playerID = PlayerIdentifier{ 1 };
@@ -458,14 +458,14 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
     TileDistance expectedMoveLeft = { 0 };
     Shots expectedShotleft = { 0 };
     GameTile expectedPosition = GameTile(0, 0);
-    unit.applyDamage(tankDamageSystem::kCommanderKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kGunnerKilled);
-    unit.applyDamage(tankDamageSystem::kRadiomanKilled);
-    unit.applyDamage(tankDamageSystem::kRadiomanKilled);
-    unit.applyDamage(tankDamageSystem::kRadiomanKilled);
-    unit.applyDamage(tankDamageSystem::kLoaderKilled);
+    unit.applyDamage(tankDamageSystem::kCommander);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kGunner);
+    unit.applyDamage(tankDamageSystem::kRadioman);
+    unit.applyDamage(tankDamageSystem::kRadioman);
+    unit.applyDamage(tankDamageSystem::kRadioman);
+    unit.applyDamage(tankDamageSystem::kLoader);
     auto cmdMove{ std::make_unique<MoveToAction>() };
     cmdMove->m_unitID = { unit.getID() };
     cmdMove->m_playerID = PlayerIdentifier{ 1 };
@@ -480,20 +480,18 @@ TEST_F(UnitFixture, TankCrewKilledOneByOne)
     EXPECT_EQ(unit.getPosition(), expectedPosition);
 }
 
-// driver killed so unit cant move this turn
 TEST_F(UnitFixture, TankGunCrewKilled)
 {
     bool expectedShootLeft = true;
     bool expectedMoveAction = false;
     TileDistance expectedMoveLeft = { 0 }; 
     Shots expectedShotleft = { 1 };
-    //unit.applyDamage(tank_state_system::kCommanderKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kGunnerKilled);
-    unit.applyDamage(tankDamageSystem::kLoaderKilled);
-    //.applyDamage(tank_state_system::kLO);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kGunner);
+    unit.applyDamage(tankDamageSystem::kLoader);
 
+    // driver killed so unit cant move this turn
     EXPECT_EQ(unit.canMove(), expectedMoveAction);
     EXPECT_EQ(unit.canShoot(), expectedShootLeft);
     EXPECT_EQ(unit.hasActionLeft(), expectedShootLeft);
@@ -508,9 +506,9 @@ TEST_F(UnitFixture, TankGunCrewHalfKilled)
     bool expectedMoveAction = false;
     TileDistance expectedMoveLeft = { 0 };
     Shots expectedShotleft = { 1 };
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kLoaderKilled);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kLoader);
 
     EXPECT_EQ(unit.canMove(), expectedMoveAction);
     EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -525,8 +523,8 @@ TEST_F(UnitFixture, TankGun1fKilled)
     bool expectedMoveAction = true;
     TileDistance expectedMoveLeft = { 5 };
     Shots expectedShotleft = { 2 };
-    unit.applyDamage(tankDamageSystem::kLoaderKilled);
-    unit.applyDamage(tankDamageSystem::kLoaderKilled);
+    unit.applyDamage(tankDamageSystem::kLoader);
+    unit.applyDamage(tankDamageSystem::kLoader);
 
     EXPECT_EQ(unit.canMove(), expectedMoveAction);
     EXPECT_EQ(unit.canShoot(), expectedShootLeft);
@@ -542,10 +540,10 @@ TEST_F(UnitFixture, TankOneGuyLeftOnlyMove)
     bool expectedMoveAction = true;
     TileDistance expectedMoveLeft = { 4 };
     Shots expectedShotleft = { 0 };
-    unit.applyDamage(tankDamageSystem::kCommanderKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kGunnerKilled);
-    unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+    unit.applyDamage(tankDamageSystem::kCommander);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kGunner);
+    unit.applyDamage(tankDamageSystem::kRadioman);
     unit.nextTurn();
     auto cmdMove{ std::make_unique<MoveToAction>() };
     cmdMove->m_unitID = { unit.getID() };
@@ -567,10 +565,10 @@ TEST_F(UnitFixture, TankImmomobileForOneTurn)
     bool expectedMoveAction = false;
     TileDistance expectedMoveLeft = { 0 };
     Shots expectedShotleft = { 1 };
-    unit.applyDamage(tankDamageSystem::kCommanderKilled);
-    unit.applyDamage(tankDamageSystem::kDriverKilled);
-    unit.applyDamage(tankDamageSystem::kGunnerKilled);
-    unit.applyDamage(tankDamageSystem::kRadiomanKilled);
+    unit.applyDamage(tankDamageSystem::kCommander);
+    unit.applyDamage(tankDamageSystem::kDriver);
+    unit.applyDamage(tankDamageSystem::kGunner);
+    unit.applyDamage(tankDamageSystem::kRadioman);
     auto cmdMove{ std::make_unique<MoveToAction>() };
     cmdMove->m_unitID = { unit.getID() };
     cmdMove->m_playerID = PlayerIdentifier{ 1 };
@@ -696,6 +694,29 @@ TEST_F(UnitFixture, TankTurretJammed)
     EXPECT_EQ(unit.canMove(), expectedMoveAction);
     EXPECT_EQ(unit.canShoot(), expectedShotsLeft);
     EXPECT_EQ(unit.hasActionLeft(), expectedMoveAction);
+    EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
+    EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
+}
+
+// unit used some activity already so damage effect will be saved for nex turn but then he got damage again in next,so effect should stay on next anyway 
+TEST_F(UnitFixture, TankImmomobileForNextTurnVeryTricky)
+{
+    bool expectedActionsLeft = false;
+    bool expectedMoveAction = false;
+    TileDistance expectedMoveLeft = { 0 };
+    Shots expectedShotleft = { 0 };
+    auto cmdMove{ std::make_unique<MoveToAction>() };
+    cmdMove->m_unitID = { unit.getID() };
+    cmdMove->m_playerID = PlayerIdentifier{ 1 };
+    cmdMove->m_destination = GameTile(0, 1);
+    unit.moveTo(cmdMove.get(), testableBoard);
+    unit.applyDamage(tankDamageSystem::kCrewShellShocked);
+    unit.nextTurn();
+    unit.applyDamage(tankDamageSystem::kCrewShellShocked);
+
+    EXPECT_EQ(unit.canMove(), expectedMoveAction);
+    EXPECT_EQ(unit.canShoot(), expectedActionsLeft);
+    EXPECT_EQ(unit.hasActionLeft(), expectedActionsLeft);
     EXPECT_EQ(unit.getRemainingMovement(), expectedMoveLeft);
     EXPECT_EQ(unit.getRemainingShots(), expectedShotleft);
 }

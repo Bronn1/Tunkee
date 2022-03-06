@@ -1,6 +1,10 @@
 #include "game_tooltip.h"
 
-graphics::GameTooltip::GameTooltip()  
+#include <SFML/Graphics/RenderTarget.hpp>
+constexpr int kTooltipCharacterSize = 100;
+constexpr int kBorderOffset = 25;
+
+graphics::GameTooltip::GameTooltip(sf::Texture& tooltipStates) : m_tooltipStates(tooltipStates), m_sprite(m_tooltipStates)
 {
     // move all fonts to texture manager
     m_font.loadFromFile("data/examples/comic.ttf");
@@ -14,11 +18,16 @@ graphics::GameTooltip::GameTooltip()
     setOutlineColor(sf::Color::Black);
     setFillColor(m_backgroundColor);
     setOutlineThickness(1);
+    
+    sf::Vector2i m_frameSize{ 62, 62 };
+    sf::IntRect textureRect = sf::IntRect(300, 120, m_frameSize.x, m_frameSize.y);
+    m_sprite.setScale(4.0f, 4.0f);
+    m_sprite.setTextureRect(textureRect);
 }
 
 void graphics::GameTooltip::show()
 {
-    setText("Random\nTESTSTETS\n11232+\nTOOLTIp\n11232+");
+    //setText("Random\nTESTSTETS\n11232+\nTOOLTIp\n11232+");
     m_text.setColor(sf::Color::Black);
 
     setFillColor(m_backgroundColor);
@@ -52,6 +61,7 @@ void graphics::GameTooltip::editTooltipSizeByText()
 {
     sf::FloatRect boundsText = m_text.getGlobalBounds();
 
+    // TODO Some test code..
     setSize({ boundsText.width + kBorderOffset, boundsText.height + kBorderOffset });
     setOrigin(boundsText.width, 0);
     setPosition(m_parentBounds.width / 2.f, m_parentBounds.height / 4.f);

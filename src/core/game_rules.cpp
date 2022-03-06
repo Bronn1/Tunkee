@@ -27,21 +27,17 @@ void core::GameRulesBasic::nextActionPhase(const FinishActionPhase* finishAction
     assert(size(m_playerActiveUnits) == 2);
 
     if (finishActionPhase->m_playerID != m_currentPlayer ||
-        m_currStage == TurnEnd)
+        m_currStage == TurnEnd || m_currStage == GameEnd)
         return;
 
-    auto curPlayer = m_playerActiveUnits.extract(m_currentPlayer);
-    if (curPlayer.empty())
-        return; // TODO throw !!!
-    PlayerIdentifier secondPlayer = begin(m_playerActiveUnits)->first;
-    m_playerActiveUnits.insert(std::move(curPlayer));
+    //auto curPlayer = m_playerActiveUnits.extract(m_currentPlayer);
     m_playerActiveUnits[m_currentPlayer]--;
 
-    if (m_playerActiveUnits[secondPlayer] > 0)
+    if (m_playerActiveUnits[m_secondPlayer] > 0)
     {
-        setCurrentPlayer(secondPlayer);
         m_currStage = ActionPhase;
         m_selectedUnit = m_emptyUnitId;
+        swapPlayers();
     }
     else if (m_playerActiveUnits[m_currentPlayer] > 0)
     {
@@ -51,9 +47,9 @@ void core::GameRulesBasic::nextActionPhase(const FinishActionPhase* finishAction
     }
     else
     {
-        setCurrentPlayer(secondPlayer);
         m_selectedUnit = m_emptyUnitId;
         m_currStage = TurnEnd;
+        swapPlayers();
     }
 }
 
@@ -100,22 +96,30 @@ UnitIdentifier core::GameRulesBasic::selectUnit(const SelectUnitQuery* selectUni
     return m_selectedUnit;
 }
 
-void core::GameRulesInterface::setActiveUnits(const PlayerIdentifier playerId)
+bool core::GameRulesBasic::isGameEndedFor(PointOfView pov) 
+{
+    if (m_unitManager->countAliveUnits((pov == PointOfView::Player) ? m_currentPlayer : m_secondPlayer)) 
+        return false;
+
+    m_currStage = GameEnd;
+    m_unitManager->setAllDamageVisible();
+    return true;
+}
+
+void core::GameRulesBasic::setActiveUnits(const PlayerIdentifier playerId)
 {
     if (m_playerActiveUnits.contains(playerId))
         m_playerActiveUnits[playerId] = m_unitManager->countActiveUnitsOwnedBy(playerId);
     else
         std::cout << "Unknown players with ID: " << playerId.identifier << "\n"; //TODO logger and prob throw
-        
 }
 
-core::GameRulesInterface::GameRulesInterface()
+void core::GameRulesBasic::setPlayer(const PlayerIdentifier playerId)
 {
-}
 
-void core::GameRulesInterface::setPlayer(const PlayerIdentifier playerId)
-{
-    m_playerActiveUnits.insert({ playerId , 0});
+    m_playerActiveUnits.insert({ playerId , 0 });
+    if (m_currentPlayer == PlayerIdentifier{ 0 }) m_currentPlayer = playerId;
+    else m_secondPlayer = playerId;
 }
 
 bool core::GameRulesBasic::isShootActionAllowed(const ShootAction& shootAction)

@@ -10,10 +10,12 @@ TanksFactory::TanksFactory()
     std::string_view T34TurretTextureFilename = "data/textures/TopDown_soldier_tank_turrent.png";
     std::string_view explosionTextureFilename = "data/textures/Explosion.png";
     std::string_view mediumMissileFilename =    "data/textures/Medium_Shell.png";
+    std::string_view tooltipTexturesFilename =    "data/textures/tooltip_test.png";
     m_textures.load(T34TankBody, T34BodyTextureFilename);
     m_textures.load(T34TankTurret, T34TurretTextureFilename);
     m_textures.load(Explosion, explosionTextureFilename);
     m_textures.load(Missile, mediumMissileFilename);
+    m_textures.load(TooltipStates, tooltipTexturesFilename);
 }
 
 UnitModelPtr TanksFactory::createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier playerID)

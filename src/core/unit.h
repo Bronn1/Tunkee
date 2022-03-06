@@ -44,7 +44,7 @@ namespace core
         TileDistance getHalfMovePoints() const { return TileDistance{ m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
         Shots getHalfShotsRoundedUp() const;
         Shots getHalfShots() const { return Shots{ m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire).shots / 2 }; }
-        void setDamageStrategy(DamageSystemStrategies strategy, Crew crewAmount);
+        void setDamageStrategy(DamageSystemStrategies strategy, CrewInfo crew);
         void setActionState(const ActionStatus& state);
         virtual ~UnitActionState() = default;
         friend class Unit;
@@ -99,6 +99,7 @@ namespace core
         virtual bool isTargetInLineOfSight(const GameBoard& board, const GameTile& target) const = 0;
         virtual int  getArmor(const Angle& attackingAngle) const = 0;
         virtual void setGunRotation(const Angle& angle) = 0;
+        virtual bool canGunRotate(const Angle& target) const = 0;
         virtual void applyDamage(const std::string_view damageType) = 0;
         /** Move to destination with adjustment by available movement.
         * returns adjusted path
@@ -138,7 +139,10 @@ namespace core
         TileDistance getFullMovement() const { return m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints); }
         Shots getRemainingShots() const { return m_remainingShots; }
         TileDistance getRemainingMovement() const { return m_remainingMovePoints; }
-        void setDamageState(const DamageType damageType, const  UnitPart::State  state) { m_damageSystemStrategy->setDamageState(damageType, state); }
+        DamageStatus getDamageStatus(const DamageTo damageOf) const { return m_damageSystemStrategy->getDamageStatus(damageOf); }
+        CrewInfo getCrewInfo() const { return m_damageSystemStrategy->getCrewInfo(); }
+        UnitPartsInfoVec getUnitPartsInfo() const { return m_damageSystemStrategy->getPartsInfo(); }
+        void setDamageStatus(const DamageTo damageTo, const  DamageStatus  state) { m_damageSystemStrategy->setDamageStatus(damageTo, state); }
         inline void setOwner(const PlayerIdentifier id) { m_owner = id; }
         inline void setPosition(const GameTile& pos) { m_position = pos; }
         inline void setUnitID(const UnitIdentifier id) { m_id = id; }
@@ -146,6 +150,8 @@ namespace core
         inline void setAttack(const Attack attack) { m_attack = attack; }
         void setBodyRotation(const HexVertexNumber rotation) { m_unitRotation = rotation; }
         void  setRangeOfFire(const TileDistance shootingDistance) { m_rangeOfFire = shootingDistance; }
+        void   setDamageVisibleFor(const std::vector<DamageTo>& damageNames = {}) { m_damageSystemStrategy->setDamageVisibleFor(damageNames); }
+
         bool hasActionLeft() const { return canMove() || canShoot(); }
         virtual ~Unit() = default;
     private:
@@ -174,7 +180,7 @@ namespace core
         TankUnit(UnitIdentifier id, TileDistance movePoints, Shots rateOfFire);
 
         void setGunRotation(const Angle& angle) override;
-
+        bool canGunRotate(const Angle& target) const override;
         void changeStateByMovement(const TileDistance& distance)  override { defaultChangeStateByMovement(distance); }
         void changeStateByShooting(const Shots& shots) override { defaultChangeStateByShooting(shots); }
         void applyDamage(const std::string_view damageType) override { defaultApplyDamage(damageType); }
@@ -194,9 +200,10 @@ namespace core
         NullUnit() : Unit(UnitIdentifier{ 0 }, TileDistance{ 0 }, Shots{ 1 }) {
             setOwner(PlayerIdentifier{ 0 });
             setActionState(ActionStatus::empty);
-            setDamageStrategy(DamageSystemStrategies::TankDamageSystem, Crew{ 0, 0 });
+            setDamageStrategy(DamageSystemStrategies::TankDamageSystem, CrewInfo{});
         }
 
+        bool canGunRotate(const Angle& target) const  override { return false; }
         bool hasActionLeft() const { return  false; }
         void setGunRotation(const Angle& angle) override { }
         void changeStateByMovement(const TileDistance& distance)  override {  }

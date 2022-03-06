@@ -42,6 +42,12 @@ void controllers::GameController::onUnitClicked(const UnitIdentifier selectedUni
     }
 }
 
+void controllers::GameController::onShowUnitStateMsg(const UnitIdentifier selectedUnitID, const UnitIdentifier targetUnitID, const Angle& requiredGunAngleToShot) const
+{
+    auto unitStateQuery = std::make_unique<UnitStateQuery>(selectedUnitID, targetUnitID, requiredGunAngleToShot, m_player);
+    m_gameEngine->createUnitStateMsg(unitStateQuery.get());
+}
+
 void controllers::GameController::finishSetupStage(PlayerIdentifier playerId)
 {
     auto finishSetupStageAction{ std::make_unique<FinishSetupStage>() };

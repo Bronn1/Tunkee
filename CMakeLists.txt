@@ -44,6 +44,8 @@ set(Header_Files
         "src/core/unit_damage_system_strategy.h"
         "src/graphics/explosion_effects.h"
         "src/graphics/projectile.h"
+        "src/core/game_message.h"
+        "src/core/unit_damage_common.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -79,12 +81,14 @@ set(Source_Files
         "src/core/unit_damage_system_strategy.cpp"
         "src/graphics/explosion_effects.cpp"
         "src/graphics/projectile.cpp"
+         "src/core/game_message.cpp" 
+        "src/core/unit_damage_common.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES}   )
+add_executable(Tunkee ${ALL_FILES} )
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

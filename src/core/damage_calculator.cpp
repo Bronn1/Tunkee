@@ -32,14 +32,14 @@ std::vector<UnitStateInfo> core::DamageCalculator::nextTurn()
         int rolledNumber = rollDiceWithFaces(kChanceToKeepBurning);
         if (rolledNumber <= kChanceToStopBurning)
         {
-            UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), UnitPart::State::Normal };
+            UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), DamageStatus::Normal };
             info.m_damageTypeName = tankDamageSystem::kBurning;
-            unit->setDamageState(tankDamageSystem::kBurning, UnitPart::State::Normal);
+            unit->setDamageStatus(tankDamageSystem::kBurning, DamageStatus::Normal);
             changedUnitStates.push_back(info);
         }
         else if (rolledNumber <= kChanceToExplode)
         {
-            UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), UnitPart::State::Damaged };
+            UnitStateInfo info{ UnitIdentifier{0}, unit->getID(), DamageStatus::Damaged };
             info.m_damageTypeName = tankDamageSystem::kExploded;
             changedUnitStates.push_back(info);
             unit->applyDamage(tankDamageSystem::kExploded);
@@ -52,10 +52,29 @@ std::vector<UnitStateInfo> core::DamageCalculator::nextTurn()
     return changedUnitStates;
 }
 
-void core::DamageCalculator::saveTempDamage(Unit* targetUnit, const DamageType damageType)
+void core::DamageCalculator::saveTempDamage(Unit* targetUnit, const DamageTo damageTo)
 {
-    if (damageType == tankDamageSystem::kBurning)
+    if (damageTo == tankDamageSystem::kBurning)
         m_burningUnits.insert(targetUnit);
+}
+
+void core::DamageCalculator::fillDamageProbabilities(UnitPartsInfoVec& partsInfoVec, const  Unit* selectedUnit, const Unit* targetUnit, const Angle& requiredGunAngleToShot) const
+{
+    //std::remove_const<decltype(e)>::type
+    std::type_index typeIndx = std::type_index(typeid(*targetUnit));
+    if (!m_damageTables.contains(typeIndx))
+        throw std::runtime_error(std::string("Unknown unit type received in damage calculator") + typeid(targetUnit).name());// TODO throw custom exception
+
+    Attack unitAttack = selectedUnit->getAttack();
+    auto armor = targetUnit->getArmor(requiredGunAngleToShot);
+    ThreatLevel threat{ unitAttack.attack - armor };
+    int overallProbSize = m_damageTables.at(typeIndx).getOverallProbabilitySize(threat);
+    const int kMaxPercent = 100;
+    for (auto& partInfo : partsInfoVec)
+    {
+        int probToHitPart = m_damageTables.at(typeIndx).getProbabilityTo(threat, partInfo.m_name);
+        partInfo.chanceToHitPercent = (probToHitPart * kMaxPercent) / overallProbSize;
+    }
 }
 
 void core::DamageCalculator::initProbabilityTables()
@@ -66,7 +85,7 @@ void core::DamageCalculator::initProbabilityTables()
 
 UnitStateInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit, const std::vector<GameTile>& lineOfFire)
 {
-    UnitStateInfo info{ sourceUnit->getID(), targetUnit->getID(), UnitPart::State::Damaged };
+    UnitStateInfo info{ sourceUnit->getID(), targetUnit->getID(), DamageStatus::Damaged };
     info.m_damageTypeName = core::kShotMissed;
 
     if(!isTargerReachable(sourceUnit, targetUnit, lineOfFire))
@@ -84,7 +103,7 @@ UnitStateInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
     {
         std::type_index typeIndx = std::type_index(typeid(*targetUnit));
         if (!m_damageTables.contains(typeIndx))
-            std::cout << "ERRROR\n";// TODO throw custom exception
+            throw std::runtime_error(std::string("Unknown unit type received in damage calculator") + typeid(targetUnit).name());
         
         Attack unitAttack = sourceUnit->getAttack();
         auto armor = targetUnit->getArmor(sourceUnit->getGunRotation());

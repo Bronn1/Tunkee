@@ -48,8 +48,10 @@ namespace core {
         int countActiveUnitsOwnedBy(const PlayerIdentifier& playerId) const;
         void passNextTurnToUnits();
         void setUnitsActions(const ActionStatus state);
+        int countAliveUnits(const PlayerIdentifier& playerId, PointOfView pov = PointOfView::Player) const;
         std::vector<UnitIdentifier> getUnitIDs() const;
         std::vector<UnitIdentifier> getUnitIDsForPlayer(const PlayerIdentifier playerId) const;
+        void setAllDamageVisible();
         UnitIdentifier addUnit(UnitPtr unit);
 
     private:

@@ -20,7 +20,7 @@ constexpr float moveTargetEps = 0.f;
 graphics::UnitView::UnitView(UnitIdentifier id, Type type, TextureHolder& textures) :
     m_type(type), m_bodySprite(textures.get(textures::ID::T34TankBody)),
     m_turretSprite(textures.get(textures::ID::T34TankTurret)), m_explosion(textures.get(textures::ID::Explosion)), m_buriningAnimation(textures.get(textures::ID::Explosion)),
-    m_textures(textures), m_moveFrame(moveOffsetPerFrame, sf::Time::Zero, moveTargetEps)
+    m_textures(textures), m_moveFrame(moveOffsetPerFrame, sf::Time::Zero, moveTargetEps), m_tooltipDescription(textures.get(textures::ID::TooltipStates))
 {
     m_id = id;
     // TODO after we'll have full animation support get rid of magic numbers here
@@ -62,12 +62,12 @@ void graphics::UnitView::drawCurrent(sf::RenderTarget& target, sf::RenderStates 
     {
         target.draw(m_bodySprite, states);
         target.draw(m_turretSprite, states);
-        target.draw(m_tooltipDescription, states);
-        target.draw(m_tooltipDescription.getTextToRender(), states);
     }
     else
         target.draw(m_bodySprite, states);
 
+    target.draw(m_tooltipDescription, states);
+    target.draw(m_tooltipDescription.getTextToRender(), states);
     target.draw(m_explosion, states);
     target.draw(m_buriningAnimation, states);
 }

@@ -19,6 +19,7 @@ namespace controllers {
         void moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const;
         void onChangeUnitRotation(const UnitIdentifier unitID, const Angle& rotation, const RotateUnitActiom::Type rotationType);
         void onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const ;
+        void onShowUnitStateMsg(const UnitIdentifier selectedUnitID, const UnitIdentifier targetUnitID, const Angle& requiredGunAngleToShot) const;
         void finishSetupStage(PlayerIdentifier playerId);
         void finishActionPhase(PlayerIdentifier playerId);
         bool isEnemyUnitId(const UnitIdentifier unitID) { return !m_ownUnits.contains(unitID); }

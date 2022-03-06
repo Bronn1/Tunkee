@@ -185,7 +185,7 @@ void core::Unit::rotateToVertex(const HexVertexNumber vertex)
 
 void core::UnitActionState::setActionState(const ActionStatus& state)
 {
-    if (state == ActionStatus::full) {
+    if (state == ActionStatus::full && m_damageSystemStrategy->isAlive(PointOfView::Player))  {
         m_remainingMovePoints = m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints);
         m_remainingShots = m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire);
         m_actionState = NoActionsPerformed;
@@ -266,15 +266,15 @@ TileDistance core::UnitActionState::getHalfMovePointsRoundedUp() const
     return TileDistance((fullMovePtsWithFine.distance % 2 == 0) ? (fullMovePtsWithFine.distance / 2) : (fullMovePtsWithFine.distance / 2) + 1);
 }
 
-void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, Crew crewAmount)
+void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, CrewInfo crew)
 {
     switch (strategy)
     {
     case DamageSystemStrategies::TankDamageSystem:
-        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crewAmount);
+        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crew);
         break;
     default:
-        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crewAmount);
+        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crew);
         break;
     }
 }
@@ -284,7 +284,9 @@ core::TankUnit::TankUnit(UnitIdentifier id, TileDistance dis, Shots rateOfFire)
 {
     m_type = UnitType::Tank;
 
-    setDamageStrategy(DamageSystemStrategies::TankDamageSystem, Crew{ 5, 3 });
+    // TODO ger rid of bool in contsructor, change to enum for better readability
+    setDamageStrategy(DamageSystemStrategies::TankDamageSystem, CrewInfo{ CrewMemberInfo{tankDamageSystem::kCommander, false, false}, CrewMemberInfo{tankDamageSystem::kDriver, true, false},CrewMemberInfo{tankDamageSystem::kRadioman, false, false},
+                   CrewMemberInfo{tankDamageSystem::kLoader, true, false} , CrewMemberInfo{tankDamageSystem::kGunner , true, false} });
     //applyDamage(tankDamageSystem::kTurretJammed);
 }
 
@@ -299,6 +301,12 @@ void core::TankUnit::setGunRotation(const Angle& angle)
         m_gunRotation = VertexToAngle(vertex);
     }
     std::cout << " " << m_gunRotation.angle << " model2\n";
+}
+
+bool core::TankUnit::canGunRotate(const Angle& target) const
+{
+    // TODO Implement later, should include gun rotation counter
+    return true;
 }
 
 bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTile& target) const

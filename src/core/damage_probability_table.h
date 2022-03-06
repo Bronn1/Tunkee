@@ -1,7 +1,6 @@
 #pragma once
 
-#include "unit_damage_system_strategy.h"
-
+#include "data_types.h"
 #include <unordered_map>
 #include <functional>
 #include <numeric>
@@ -30,10 +29,10 @@ namespace core {
         int level;
     };
 
-    using UnitDamageType = std::string_view;
+    using UnitDamageName = std::string_view;
 
     struct Probability {
-        UnitDamageType type;
+        UnitDamageName name;
         int probability;
     };
 
@@ -53,6 +52,7 @@ namespace core {
         void loadProbabilitiesFromFile(std::string_view filename);
         void calcEvent(const ThreatLevel& lvl);
         int getOverallProbabilitySize(const ThreatLevel& lvl) const;
+        int getProbabilityTo(const ThreatLevel& lvl, const UnitDamageName columnName) const;
         std::string_view getDestroyedPart(const ThreatLevel& lvl, int rolledProbability) const;
         void fillTankTableWithoutFile();
     protected:

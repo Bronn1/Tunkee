@@ -30,13 +30,14 @@ namespace graphics {
         void handleEvent(const sf::Event& event, const sf::Vector2f& mousePos);
         void moveView(const sf::Event& event, const sf::Vector2f& mousePos);
         bool checkIfClickedOnUnit(const sf::Vector2f& mousePos);
+        void checkMousePosition(const sf::Vector2f& mousePos);
         void onBoardClicked(const sf::Vector2f& mousePos);
         void clearMoveArea();
         void endSetupStage();
 
         // observer events
         void newUnitSelected(const UnitSelectedInfo& unitInfo) override;
-        void informationMsgRecieved(const GameInfoMessage& msgInfo) override;
+        void informationMsgRecieved(const core::UnitStateMsg& unitStateMs) override;
         void moveAreaRecieved(const MoveAreaInfo& moveArea) override;
         void moveUnitRecieved(const MoveUnitInfo& moveUnit) override;
         void ChangeUnitStateRecieved(const UnitStateInfo& shotUnit) override;

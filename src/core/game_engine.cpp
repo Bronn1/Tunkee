@@ -15,7 +15,6 @@ void core::GameEngine::moveUnit(MoveToAction* action)
     {
         auto unit = m_unitManager->getUnitIfExist(action->m_unitID);
         GameTile startingPos = (*unit)->getPosition();
-        // TODO should be call to unit instead
         auto  movePath = (*unit)->moveTo(action, m_board);
         auto moveInfo  = MoveUnitInfo(movePath, startingPos, (*unit)->getID(), (*unit)->getUnitVertexRotation());
         notify(moveInfo);
@@ -44,6 +43,9 @@ void core::GameEngine::shootUnit(ShootAction* action)
         notify(unitShotInfo);
         auto moveArea = (*sourceUnit)->getMoveArea(m_board);
         notify(moveArea);
+        if (m_gameRules->isGameEndedFor(PointOfView::Enemy))
+            std::cout << "Player: " << m_gameRules->getCurrentPlayer().identifier << " has won, Gratz!\n";
+
     }
     else
     {
@@ -55,7 +57,7 @@ void core::GameEngine::shootUnit(ShootAction* action)
 void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction)
 {
     Player& player = (m_playerOne.getId() == finishSetupStageAction->m_playerID) ? m_playerOne : m_playerTwo;
-    bool isAbleToEnd = player.endSetupStage();
+    bool isAbleToEnd = player.endSetupStage(); // move to game_rules strategy
     // notify or return some success indicator
     // when both players ready notify about visible/created units for both
     //notify(m_unitMng.getAllVisibleUnitsForPlaer());
@@ -69,11 +71,15 @@ void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction
 
 void core::GameEngine::finishActionPhase(FinishActionPhase* finishActionPhase)
 {
-    m_gameRules->nextActionPhase(finishActionPhase);
     // TODO should we allow to let ppl finish stage with any  action left on unit??
     auto unit =  m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
     if (unit)
         (*unit)->setActionState(ActionStatus::empty);
+
+    if (m_gameRules->isGameEndedFor(PointOfView::Enemy))
+        std::cout << "Player: " << m_gameRules->getCurrentPlayer().identifier << " has won, Gratz!\n";
+    // try to implement as a strategy
+    m_gameRules->nextActionPhase(finishActionPhase);
 
     if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::TurnEnd)
         endOfTurn();
@@ -101,6 +107,17 @@ void core::GameEngine::selectUnit(const SelectUnitQuery* selectUnitQuery)
         auto moveArea = (*unit)->getMoveArea(m_board);
         notify(moveArea);
     }
+}
+
+void core::GameEngine::createUnitStateMsg(const UnitStateQuery* unitStateQuery)
+{
+    auto selectedUnit = m_unitManager->getUnitIfExist(unitStateQuery->m_selectedUnit);
+    auto targetUnit = m_unitManager->getUnitIfExist(unitStateQuery->m_targetUnit);
+    if (!selectedUnit || !targetUnit) return;
+ 
+    PointOfView pointOfView = (unitStateQuery->m_player == (*targetUnit)->getOwnerID()) ? PointOfView::Player : PointOfView::Enemy;
+    auto unitStateMsg = GameMessageFactory::createUnitStateMsg(m_board, *selectedUnit, *targetUnit, m_damageCalculator,  unitStateQuery->m_requiredGunAngleToShot, pointOfView);
+    notify(unitStateMsg);
 }
 
 UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
@@ -131,14 +148,17 @@ void core::GameEngine::rotateUnitGun(RotateUnitActiom* rotateAction)
 void core::GameEngine::endOfTurn()
 {
     std::cout << "END OF TURN...\n";
+    auto changedUnitStatesVec = m_damageCalculator.nextTurn();
+    for (const auto& state : changedUnitStatesVec)
+        notify(state);
     m_unitManager->passNextTurnToUnits();
     //m_unitManager->setUnitsActions(ActionStatus::full);
     m_gameRules->setStage(GameRulesInterface::GameStage::ActionPhase);
     m_gameRules->setActiveUnits(m_playerOne.getId());
     m_gameRules->setActiveUnits(m_playerTwo.getId());
-    auto changedUnitStatesVec = m_damageCalculator.nextTurn();
-    for (const auto& state : changedUnitStatesVec)
-        notify(state);
+    m_gameRules->isGameEndedFor(PointOfView::Enemy);
+    m_gameRules->isGameEndedFor(PointOfView::Player);
+    //TODO show  winning or losing msg if game ended
 }
 
 void core::GameEngine::setPlayer(const Player& player)

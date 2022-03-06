@@ -73,6 +73,7 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
         break;
     case sf::Event::MouseMoved:
     {
+        checkMousePosition(mousePos);
         moveView(event, mousePos);
         break;;
     }
@@ -140,6 +141,20 @@ bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
     return false;
 }
 
+void graphics::GameWorldView::checkMousePosition(const sf::Vector2f& mousePos)
+{
+    for (const auto& [id, unit] : m_units)
+    {
+        if (unit->getBoundingRect().contains(mousePos))
+        {
+            Angle requiredGunAngleToShot{ 0.0f };
+            if(m_selectedUnit->getId())
+                requiredGunAngleToShot = m_selectedUnit->calculateGunRotation(m_selectedUnit->getPosition(), unit->getPosition());
+            m_gameController.onShowUnitStateMsg(m_selectedUnit->getId(), unit->getId(), requiredGunAngleToShot);
+        }
+    }
+}
+
 void graphics::GameWorldView::onBoardClicked(const sf::Vector2f& mousePos)
 {
     m_gameController.moveUnit(m_selectedUnit->getId(), (m_board).getSelectorTileCoordinates());
@@ -161,8 +176,40 @@ void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
     }
 }
 
-void graphics::GameWorldView::informationMsgRecieved(const GameInfoMessage& msgInfo)
+void graphics::GameWorldView::informationMsgRecieved(const core::UnitStateMsg& unitStateMsg)
 {
+    auto mousePos = sf::Mouse::getPosition(m_renderTarget);
+    auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
+    //std::cout << unitStateMsg.m_isAlive << " " << unitStateMsg.m_id.identifier << " " << unitStateMsg.m_unitParts[0].chanceToHitPercent << "\n";
+    
+    /*
+    * TODO only for test rn, this should be part of msg factory or part of message parser, it will replace msg data with textures and markers
+    * Cant do it for now cuz dont have any textures yet, and need to think what should be displayed as a text and what as a texture
+    */
+    std::string tmp = (unitStateMsg.m_isAlive) ? "alive \n" : "destroyed \n";
+    std::string text = "Unit is " + tmp;
+    for (const auto& crew : unitStateMsg.m_crewInfo)
+    {
+        std::string  strStatus = "Ideal\n";
+        if (crew.m_state == tankDamageSystem::DamageStatus::Hidden) strStatus = "???\n";
+        else  if (crew.m_state == tankDamageSystem::DamageStatus::Damaged) strStatus = "Killed\n";
+        else  if (crew.m_state == tankDamageSystem::DamageStatus::Normal) strStatus = "alive\n";
+        text += std::string(crew.m_name) + "(" + std::to_string(crew.amountOfmembers) + "): " + strStatus;
+        //crew.m_isGunMember
+    }
+    for (const auto& part : unitStateMsg.m_unitParts)
+    {
+        std::string  strStatus = "Ideal\n";
+        if (part.m_state == tankDamageSystem::DamageStatus::Hidden) strStatus = "???\n";
+        else  if (part.m_state == tankDamageSystem::DamageStatus::Damaged) strStatus = "Destroyed\n";
+        else  if (part.m_state == tankDamageSystem::DamageStatus::Normal) strStatus = "Normal state\n";
+        text += std::string(part.m_name) + ": " + strStatus;
+        //crew.m_isGunMember
+    }
+    //std::cout << text << "\n";
+    m_units[unitStateMsg.m_id]->setTooltipText(text);
+    m_units[unitStateMsg.m_id]->showTooltip(translatedMousePos);
+    ///m_units[unitStateMsg.m_id]->
 }
 
 void graphics::GameWorldView::moveAreaRecieved(const MoveAreaInfo& moveArea)
@@ -198,7 +245,7 @@ void graphics::GameWorldView::ChangeUnitStateRecieved(const UnitStateInfo& unitS
     if (unitState.m_damageTypeName == core::kShotMissed)
         return;
 
-    if (unitState.m_damageState == core::UnitPart::State::Damaged)
+    if (unitState.m_damageStatus == core::DamageStatus::Damaged)
         if (unitState.m_srcUnit != UnitIdentifier{ 0 })
             m_views.push_back(m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName));
         else

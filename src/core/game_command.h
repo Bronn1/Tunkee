@@ -111,12 +111,13 @@ struct UnitSelectedInfo {
     UnitIdentifier m_unitId{};
 };
 
-struct GameInfoMessage {
-    GameInfoMessage(UnitIdentifier unitId,  PlayerIdentifier playerId, const std::string& info ) : 
-        m_unitId(unitId), m_player(playerId), m_message(info) {}
-    UnitIdentifier m_unitId{};
+struct UnitStateQuery {
+    UnitStateQuery(UnitIdentifier selectedId, UnitIdentifier targetId, Angle requiredGunAngle, PlayerIdentifier playerId ) :
+        m_selectedUnit(selectedId), m_targetUnit(targetId), m_requiredGunAngleToShot(requiredGunAngle), m_player(playerId) {}
+    UnitIdentifier m_selectedUnit{};
+    UnitIdentifier m_targetUnit{};
+    Angle m_requiredGunAngleToShot;
     PlayerIdentifier m_player;
-    std::string m_message{}; // maybe string_view better here??
 };
 
 // structs like *Info containts information about changes performed in model
@@ -149,12 +150,12 @@ struct RotateGunInfo {
 };
 
 struct UnitStateInfo {
-    UnitStateInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit, core::UnitPart::State state) :
-        m_srcUnit(srcUnit), m_targetUnit(targetUnit), m_damageState(state) {}
+    UnitStateInfo( UnitIdentifier srcUnit, UnitIdentifier targetUnit, core::DamageStatus Status) :
+        m_srcUnit(srcUnit), m_targetUnit(targetUnit), m_damageStatus(Status) {}
     UnitIdentifier m_srcUnit{};
     UnitIdentifier m_targetUnit{};
     std::string_view m_damageTypeName;
-    core::UnitPart::State m_damageState;
+    core::DamageStatus m_damageStatus;
 };
 
 

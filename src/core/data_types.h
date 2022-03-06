@@ -118,6 +118,11 @@ struct Angle {
     }
 };
 
+enum  class PointOfView {
+    Player,
+    Enemy
+};
+
 enum class ActionStatus
 {
     empty = 0 ,
