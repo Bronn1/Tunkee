@@ -17,9 +17,17 @@ namespace textures
         T34TankTurret,
         Explosion,
         Missile,
-        TooltipStates
-    };
+        ExplodedIcon,
+        GunDestroyedIcon,
+        EngineDestroyedIcon,
+        CrewShellshockedIcon,
+        BurningIcon,
+        LoaderKilledIcon,
+        HiddenDamageIcon,
+        MovementInfoIcon,
+        ShootingInfoIcon
 
+    };
 }
 
 namespace fonts
@@ -50,9 +58,9 @@ public:
         (*resource).setSmooth(true);
         m_holder.insert({ id, std::move(resource) });
     }
-    Resource& get(const Identifier& id) {
+    Resource& get(const Identifier& id) const {
         assert(m_holder.contains(id));
-        return (*m_holder[id]);
+        return (*m_holder.at(id));
     }
     
 private:

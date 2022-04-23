@@ -99,7 +99,7 @@ std::vector<UnitIdentifier> core::UnitManager::getUnitIDsForPlayer(const PlayerI
 void core::UnitManager::setAllDamageVisible()
 {
     for (auto& [id, unit] : m_units) 
-        unit->setDamageVisibleFor();
+        unit->setDamageVisibleForEnemy();
 }
 
 UnitIdentifier core::UnitManager::addUnit(UnitPtr unit)

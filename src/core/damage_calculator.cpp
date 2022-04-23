@@ -23,10 +23,10 @@ std::vector<UnitStateInfo> core::DamageCalculator::nextTurn()
 {
     std::vector<UnitStateInfo> changedUnitStates;
     std::set<Unit*> tmp{};
-    //move these constans later, better to make them constexpr
-    const int kChanceToStopBurning = 5;
-    const int kChanceToExplode = 8;
-    const int kChanceToKeepBurning = 10;
+    //move these constans later
+    constexpr int kChanceToStopBurning = 5;
+    constexpr  int kChanceToExplode = 8;
+    constexpr  int kChanceToKeepBurning = 10;
     for (auto& unit : m_burningUnits)
     {
         int rolledNumber = rollDiceWithFaces(kChanceToKeepBurning);

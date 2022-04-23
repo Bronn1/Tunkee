@@ -54,7 +54,7 @@ namespace events {
             std::erase(m_observers, obs);
         }
     protected:
-        void notify(const GameInfoVariant& info) const
+        void notifyHost(const GameInfoVariant& info) const
         {
             for (const auto& observer : m_observers)
             {

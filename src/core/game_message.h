@@ -22,9 +22,11 @@ namespace core
         UnitPartsInfoVec m_unitParts{};
         //UnitType m_unitType;
         std::pair<UnitActions, UnitActions> m_lastActions{ UnitActions::None, UnitActions::None };
+        ActionState m_actionState;
         UnitIdentifier m_id{ UnitIdentifier{0} };
         //ThreatLevel threatLvl{}
         PointOfView m_pointOfView{ PointOfView::Enemy };
+        int m_hiddenDamageCounter{ 0 };
         bool m_isAlive{ true };
         bool m_isRotatableTo{ false };
         bool m_isInLineOfSight{  false };

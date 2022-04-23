@@ -57,3 +57,13 @@ void core::Crew::setVisibleForEnemy(bool isVisibleForEnemy)
     for (auto& member : m_members)
         member.m_isVisibleForEnemy = isVisibleForEnemy;
 }
+
+bool core::Crew::contains(std::string_view memberName) const
+{
+    auto ifNameEqual = [&memberName](const auto& crewInfo) { return crewInfo.m_name == memberName; };
+    auto crewIt = std::find_if(begin(m_members), end(m_members), ifNameEqual);
+    if (crewIt == end(m_members))
+        return false;
+
+    return true;
+}

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "scene_node.h"
+//#include "scene_node.h"
+#include "interface_unit_view.h"
 #include "../units_factory.h"
-#include "../controllers/game_controller.h"
+#include "src/controllers/game_controller.h"
 #include "board_view.h"
 
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -21,6 +22,7 @@ namespace graphics
     constexpr int kBackgroundColorAlpha = 120;
     constexpr int kTooltipCharacterSize = 120;
     constexpr int kBorderOffset = 20;
+    using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
     using UnitIDMapUnit = std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>;
 
     class UnitSetupView : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
@@ -44,13 +46,14 @@ namespace graphics
         inline void moveDragDropUnit(const sf::Vector2f& mousePos) { m_unitDragDropView->setPosition(mousePos); }
         void setUnitSetupController(controllers::UnitSetupContoller controller) { m_unitSetupController = std::move(controller); }
         void resetPickedUnit();
+        const TextureHolder& getTextureHolder() const { return m_tankFactory.getTexureHolder(); }
 
         UnitIDMapUnit& getAddedUnitRef() { return m_addedUnits; }
 
     private:
         sf::RectangleShape m_background;
         std::vector<UnitViewPtr> m_availableUnits;
-        SceneNodePtr m_unitDragDropView;
+        UnitViewPtr m_unitDragDropView;
         UnitIDMapUnit m_addedUnits;
         controllers::UnitSetupContoller m_unitSetupController;
 

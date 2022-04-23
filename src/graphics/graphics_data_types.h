@@ -18,4 +18,6 @@ struct GraphicMovementFrame {
     const float fullPath{ 1.f };
 };
 
+
+
 //using BoardSecondLayerColor = const sf::Color::(100, 9, 12, 250);

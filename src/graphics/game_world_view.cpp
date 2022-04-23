@@ -4,6 +4,8 @@
 #include <ranges>
 
 const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+constexpr float kTooltipAnimationTime = 3;
+constexpr float kZoomViewOffset = 0.2f;
 
 graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller) :
     m_renderTarget(target), m_board(std::move(board)), m_gameController(controller)
@@ -57,11 +59,13 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
     switch (event.type)
     {
     case sf::Event::MouseButtonReleased:
-        if (!checkIfClickedOnUnit(mousePos))
-        {
-            onBoardClicked(mousePos);
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            if (!checkIfClickedOnUnit(mousePos))
+            {
+                onBoardClicked(mousePos);
+            }
         }
-        if (event.mouseButton.button == sf::Mouse::Right) {
+        else  {
             m_isViewMoving = false;
         }
         break;
@@ -72,11 +76,12 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
         }
         break;
     case sf::Event::MouseMoved:
-    {
         checkMousePosition(mousePos);
         moveView(event, mousePos);
         break;;
-    }
+    case sf::Event::MouseWheelMoved:
+        resizeView((event.mouseWheelScroll.wheel > 0.f) ? -kZoomViewOffset : kZoomViewOffset);
+        break;
     case sf::Event::KeyPressed:
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
         {
@@ -90,7 +95,7 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
             clearMoveArea();
             m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
             m_gameController.finishActionPhase(m_playerId);
-            std::erase_if(m_views,  [](const auto& value) {return value->isDestoyed() == true; });
+            std::erase_if(m_views,  [](const auto& value) {return value->isMarkedToDelete() == true; });
         }
         break;
     case sf::Event::Closed:
@@ -116,6 +121,15 @@ void graphics::GameWorldView::moveView(const sf::Event& event, const sf::Vector2
         m_renderTarget.setView(m_view);
         m_mousePosBeforeMoving = m_renderTarget.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
     }
+}
+
+void graphics::GameWorldView::resizeView(const float resizeFactor)
+{
+    m_view.zoom(1.f + resizeFactor);
+    m_renderTarget.setView(m_view);
+    auto [width, height] = m_view.getSize();
+    auto viewCenter = m_view.getCenter();
+    m_unitsSetupView.setCenter(sf::Vector2f{ viewCenter.x, viewCenter.y + height / 2.f });
 }
 
 bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
@@ -178,38 +192,27 @@ void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
 
 void graphics::GameWorldView::informationMsgRecieved(const core::UnitStateMsg& unitStateMsg)
 {
-    auto mousePos = sf::Mouse::getPosition(m_renderTarget);
-    auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
-    //std::cout << unitStateMsg.m_isAlive << " " << unitStateMsg.m_id.identifier << " " << unitStateMsg.m_unitParts[0].chanceToHitPercent << "\n";
-    
-    /*
-    * TODO only for test rn, this should be part of msg factory or part of message parser, it will replace msg data with textures and markers
-    * Cant do it for now cuz dont have any textures yet, and need to think what should be displayed as a text and what as a texture
-    */
-    std::string tmp = (unitStateMsg.m_isAlive) ? "alive \n" : "destroyed \n";
-    std::string text = "Unit is " + tmp;
+    std::vector<tankDamageSystem::DamageTo> damageToVec{};
+    if (unitStateMsg.m_hiddenDamageCounter)
+        damageToVec.push_back(core::kHiddenDamage);
     for (const auto& crew : unitStateMsg.m_crewInfo)
-    {
-        std::string  strStatus = "Ideal\n";
-        if (crew.m_state == tankDamageSystem::DamageStatus::Hidden) strStatus = "???\n";
-        else  if (crew.m_state == tankDamageSystem::DamageStatus::Damaged) strStatus = "Killed\n";
-        else  if (crew.m_state == tankDamageSystem::DamageStatus::Normal) strStatus = "alive\n";
-        text += std::string(crew.m_name) + "(" + std::to_string(crew.amountOfmembers) + "): " + strStatus;
-        //crew.m_isGunMember
-    }
+        if (crew.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(crew.m_name);
     for (const auto& part : unitStateMsg.m_unitParts)
+        if(part.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(part.m_name);
+
+    std::vector<std::string> unitInfo{}; 
+    if (unitStateMsg.m_pointOfView == PointOfView::Player)
     {
-        std::string  strStatus = "Ideal\n";
-        if (part.m_state == tankDamageSystem::DamageStatus::Hidden) strStatus = "???\n";
-        else  if (part.m_state == tankDamageSystem::DamageStatus::Damaged) strStatus = "Destroyed\n";
-        else  if (part.m_state == tankDamageSystem::DamageStatus::Normal) strStatus = "Normal state\n";
-        text += std::string(part.m_name) + ": " + strStatus;
-        //crew.m_isGunMember
+        unitInfo.push_back(std::to_string(unitStateMsg.m_actionState.m_remainingMovePoints.distance) + "/" + std::to_string(unitStateMsg.m_actionState.m_fullMovePoints.distance));
+        unitInfo.push_back(std::to_string(unitStateMsg.m_actionState.m_remainingShots.shots) + "/" + std::to_string(unitStateMsg.m_actionState.m_rateOfFire.shots));
     }
-    //std::cout << text << "\n";
-    m_units[unitStateMsg.m_id]->setTooltipText(text);
-    m_units[unitStateMsg.m_id]->showTooltip(translatedMousePos);
-    ///m_units[unitStateMsg.m_id]->
+    else
+    {
+        unitInfo.push_back("??/??");
+        unitInfo.push_back("??/??");
+    }
+    unitInfo.push_back(std::to_string(unitStateMsg.m_hiddenDamageCounter));
+    m_units[unitStateMsg.m_id]->setTooltipMsg(unitStateMsg.m_isAlive, unitInfo, damageToVec);
 }
 
 void graphics::GameWorldView::moveAreaRecieved(const MoveAreaInfo& moveArea)
@@ -230,33 +233,40 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
     core::GameTile dest = moveUnit.m_unitPos;
     if (size(moveUnit.m_movePath)) dest = moveUnit.m_movePath.back();
     auto rotationPoint = m_board.getTileVertex(dest, moveUnit.m_rotation);
-    m_units[moveUnit.m_unitId]->rotateTo(m_units[moveUnit.m_unitId]->getPosition(), rotationPoint);
+    m_units[moveUnit.m_unitId]->setUpRotationAnimation(m_units[moveUnit.m_unitId]->getPosition(), rotationPoint);
     m_units[moveUnit.m_unitId]->setCurrentRotationPoint(rotationPoint);
 
-    auto movementPath = m_board.getBulkPositionsByTiles(moveUnit.m_movePath);
+    auto movementPath = m_board.convertTileCoordinatesToScreenPos(moveUnit.m_movePath);
     if (size(movementPath) == 0) return;
 
-    m_units[moveUnit.m_unitId]->setMovementState(std::move(movementPath));
+    m_units[moveUnit.m_unitId]->setMovementPath(std::move(movementPath));
     //m_isPerformingAction = true;
 }
 
 void graphics::GameWorldView::ChangeUnitStateRecieved(const UnitStateInfo& unitState)
 {
+    auto animatedTooltip = std::make_unique<AnimatedTooltip>(m_unitsSetupView.getTextureHolder(), kTooltipAnimationTime);
+    animatedTooltip->setText(std::string(unitState.m_damageTypeName), m_units[unitState.m_targetUnit]->getPosition());
+    m_views.push_back(std::move(animatedTooltip));
+    
+    Angle requiredGunAngleToShot = m_selectedUnit->calculateGunRotation(m_units[unitState.m_srcUnit]->getPosition(), m_units[unitState.m_targetUnit]->getPosition());
+    m_gameController.onShowUnitStateMsg(unitState.m_srcUnit, unitState.m_targetUnit, requiredGunAngleToShot);
+
     if (unitState.m_damageTypeName == core::kShotMissed)
         return;
 
     if (unitState.m_damageStatus == core::DamageStatus::Damaged)
         if (unitState.m_srcUnit != UnitIdentifier{ 0 })
-            m_views.push_back(m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName));
+            m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName);
         else
             m_units[unitState.m_targetUnit]->showDamage(unitState.m_damageTypeName);
     else
-        m_units[unitState.m_targetUnit]->resetUnitState(unitState.m_damageTypeName);
+        m_units[unitState.m_targetUnit]->recoveryDamage(unitState.m_damageTypeName);
 }
 
 void graphics::GameWorldView::rotateGunRecieved(const RotateGunInfo& rotateUnitGun)
 {
-    m_units[rotateUnitGun.m_unitId]->setGunRotation(rotateUnitGun.m_gunRotation);
+    m_units[rotateUnitGun.m_unitId]->setUpGunRotationAnimation(rotateUnitGun.m_gunRotation);
 }
 
 void graphics::GameWorldView::clearMoveArea()

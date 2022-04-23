@@ -56,12 +56,6 @@ namespace core
        
     };
 
-
-    struct PlayerActiveUnitsCount {
-        PlayerIdentifier id{ 0 };
-        int unitsCount{ 0 };
-    };
-
     /* In first version of the rules players move units in turns one by one until all of units run out 
     * of possible actions. Player can not select another unit if he already started action with 
     * one unit until all possible actions has been used.

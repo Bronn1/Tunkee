@@ -13,9 +13,9 @@
 class GameBuilder;
 
 namespace graphics {
-    using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
+    using SceneNodePtr = std::unique_ptr<graphics::ISceneNode>;
     using ProjectilePtr = std::unique_ptr<graphics::Projectile>;
-    using UnitViewPtr = std::unique_ptr < graphics::UnitView>;
+    using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
 
     class GameWorldView : public events::Observer<core::GameEngine>
     {
@@ -29,6 +29,7 @@ namespace graphics {
     private:
         void handleEvent(const sf::Event& event, const sf::Vector2f& mousePos);
         void moveView(const sf::Event& event, const sf::Vector2f& mousePos);
+        void resizeView(const float resizeFactor);
         bool checkIfClickedOnUnit(const sf::Vector2f& mousePos);
         void checkMousePosition(const sf::Vector2f& mousePos);
         void onBoardClicked(const sf::Vector2f& mousePos);
@@ -50,7 +51,7 @@ namespace graphics {
         std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>  m_units{};
         std::vector< SceneNodePtr> m_views;
         PlayerIdentifier m_playerId{ 1 };
-        UnitView*  m_selectedUnit;
+        IUnitView*  m_selectedUnit;
         bool m_isPerformingAction{ false };
         controllers::GameController m_gameController;
 

@@ -75,7 +75,7 @@ controllers::UnitSetupContoller::UnitSetupContoller(core::GameEngine* engine, co
 {
 }
 
-std::optional<UnitViewPtr> controllers::UnitSetupContoller::addUnit(const core::GameTile& position)
+std::optional<controllers::UnitNodePtr> controllers::UnitSetupContoller::addUnit(const core::GameTile& position)
 {
     Angle rotation{ 270.f };
     float scale = 0.17f;

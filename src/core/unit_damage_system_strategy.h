@@ -23,7 +23,12 @@ namespace core
     class IDamageSystemStrategy
     {
     public:
-        virtual void applyDamage(const std::string_view damageType, ActionStatus actionStatus) = 0;
+        /**
+         * @brief applay damage
+         * @param damageType 
+         * @param actionStatus - if unit has full or empty action status(might be useful for damage which makes unit miss turn)
+        */
+        virtual void applyDamage(const DamageTo damageType, ActionStatus actionStatus) = 0;
         virtual TileDistance getMoveDistanceWithFine(const TileDistance movement) const = 0;
         virtual Shots  getRateOfFireWithFine(const Shots rateOfFire) const = 0;
         virtual int    amountOfActionCanDo() const = 0;
@@ -31,13 +36,15 @@ namespace core
         virtual bool   isGunsAlive() const = 0;
         virtual bool   isGunsRotatable() const = 0;
         virtual bool   isAlive(PointOfView pointOfView) const = 0;
+        virtual bool isDamageVisibleForEnemy(const DamageTo damageType) const = 0;
         virtual void   nextTurn() = 0;
-        virtual void   setDamageVisibleFor(const std::vector<DamageTo>& damageNames = {}) = 0;
+        virtual void   setDamageVisibleForEnemy(const std::vector<DamageTo>& damageNames = {}) = 0;
         virtual CrewInfo   getCrewInfo() const = 0;
         virtual ~IDamageSystemStrategy() = default;
-        virtual DamageStatus getDamageStatus(const DamageTo damageOf ) const = 0;
+        virtual DamageStatus getDamageStatus(const DamageTo damageType ) const = 0;
         virtual UnitPartsInfoVec getPartsInfo() const = 0;
-        virtual void         setDamageStatus(const DamageTo, const  DamageStatus  state) = 0;
+        virtual void   setDamageStatus(const DamageTo, const  DamageStatus  state) = 0;
+        virtual int    getHiddenDamageCounter() const = 0;
         //void setCrew(const CrewAmount& crew) { m_crew = crew; }
     protected:
         Crew m_crew{};
@@ -84,7 +91,7 @@ namespace tankDamageSystem
     {
     public:
         using enum DamageStatus;
-        void applyDamage(const std::string_view damageType, ActionStatus actionStatus) override;
+        void applyDamage(const DamageTo damageType, ActionStatus actionStatus) override;
         TankDamageSystemStrategy(CrewInfo info);
         TileDistance getMoveDistanceWithFine(const TileDistance movement) const override;
         Shots  getRateOfFireWithFine(const Shots rateOfFire) const override;
@@ -96,20 +103,24 @@ namespace tankDamageSystem
         DamageStatus getDamageStatus(const DamageTo damageOf) const override { return m_damageableParts.at(damageOf).getState(); } // TODO POTENTIAL THROW REFACTOR
         void setDamageStatus(const DamageTo damageType, const  DamageStatus  state) override;
         void   nextTurn() override;
-        void   setDamageVisibleFor(const std::vector<DamageTo>& damageNames = {}) override;
+        void   setDamageVisibleForEnemy(const std::vector<DamageTo>& damageNames = {}) override;
+        bool isDamageVisibleForEnemy(const DamageTo damageType) const override;
         CrewInfo   getCrewInfo() const override { return m_crew.getCrewInfo(); }
         UnitPartsInfoVec getPartsInfo() const;
+        int   getHiddenDamageCounter() const  override { return m_hiddenDamageCounter; }
     private:
         void setActionMiss(const std::string_view damageType, ActionStatus actionStatus);
         void resetMissActionOnNextTurn();
         void checkAliveSystemsAfterDamage();
+        
 
-        std::unordered_map< DamageTo, UnitPart> m_damageableParts{};
+        std::unordered_map<DamageTo, UnitPart> m_damageableParts{};
         std::unordered_map<DamageTo, ActionMiss> m_missingAction{ {kDriver, ActionMiss::none}, {kCrewShellShocked, ActionMiss::none} };
         bool m_isAlive{ true };
         /**
          * @brief With fog of war enemy cannot see some fatal damage(for example crew killed )
         */
         bool m_isAliveForEnemy{ true };
+        int m_hiddenDamageCounter{ 0 };
     };
 }

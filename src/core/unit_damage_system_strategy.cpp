@@ -18,6 +18,8 @@ void tankDamageSystem::TankDamageSystemStrategy::applyDamage(const std::string_v
         m_damageableParts.at(damageType).applyDamage();
 
     checkAliveSystemsAfterDamage();
+    if (!isDamageVisibleForEnemy(damageType))
+        ++m_hiddenDamageCounter;
 }
 
 void tankDamageSystem::TankDamageSystemStrategy::checkAliveSystemsAfterDamage()
@@ -36,6 +38,16 @@ void tankDamageSystem::TankDamageSystemStrategy::checkAliveSystemsAfterDamage()
 
     if(m_damageableParts[kEngine].getState() == Damaged && m_damageableParts[kGunDestroyed].getState() == Damaged)
         m_isAlive = false;
+}
+
+bool tankDamageSystem::TankDamageSystemStrategy::isDamageVisibleForEnemy(const DamageTo damageType) const
+{
+    if (m_damageableParts.contains(damageType))
+        return m_damageableParts.at(damageType).isVisibleForEnemy();
+    if(m_crew.contains(damageType))
+        return m_crew.isVisibleForEnemy();
+
+    return true;
 }
 
  
@@ -150,13 +162,14 @@ void tankDamageSystem::TankDamageSystemStrategy::nextTurn()
     resetMissActionOnNextTurn();
 }
 
-void tankDamageSystem::TankDamageSystemStrategy::setDamageVisibleFor(const std::vector<DamageTo>& damageNames)
+void tankDamageSystem::TankDamageSystemStrategy::setDamageVisibleForEnemy(const std::vector<DamageTo>& damageNames)
 {
     if (std::size(damageNames) == 0)
     {
         m_crew.setVisibleForEnemy(true);
         for (auto& [name, part] : m_damageableParts)
             part.setVisibilityForEnemy(true);
+        m_isAliveForEnemy = m_isAlive;
     }
     else
     {

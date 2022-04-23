@@ -7,6 +7,7 @@
 namespace core
 {
     constexpr std::string_view kShotMissed = "Missed";
+    constexpr std::string_view kHiddenDamage = "Hidden";
     using MemberCount = int;
     using DamageTo = std::string_view;
     using CrewMemberName = std::string_view;
@@ -58,6 +59,7 @@ namespace core
         void initCrew(CrewInfo&& crewInfo) { m_members = crewInfo; }
         bool isVisibleForEnemy() const { return m_isVisibleForEnemy; }
         void setVisibleForEnemy(bool isVisibleForEnemy);
+        bool contains(std::string_view memberName) const;
     private:
         std::vector<CrewMemberInfo> m_members{};
         bool m_isVisibleForEnemy{ false };

@@ -8,8 +8,7 @@
 #include <memory>
 #include <SFML/Graphics/Texture.hpp>
 
-using UnitViewPtr = std::unique_ptr < graphics::UnitView>;
-using UnitModelPtr = std::unique_ptr<core::Unit>;
+
 
 /*class UnitFactory
 {
@@ -21,10 +20,13 @@ protected:
 class TanksFactory 
 {
 public:
+    using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
+    using UnitModelPtr = std::unique_ptr<core::Unit>;
     TanksFactory();
     UnitModelPtr createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier);
     UnitViewPtr createBacisTankView(const UnitIdentifier id, const Angle rotation, const  float scale);
     UnitViewPtr createNullUnitView();
+    const TextureHolder& getTexureHolder() const { return m_textures; }
 private:
     UnitModelPtr createTank(const core::GameTile& pos, const Angle rotation, const TileDistance movement, const PlayerIdentifier);
     UnitViewPtr createTankView(const UnitIdentifier id, const Angle rotation, const float scale);

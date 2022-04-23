@@ -4,7 +4,8 @@ project(Tunkee)
 set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml/SFML-2.5.1)
 set(CMAKE_CXX_STANDARD 23)
-
+#set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
 #add_executable(Tunkee main.cpp)
@@ -30,7 +31,7 @@ set(Header_Files
         "src/graphics/board_view.h"
         "src/graphics/tile_view.h"
         "src/gui/gui.h"
-        "src/graphics/entity_view.h"
+        "src/graphics/interface_unit_view.h"
         "src/graphics/tank_view.h"
         "src/graphics/game_tooltip.h"
         "src/game_builder.h"
@@ -46,6 +47,7 @@ set(Header_Files
         "src/graphics/projectile.h"
         "src/core/game_message.h"
         "src/core/unit_damage_common.h"
+        "src/graphics/common.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -68,7 +70,7 @@ set(Source_Files
         "src/graphics/board_view.cpp"
         "src/graphics/tile_view.cpp"
         "src/gui/gui.cpp"
-        "src/graphics/entity_view.cpp"
+        "src/graphics/interface_unit_view.cpp"
         "src/graphics/tank_view.cpp"
         "src/graphics/game_tooltip.cpp"
         "src/game_builder.cpp"
@@ -83,12 +85,13 @@ set(Source_Files
         "src/graphics/projectile.cpp"
          "src/core/game_message.cpp" 
         "src/core/unit_damage_common.cpp"
+        "src/graphics/common.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES} )
+add_executable(Tunkee ${ALL_FILES})
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

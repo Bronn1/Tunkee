@@ -16,7 +16,7 @@ using UnitManagerPtr = std::unique_ptr<core::UnitManager>;
 using GameStateCheckerPtr = std::unique_ptr<core::GameRulesInterface>;
 
 namespace core {
-
+    constexpr int kHostID = 1;
     class GameEngine : public events::Events<GameEngine>
     {
     public:
@@ -47,6 +47,7 @@ namespace core {
         GameStateCheckerPtr m_gameRules;
         Player m_playerOne{ NullPlayer{} };
         Player m_playerTwo{ NullPlayer{} };
+        PlayerIdentifier m_gameHost{ kHostID };
         std::stack < ActionPtr > m_actionHistory;
         DamageCalculator m_damageCalculator;
         UnitManagerPtr  m_unitManager;

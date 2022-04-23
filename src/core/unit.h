@@ -7,7 +7,6 @@
 
 namespace core 
 {
-
     class GameBoard;
     /** @brief Contains logic of possible action unit can do in
     * a current turn. Unit has two possible types  of action
@@ -40,7 +39,7 @@ namespace core
 
     public: // Mandatory implementations
         TileDistance getRemainingMoveInFirstHalf() const;
-        TileDistance getHalfMovePointsRoundedUp() const;
+        TileDistance getHalfMovePointsRoundedUp() const; 
         TileDistance getHalfMovePoints() const { return TileDistance{ m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
         Shots getHalfShotsRoundedUp() const;
         Shots getHalfShots() const { return Shots{ m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire).shots / 2 }; }
@@ -68,28 +67,10 @@ namespace core
         std::vector<std::string_view> damageDone{};
     };
 
-    class UnitLogger
-    {
-    public:
-        // pop
-        // isCurrentTurnEmpty()
-        // 
-        //std::string getFullInformation() const;
-    private:
-        std::deque< UnitTurnInfo> m_turnsHistory{};
-        // get unit infoMessage
-        // undo checkIfEnemysecretsFind for fog of war check if we can undo last move or shot or rotation should be function in game engine undo command(pop stack( with flag undoable or not, 
-        // if yes pass to logger and unit to change state
-        //getlastmove
-        // getlastShot
-        // 
-    };
-
     enum class UnitType: unsigned char
     {
         Tank
     };
-
 
     class Unit : public UnitActionState
     {
@@ -126,6 +107,7 @@ namespace core
     public:
         // Mandatory implementation
         bool isAlive(PointOfView pointOfView) const { return m_damageSystemStrategy->isAlive(pointOfView); }
+        bool isDamageVisibleForEnemy(DamageTo damage) const { return m_damageSystemStrategy->isDamageVisibleForEnemy(damage); }
         ActionStatus isUnitHaveFullActionState() const;
         Attack getAttack() const { return m_attack; }
         inline UnitIdentifier getID() const { return m_id; }
@@ -133,7 +115,7 @@ namespace core
         inline GameTile getPosition() const { return m_position; }
         HexVertexNumber getUnitVertexRotation() const { return m_unitRotation; }
         TileDistance getRangeOfFire() const { return m_rangeOfFire; }
-        Shots getRateOfFire() const { return m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire); }
+        Shots getRateOfFire() const { return m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire); } // reduce amount of get/set by replacing separate data into action status struct
         inline Angle getGunRotation() const { return m_gunRotation; }
         inline PlayerIdentifier getOwnerID() const { return m_owner; }
         TileDistance getFullMovement() const { return m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints); }
@@ -142,6 +124,7 @@ namespace core
         DamageStatus getDamageStatus(const DamageTo damageOf) const { return m_damageSystemStrategy->getDamageStatus(damageOf); }
         CrewInfo getCrewInfo() const { return m_damageSystemStrategy->getCrewInfo(); }
         UnitPartsInfoVec getUnitPartsInfo() const { return m_damageSystemStrategy->getPartsInfo(); }
+        int getHiddenDamageCounter() const { return m_damageSystemStrategy->getHiddenDamageCounter(); }
         void setDamageStatus(const DamageTo damageTo, const  DamageStatus  state) { m_damageSystemStrategy->setDamageStatus(damageTo, state); }
         inline void setOwner(const PlayerIdentifier id) { m_owner = id; }
         inline void setPosition(const GameTile& pos) { m_position = pos; }
@@ -150,7 +133,7 @@ namespace core
         inline void setAttack(const Attack attack) { m_attack = attack; }
         void setBodyRotation(const HexVertexNumber rotation) { m_unitRotation = rotation; }
         void  setRangeOfFire(const TileDistance shootingDistance) { m_rangeOfFire = shootingDistance; }
-        void   setDamageVisibleFor(const std::vector<DamageTo>& damageNames = {}) { m_damageSystemStrategy->setDamageVisibleFor(damageNames); }
+        void   setDamageVisibleForEnemy(const std::vector<DamageTo>& damageNames = {}) { m_damageSystemStrategy->setDamageVisibleForEnemy(damageNames); }
 
         bool hasActionLeft() const { return canMove() || canShoot(); }
         virtual ~Unit() = default;

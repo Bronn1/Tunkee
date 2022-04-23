@@ -32,10 +32,11 @@ void TunkeGame::run()
     worldBuilder.addAi();
     auto testBoard = worldBuilder.getBoardModel();
     auto worldView = worldBuilder.getWorldView();
+    sf::Color backgroundGrass{ 83, 132, 66 };
 
     while (m_window.isOpen()) {
         sf::Event event;
-        m_window.clear(sf::Color::Green);
+        m_window.clear(backgroundGrass);
         worldView->draw();
         worldView->update(event);
         // should use screen stack
@@ -46,7 +47,7 @@ void TunkeGame::run()
                 m_window.close();
         }*/
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(15));
+       // std::this_thread::sleep_for(std::chrono::milliseconds(10));
         m_window.display();
     }
 }

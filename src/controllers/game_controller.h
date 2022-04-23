@@ -3,7 +3,6 @@
 #include "src/core/game_engine.h"
 #include "src/core/data_types.h"
 #include "src/core/game_tile.h"
-#include "src/graphics/scene_node.h"
 #include "src/units_factory.h"
 
 #include <SFML/Graphics/Texture.hpp>
@@ -35,14 +34,14 @@ namespace controllers {
         PlayerIdentifier m_player;
     };
 
-    using SceneNodePtr = std::unique_ptr<graphics::SceneNode>;
+    using UnitNodePtr = std::unique_ptr<graphics::IUnitView>;
 
     class UnitSetupContoller
     {
     public:
         UnitSetupContoller() = default;
         UnitSetupContoller(core::GameEngine* engine, const PlayerIdentifier player);
-        std::optional<UnitViewPtr> addUnit(const core::GameTile& position);
+        std::optional<UnitNodePtr> addUnit(const core::GameTile& position);
         //void setWorldView(graphics::GameWorldView* worldView) { m_worldView = worldView; };
     private:
         core::GameEngine* m_gameEngine;

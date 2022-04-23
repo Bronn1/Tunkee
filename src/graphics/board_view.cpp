@@ -63,7 +63,7 @@ sf::Vector2f graphics::BoardView::getPositionByTileCoordinates(const core::GameT
     }
 }
 
-std::stack<sf::Vector2f> graphics::BoardView::getBulkPositionsByTiles(const std::vector<core::GameTile>& coordinates) const
+std::stack<sf::Vector2f> graphics::BoardView::convertTileCoordinatesToScreenPos(const std::vector<core::GameTile>& coordinates) const
 {
     std::stack<sf::Vector2f> positions{};
     for (auto it = std::rbegin(coordinates); it != std::rend(coordinates); it++)

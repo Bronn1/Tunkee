@@ -139,5 +139,12 @@ struct Comparator {
 
 };
 
+struct ActionState {
+    TileDistance m_fullMovePoints{ 0 };
+    Shots m_rateOfFire{ 0 };
+    TileDistance m_remainingMovePoints{ 0 };
+    Shots m_remainingShots{ 0 };
+};
+
 Angle VertexToAngle(HexVertexNumber vertex); 
 HexVertexNumber AngleToClosestVertex(Angle angle);
