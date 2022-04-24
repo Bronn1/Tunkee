@@ -5,7 +5,7 @@ set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml/SFML-2.5.1)
 set(CMAKE_CXX_STANDARD 23)
 #set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 
 #add_executable(Tunkee main.cpp)

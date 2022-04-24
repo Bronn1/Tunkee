@@ -33,9 +33,8 @@ void TunkeGame::run()
     auto testBoard = worldBuilder.getBoardModel();
     auto worldView = worldBuilder.getWorldView();
     sf::Color backgroundGrass{ 83, 132, 66 };
-
+    sf::Event event;
     while (m_window.isOpen()) {
-        sf::Event event;
         m_window.clear(backgroundGrass);
         worldView->draw();
         worldView->update(event);

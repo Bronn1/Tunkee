@@ -6,6 +6,7 @@
 const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 constexpr float kTooltipAnimationTime = 3;
 constexpr float kZoomViewOffset = 0.2f;
+const sf::Time kTimePerAnimationUpdate = sf::milliseconds(9);
 
 graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller) :
     m_renderTarget(target), m_board(std::move(board)), m_gameController(controller)
@@ -15,6 +16,7 @@ graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board
     m_unitsSetupView.setSize(sf::Vector2f{ (float)height, (float)width / 4.f });
     auto [view_height, view_width] = m_view.getSize();
     m_unitsSetupView.setCenter(sf::Vector2f{ (float)view_height / 2.f, (float)view_width });
+    m_timer.restart();
 }
 
 void graphics::GameWorldView::draw()
@@ -36,26 +38,29 @@ void graphics::GameWorldView::draw()
 
 void graphics::GameWorldView::update(sf::Event& event)
 {
+
     auto mousePos = sf::Mouse::getPosition(m_renderTarget);
     auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
-
-    // actually useless anyway events are gonna be saved in poll event
-    if (!m_selectedUnit->isPerformingAction())
+    while (m_renderTarget.pollEvent(event))
     {
-        while (m_renderTarget.pollEvent(event))
-        {
-            m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
-            handleEvent(event, translatedMousePos);
+        if (m_selectedUnit->isPerformingAction()){
+            //we need to skip animation if player clicking while unit is doing smth
+            // TODO for now just continue to fix not responding bug
+            continue;
         }
+        m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
+        handleEvent(event, translatedMousePos);
     }
 
+    if (m_timer.getElapsedTime() < kTimePerAnimationUpdate) { return; }
+    m_timer.restart();
     for (const auto& [id, unit] : m_units) unit->update(TimePerFrame);
     for (const auto& view : m_views) view->update(TimePerFrame);
 }
 
 void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
 {
-    // TODO would be good to refactor this horrible switch with states or at least separates functions
+    // TODO would be good to refactor this switch with states or at least separate functions
     switch (event.type)
     {
     case sf::Event::MouseButtonReleased:
@@ -80,7 +85,7 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
         moveView(event, mousePos);
         break;;
     case sf::Event::MouseWheelMoved:
-        resizeView((event.mouseWheelScroll.wheel > 0.f) ? -kZoomViewOffset : kZoomViewOffset);
+        resizeView((static_cast<int>(event.mouseWheelScroll.wheel) > 0) ? -kZoomViewOffset : kZoomViewOffset);
         break;
     case sf::Event::KeyPressed:
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
@@ -199,7 +204,7 @@ void graphics::GameWorldView::informationMsgRecieved(const core::UnitStateMsg& u
         if (crew.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(crew.m_name);
     for (const auto& part : unitStateMsg.m_unitParts)
         if(part.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(part.m_name);
-
+    // fog of war
     std::vector<std::string> unitInfo{}; 
     if (unitStateMsg.m_pointOfView == PointOfView::Player)
     {
