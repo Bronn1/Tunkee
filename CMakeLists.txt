@@ -30,7 +30,7 @@ set(Header_Files
         "src/graphics/scene_node.h"
         "src/graphics/board_view.h"
         "src/graphics/tile_view.h"
-        "src/gui/gui.h"
+        "src/gui/main_menu.h"
         "src/graphics/interface_unit_view.h"
         "src/graphics/tank_view.h"
         "src/graphics/game_tooltip.h"
@@ -69,7 +69,7 @@ set(Source_Files
         "src/graphics/scene_node.cpp"
         "src/graphics/board_view.cpp"
         "src/graphics/tile_view.cpp"
-        "src/gui/gui.cpp"
+        "src/gui/main_menu.cpp"
         "src/graphics/interface_unit_view.cpp"
         "src/graphics/tank_view.cpp"
         "src/graphics/game_tooltip.cpp"
@@ -91,7 +91,7 @@ source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES})
+add_executable(Tunkee ${ALL_FILES} "src/gui/text_label.h" "src/gui/text_label.cpp")
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

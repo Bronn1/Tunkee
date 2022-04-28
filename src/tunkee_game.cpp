@@ -1,5 +1,4 @@
 #include "tunkee_game.h"
-#include "gui/gui.h"
 #include "graphics/board_view.h"
 #include "core/game_board.h"
 #include "core/game_engine.h"
@@ -20,7 +19,7 @@ TunkeGame::TunkeGame() :
 {
 }
 
-void TunkeGame::run()
+void TunkeGame::runGameLoop()
 {
     // TODO  add texture holder
     sf::Texture      m_grassTexture1;
@@ -38,15 +37,32 @@ void TunkeGame::run()
         m_window.clear(backgroundGrass);
         worldView->draw();
         worldView->update(event);
-        // should use screen stack
-        /*while (m_window.pollEvent(event)) {
-            worldView.update(event.type);
+        m_window.display();
+    }
+}
 
-            if (event.type == sf::Event::Closed)
-                m_window.close();
-        }*/
-
-       // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+void TunkeGame::run()
+{
+    sf::Color backgroundGrass{ 83, 132, 66 };
+    sf::Event event;
+    gui::MainMenu menu(static_cast<float>(m_window.getSize().x));
+    using enum gui::MainMenu::Dialogs;
+    while (m_window.isOpen()) {
+        m_window.clear(backgroundGrass);
+        m_window.draw(menu);
+        while (m_window.pollEvent(event)) {
+            gui::MainMenu::Dialogs dialogStatus =  menu.update(event);
+            switch (dialogStatus)
+            {
+            case SinglePlayer:
+                runGameLoop();
+                break;
+            case QuitGame:
+                return;
+            default:
+                break;
+            }
+        }
         m_window.display();
     }
 }

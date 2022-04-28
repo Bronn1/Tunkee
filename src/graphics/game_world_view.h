@@ -56,7 +56,6 @@ namespace graphics {
         controllers::GameController m_gameController;
 
         UnitSetupView m_unitsSetupView;
-        bool m_isUnitSetupViewHided{ false };
         sf::Clock m_timer;
 
         // TODO prob hide all view logic inside separate class

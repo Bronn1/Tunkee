@@ -43,7 +43,7 @@ namespace graphics
         void  showTooltip(const sf::Vector2f& mouse_pos) override;
         void showDamage(std::string_view damageType) override;
         void setUpGunRotationAnimation(const Angle& gunRotation) override;
-        void  setUpRotationAnimation(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override;
+        void setUpRotationAnimation(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) override;
         void recoveryDamage( std::string_view damageType) override;
         void setMovementPath(std::stack < sf::Vector2f> path) override;
         void setCurrentRotationPoint(const sf::Vector2f& point) override  { m_currentRotationPoint = point; } ;
@@ -65,7 +65,7 @@ namespace graphics
         // TODO change all damage type to Unit parts 
         bool m_isDestroyed{ false };
         bool m_isSelected{ false };
-        GameTooltip m_tooltipDescription;
+        UnitInfoTooltip m_tooltipDescription;
         TextureHolder& m_textures;
         GraphicMovementFrame m_moveFrame;
         MoveState m_currentState{ MoveState::Idle };

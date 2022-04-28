@@ -2,9 +2,10 @@
 
 //#include "scene_node.h"
 #include "interface_unit_view.h"
-#include "../units_factory.h"
+#include "src/units_factory.h"
 #include "src/controllers/game_controller.h"
 #include "board_view.h"
+#include "game_tooltip.h"
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/NonCopyable.hpp>
@@ -20,25 +21,30 @@ namespace graphics
     constexpr int kBackgroundColorG = 169;
     constexpr int kBackgroundColorB = 169;
     constexpr int kBackgroundColorAlpha = 120;
-    constexpr int kTooltipCharacterSize = 120;
-    constexpr int kBorderOffset = 20;
+
     using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
     using UnitIDMapUnit = std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>;
 
+    // TODO standardize with ISceneNode interface
     class UnitSetupView : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
     {
     public:
-
+        enum class State
+        {
+            Idle,
+            UnitPicked,
+            Hidden
+        };
         UnitSetupView();
-
         void  show();
-        void  hide();
         void  setAvailableUnits();
-        void  draw(sf::RenderWindow& target) const;
-        void  draw(sf::RenderTarget& target, sf::RenderStates states) const override {}
+
+        void  draw(sf::RenderTarget& target, sf::RenderStates states) const override;
         void  setSize(const sf::Vector2f& size);
         void  handleEvent(const sf::Event::EventType& evenType, const sf::Vector2f& mousePos, const BoardView& board);
-        inline bool isUnitNewUnitPicked() const { return is_addingNewUnit; }
+        inline void  setState(const State state) { m_state = state; }
+        void update(sf::Time dt);
+        //inline bool isUnitNewUnitPicked() const { return is_addingNewUnit; }
 
         //virtual ~UnitSetupView() = default;
         void setCenter(const sf::Vector2f& pos);
@@ -53,12 +59,13 @@ namespace graphics
     private:
         sf::RectangleShape m_background;
         std::vector<UnitViewPtr> m_availableUnits;
+        BlinkingTooltip m_textHelper;
         UnitViewPtr m_unitDragDropView;
         UnitIDMapUnit m_addedUnits;
         controllers::UnitSetupContoller m_unitSetupController;
+        State m_state{ State::Idle };
 
         TanksFactory m_tankFactory;
-        bool is_addingNewUnit{ false };
         const sf::Color m_backgroundColor{ kBackgroundColorR, kBackgroundColorG, kBackgroundColorB, kBackgroundColorAlpha };
     };
 }

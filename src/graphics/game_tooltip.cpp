@@ -8,7 +8,7 @@ constexpr float ktextHorizontalOrientation = 360;
 
 #include <iostream>
 
-graphics::GameTooltip::GameTooltip(const TextureHolder& textureHolder) : m_textures(textureHolder)
+graphics::UnitInfoTooltip::UnitInfoTooltip(const TextureHolder& textureHolder) : m_textures(textureHolder)
 {
     // TODO move all fonts to texture manager
     m_font.loadFromFile("data/examples/comic.ttf");
@@ -22,7 +22,7 @@ graphics::GameTooltip::GameTooltip(const TextureHolder& textureHolder) : m_textu
     m_shootingStatusIcon.setTexture(m_textures.get(textures::ID::ShootingInfoIcon));
 }
 
-void graphics::GameTooltip::initText()
+void graphics::UnitInfoTooltip::initText()
 {
     m_unitTypeInfo.setFont(m_font);
     m_unitTypeInfo.setRotation(ktextHorizontalOrientation);
@@ -47,7 +47,7 @@ void graphics::GameTooltip::initText()
     m_hiddenDamageCounter.setFillColor(sf::Color::Black);
 }
 
-void graphics::GameTooltip::show()
+void graphics::UnitInfoTooltip::show()
 {
     m_unitTypeInfo.setFillColor(sf::Color::Black);
     m_aliveInfo.setFillColor(m_aliveColor);
@@ -61,7 +61,7 @@ void graphics::GameTooltip::show()
     m_movementStatusIcon.setColor(sf::Color::White);
 }
 
-void graphics::GameTooltip::hide()
+void graphics::UnitInfoTooltip::hide()
 {
     m_unitTypeInfo.setFillColor(sf::Color::Transparent);
     m_aliveInfo.setFillColor(sf::Color::Transparent);
@@ -75,11 +75,11 @@ void graphics::GameTooltip::hide()
     m_movementStatusIcon.setColor(sf::Color::Transparent);
 }
 
-void graphics::GameTooltip::setText(const std::string& text)
+void graphics::UnitInfoTooltip::setText(const std::string& text)
 {
 }
 
-void graphics::GameTooltip::setContent(bool isAlive, const  std::vector<std::string>& unitInfo, const std::vector<textures::ID>& iconsID, const sf::Vector2f& parentCoords)
+void graphics::UnitInfoTooltip::setContent(bool isAlive, const  std::vector<std::string>& unitInfo, const std::vector<textures::ID>& iconsID, const sf::Vector2f& parentCoords)
 {
     m_icons.clear();
     float prevX = kBorderOffset;
@@ -150,7 +150,7 @@ void graphics::GameTooltip::setContent(bool isAlive, const  std::vector<std::str
     m_background.setPosition(parentCoords);
 }
 
-void graphics::GameTooltip::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void graphics::UnitInfoTooltip::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(m_background, states);
     for (const auto& icon : m_icons)
@@ -164,40 +164,24 @@ void graphics::GameTooltip::draw(sf::RenderTarget& target, sf::RenderStates stat
     target.draw(m_hiddenDamageCounter, states);
 }
 
-graphics::AnimatedTooltip::AnimatedTooltip(const TextureHolder& textureHolder, float animationTime) : 
-    m_textures(textureHolder), m_animationTime(sf::seconds(animationTime))
+graphics::GameTooltipCommon::GameTooltipCommon()
 {
+    //TODO remove hardcode, move to resource holder
     if (!m_font.loadFromFile("data/examples/comic.ttf")) {
         throw std::runtime_error("BLEATTTTTTTTTTTT\n");
     }
-  
-    m_movingText.setFont(m_font);
-    m_movingText.setRotation(ktextHorizontalOrientation);
-    m_movingText.setCharacterSize(kTooltipCharacterSize);
-    m_movingText.setFillColor(sf::Color::Transparent);
-    m_movingText.setString("");
-    m_movingIcon.setColor(sf::Color::Transparent);
-    m_movingIcon.setScale({ 0.4f, 0.4f });
 }
 
-void graphics::AnimatedTooltip::setContent(const std::vector<textures::ID>& iconsID, const std::string& text, const sf::Vector2f& parentCoords)
+graphics::AnimatedTooltip::AnimatedTooltip(const TextureHolder& textureHolder, float animationTime) : 
+    m_textures(textureHolder), m_animationTime(sf::seconds(animationTime))
 {
-    m_movingText.setString(text);
-    m_movingText.setPosition(parentCoords.x , parentCoords.y );
-    for (const auto& id : iconsID)
-    {
-        m_movingIcon.setTexture(m_textures.get(id));
-        m_movingIcon.setPosition(parentCoords.x , parentCoords.y );
-        m_movingIcon.setColor(sf::Color::White);
-    }
-    m_movingText.setFillColor(sf::Color::Red);
-}
-
-void graphics::AnimatedTooltip::setText(const std::string& text, const sf::Vector2f& parentCoords)
-{
-    m_movingText.setString(text);
-    m_movingText.setPosition(parentCoords.x, parentCoords.y);
-    m_movingText.setFillColor(sf::Color::Red);
+    m_text.setFont(m_font);
+    m_text.setRotation(ktextHorizontalOrientation);
+    m_text.setCharacterSize(kTooltipCharacterSize);
+    m_text.setFillColor(sf::Color::Transparent);
+    m_text.setString("");
+    m_icon.setColor(sf::Color::Transparent);
+    m_icon.setScale({ 0.4f, 0.4f });
 }
 
 void graphics::AnimatedTooltip::updateCurrent(sf::Time dt)
@@ -206,15 +190,55 @@ void graphics::AnimatedTooltip::updateCurrent(sf::Time dt)
     if (m_currAnumationTime > m_animationTime)
     {
         m_isAnimationDone = true;
-        m_movingIcon.setColor(sf::Color::Transparent);
-        m_movingText.setFillColor(sf::Color::Transparent);
+        m_icon.setColor(sf::Color::Transparent);
+        m_text.setFillColor(sf::Color::Transparent);
     }
-    m_movingIcon.move({ 0, -m_movementOffset });
-    m_movingText.move({ 0, -m_movementOffset });
+    m_icon.move({ 0, -m_movementOffset });
+    m_text.move({ 0, -m_movementOffset });
 }
 
 void graphics::AnimatedTooltip::drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    target.draw(m_movingText, states);
-    target.draw(m_movingIcon, states);
+    target.draw(m_text, states);
+    target.draw(m_icon, states);
+}
+
+void graphics::GameTooltipCommon::setText(const std::string& text, const sf::Vector2f& position)
+{
+    m_text.setString(text);
+    m_text.setPosition(position.x, position.y);
+}
+
+void graphics::GameTooltipCommon::setTextColor(const sf::Color& color)
+{
+    m_text.setFillColor(color);
+}
+
+void graphics::GameTooltipCommon::setContent(const std::vector<textures::ID>& iconsID, const std::string& text, const sf::Vector2f& parentCoords)
+{}
+
+graphics::TextTooltip::TextTooltip(const std::string& text)
+{
+    m_text.setFont(m_font);
+    m_text.setString(text);
+}
+
+void graphics::TextTooltip::updateCurrent(sf::Time dt)
+{
+}
+
+void graphics::TextTooltip::drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
+{
+    target.draw(m_text, states);
+}
+
+void graphics::BlinkingTooltip::updateCurrent(sf::Time dt)
+{
+    // for now just hardcode color
+    m_updateTime += dt;
+    if (m_state == State::Idle) return;
+    if (m_updateTime > sf::seconds(0.7f)) {
+        m_text.setFillColor((m_text.getColor() == m_blinkColor) ? m_color : m_blinkColor);
+        m_updateTime = sf::seconds(0);
+    }
 }

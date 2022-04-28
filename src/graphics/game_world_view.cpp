@@ -16,15 +16,13 @@ graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board
     m_unitsSetupView.setSize(sf::Vector2f{ (float)height, (float)width / 4.f });
     auto [view_height, view_width] = m_view.getSize();
     m_unitsSetupView.setCenter(sf::Vector2f{ (float)view_height / 2.f, (float)view_width });
+    m_unitsSetupView.show();
     m_timer.restart();
 }
 
 void graphics::GameWorldView::draw()
 {
     m_board.draw(m_renderTarget);
-    if(!m_isUnitSetupViewHided)
-        m_unitsSetupView.draw(m_renderTarget);
-
     auto mouse_pos = sf::Mouse::getPosition(m_renderTarget);
     auto translated_pos = m_renderTarget.mapPixelToCoords(mouse_pos);
     for (const auto& [id, unit] : m_units)
@@ -34,6 +32,8 @@ void graphics::GameWorldView::draw()
     }
     for (const auto& view : m_views)
         m_renderTarget.draw(*view);
+
+    m_renderTarget.draw(m_unitsSetupView);
 }
 
 void graphics::GameWorldView::update(sf::Event& event)
@@ -56,6 +56,7 @@ void graphics::GameWorldView::update(sf::Event& event)
     m_timer.restart();
     for (const auto& [id, unit] : m_units) unit->update(TimePerFrame);
     for (const auto& view : m_views) view->update(TimePerFrame);
+    m_unitsSetupView.update(TimePerFrame);
 }
 
 void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
@@ -252,6 +253,7 @@ void graphics::GameWorldView::ChangeUnitStateRecieved(const UnitStateInfo& unitS
 {
     auto animatedTooltip = std::make_unique<AnimatedTooltip>(m_unitsSetupView.getTextureHolder(), kTooltipAnimationTime);
     animatedTooltip->setText(std::string(unitState.m_damageTypeName), m_units[unitState.m_targetUnit]->getPosition());
+    animatedTooltip->setTextColor(sf::Color::Red);
     m_views.push_back(std::move(animatedTooltip));
     
     Angle requiredGunAngleToShot = m_selectedUnit->calculateGunRotation(m_units[unitState.m_srcUnit]->getPosition(), m_units[unitState.m_targetUnit]->getPosition());
@@ -282,7 +284,7 @@ void graphics::GameWorldView::clearMoveArea()
 
 void graphics::GameWorldView::endSetupStage()
 {
-    m_isUnitSetupViewHided = true;
+    m_unitsSetupView.setState(UnitSetupView::State::Hidden);
 }
 
 bool graphics::GameWorldView::addNewUnitView(UnitViewPtr unit, core::GameTile position)

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../core/data_types.h"
+#include "src/core/data_types.h"
 
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/System/Time.hpp>
