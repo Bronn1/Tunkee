@@ -48,6 +48,7 @@ set(Header_Files
         "src/core/game_message.h"
         "src/core/unit_damage_common.h"
         "src/graphics/common.h"
+        "src/gui/text_label.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -86,12 +87,13 @@ set(Source_Files
          "src/core/game_message.cpp" 
         "src/core/unit_damage_common.cpp"
         "src/graphics/common.cpp"
+         "src/gui/text_label.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES} "src/gui/text_label.h" "src/gui/text_label.cpp")
+add_executable(Tunkee ${ALL_FILES} )
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
