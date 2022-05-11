@@ -33,7 +33,7 @@ namespace graphics
     
     private:
         virtual void updateCurrent(sf::Time dt) = 0;
-        virtual void  drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const = 0;
+        virtual void drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const = 0;
     public:
         void  update(sf::Time dt);
         sf::Vector2f  getWorldPosition() const;
@@ -43,7 +43,7 @@ namespace graphics
         virtual ~ISceneNode() = default;
     private:
         void updateChildren(sf::Time dt);
-        virtual void  draw(sf::RenderTarget& target, sf::RenderStates states) const;    
+        void  draw(sf::RenderTarget& target, sf::RenderStates states) const;    
         void  drawChildren(sf::RenderTarget& target, sf::RenderStates states) const;
     protected:
         ISceneNode* m_parent{ nullptr };

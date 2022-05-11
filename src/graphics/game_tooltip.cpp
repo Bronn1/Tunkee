@@ -100,7 +100,7 @@ void graphics::UnitInfoTooltip::setContent(bool isAlive, const  std::vector<std:
 
     m_movementStatusIcon.setPosition(parentCoords.x + prevX, parentCoords.y + prevY);
     float xTmpPos = m_movementStatusIcon.getGlobalBounds().width + kBorderOffset;
-    m_movementInfo.setString(unitInfo.at(0)+"; ");
+    m_movementInfo.setString(unitInfo.at(0)+ "(" + unitInfo.at(3) + ")" + "; ");
     m_movementInfo.setPosition(parentCoords.x + prevX + xTmpPos, parentCoords.y + prevY);
     xTmpPos += m_movementInfo.getGlobalBounds().width + kBorderOffset;
 

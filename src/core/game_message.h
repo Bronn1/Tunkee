@@ -8,32 +8,46 @@
 
 namespace core
 {
-    class DamageCalculator;
-    class Unit;
-    class GameBoard;
+class DamageCalculator;
+class Unit;
+class GameBoard;
 
-    struct ChanceToHit{
-        int current;
+struct ChanceToHit {
+    int current;
 
-    };
+};
 
-   struct UnitStateMsg {
-        CrewInfo m_crewInfo{};
-        UnitPartsInfoVec m_unitParts{};
-        //UnitType m_unitType;
-        std::pair<UnitActions, UnitActions> m_lastActions{ UnitActions::None, UnitActions::None };
-        ActionState m_actionState;
-        UnitIdentifier m_id{ UnitIdentifier{0} };
-        //ThreatLevel threatLvl{}
-        PointOfView m_pointOfView{ PointOfView::Enemy };
-        int m_hiddenDamageCounter{ 0 };
-        bool m_isAlive{ true };
-        bool m_isRotatableTo{ false };
-        bool m_isInLineOfSight{  false };
-    };
+using UnitTextInfo = std::vector<std::string>;
+struct UnitStateMsg {
+    CrewInfo crewInfo{};
+    UnitPartsInfoVec unitParts{};
+    /**
+     * @brief Converted to text information about unit.
+     * Format: first element -  unit movement info, second - rate of fire info, third - hidden damage counter, fourth -  move status;
+    */
+    UnitTextInfo unitInfo{4,""};
+    LastActions lastActions{};
+    //UnitType m_unitType;
+    //ActionState m_actionState;
+    UnitIdentifier id{ UnitIdentifier{0} };
+    //ThreatLevel threatLvl{}
+    PointOfView pointOfView{ PointOfView::Enemy };
+    int hiddenDamageCounter{ 0 }; //prob can remove
+    bool isAlive{ true };
+    bool isRotatableTo{ false };
+    bool isInLineOfSight{ false };
+};
 
-    class GameMessageFactory {
-    public:
-        static UnitStateMsg createUnitStateMsg(const GameBoard& board, const Unit* selectedUnit, const Unit* targetUnit, const DamageCalculator& calculator, const Angle& requiredGunAngleToShot, PointOfView pointOfView);
-    };
+class GameMessageBuilder {
+public:
+    static GameMessageBuilder createUnitStateMsg(const Unit* targetUnit, const PointOfView pointOfView);
+    inline UnitStateMsg getStateMsg() const { return m_stateMsg; }
+    GameMessageBuilder& addMoveStatus(const LastActions lastActions);
+    GameMessageBuilder& addEnemyInfo(const GameBoard& board, const Unit* selectedUnit, const DamageCalculator& calculator, const Angle& requiredGunAngleToShot);
+private:
+    GameMessageBuilder() = default;
+private:
+    UnitStateMsg m_stateMsg{};
+    const Unit* m_targetUnit{ nullptr };
+};
 }

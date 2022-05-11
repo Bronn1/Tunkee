@@ -10,7 +10,7 @@ constexpr float kHexOffsetMultiplierY = 0.93f;
 constexpr float kHexOffsetMultiplierX = 0.75f;
 
 
-graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width)
+graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, const  TextureHolder& tileTextures, int width)
 {
     assert(width * width == std::size(tileCoordinateSystem));
 
@@ -23,7 +23,7 @@ graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinate
         {
             hexagon.setPosition((y % 2 ? (kOffset + kSide) * kHexOffsetMultiplierY : kOffset) + x * (hexagon.getGlobalBounds().width), 
                                 kOffset + y * (hexagon.getGlobalBounds().height * kHexOffsetMultiplierX));
-            hexagon.setTexture(basicTexture);
+            hexagon.setTexture(&tileTextures.get(textures::ID::TileGrass));
             hexagon.setCoordinates(tileCoordinateSystem[y * width + x]);
             m_tiles.insert({ tileCoordinateSystem[y * width + x] , hexagon});
         }

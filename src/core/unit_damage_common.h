@@ -1,5 +1,6 @@
 #pragma once
 
+#include "data_types.h"
 
 #include <string_view>
 #include <vector>
@@ -18,12 +19,6 @@ namespace core
         Normal,
         Ideal,
         Hidden 
-    };
-
-    enum class UnitActions {
-        None,
-        Move,
-        Shot
     };
 
     struct UnitPartInfo {

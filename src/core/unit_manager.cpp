@@ -111,6 +111,15 @@ UnitIdentifier core::UnitManager::addUnit(UnitPtr unit)
     m_units.insert({ unit.get()->getID(), std::move(unit) });
     return UnitIdentifier{ promise.m_value };
 }
+std::vector<UnitIdentifier> core::UnitManager::getAllUnits() const
+{
+    std::vector<UnitIdentifier> res {};
+    ranges::transform(m_units, std::back_inserter(res), 
+        [](const auto& unitPair) { 
+            return unitPair.first; 
+        });
+    return res;
+}
 // показываю в момент попадания и накопленные
 // +3 on red
 // ctolbci ikonka text

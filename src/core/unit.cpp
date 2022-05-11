@@ -201,13 +201,15 @@ void core::UnitActionState::defaultChangeStateByMovement(const TileDistance& dis
     else
         m_remainingMovePoints -= distance;
 
-
+    m_moveStatus = UnitMoveStatus::MovingHalfSpeed;
     TileDistance halfDistance = getHalfMovePoints();
     if (m_actionState == NoActionsPerformed || m_actionState == MovePerformed) {
-        if (m_remainingMovePoints < halfDistance || m_damageSystemStrategy->amountOfActionCanDo() <= 1)
+        if (m_remainingMovePoints < halfDistance || m_damageSystemStrategy->amountOfActionCanDo() <= 1){
             m_remainingShots = { 0 };
-        else if (m_remainingShots == m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire))
+            m_moveStatus = UnitMoveStatus::MovingFullSpeed;
+        } else if (m_remainingShots == m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire)) {
             m_remainingShots -= getHalfShots();
+        }
 
         m_actionState = MovePerformed;
     }
@@ -228,10 +230,11 @@ void core::UnitActionState::defaultChangeStateByShooting(const Shots& shots)
 
     Shots halfShots = getHalfShots();
     if (m_actionState == NoActionsPerformed || m_actionState == ShotPerformed) {
-        if (m_remainingShots < halfShots || m_damageSystemStrategy->amountOfActionCanDo() <= 1)
+        if (m_remainingShots < halfShots || m_damageSystemStrategy->amountOfActionCanDo() <= 1) {
             m_remainingMovePoints = { 0 };
-        else if (m_remainingMovePoints == m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints))
+        } else if (m_remainingMovePoints == m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints)) {
             m_remainingMovePoints -= getHalfMovePoints();
+        }
 
         m_actionState = ShotPerformed;
     }
@@ -279,7 +282,7 @@ void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, C
 core::TankUnit::TankUnit(UnitIdentifier id, TileDistance dis, Shots rateOfFire)
     : Unit(id, dis, rateOfFire)
 {
-    m_type = UnitType::Tank;
+    m_type = UnitType::BasicTank;
 
     // TODO ger rid of bool in contsructor, change to enum for better readability
     setDamageStrategy(DamageSystemStrategies::TankDamageSystem, CrewInfo{ CrewMemberInfo{tankDamageSystem::kCommander, false, false}, CrewMemberInfo{tankDamageSystem::kDriver, true, false},CrewMemberInfo{tankDamageSystem::kRadioman, false, false},

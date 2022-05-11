@@ -1,6 +1,8 @@
 #pragma once
 
 #include "text_label.h"
+#include "src/graphics/resource_holder.h"
+#include "src/graphics/button.h"
 
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
@@ -14,6 +16,7 @@ namespace gui {
 class MainMenu : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
 {
 public:
+    using TexturedButtonPtr = std::unique_ptr< graphics::TexturedButton >;
     enum class Dialogs
     {
         QuitGame,
@@ -28,6 +31,8 @@ private:
     sf::Font m_labelsFont;
     TextLabel m_version;
     TextLabel m_alphaVersionReminder;
+    //TexturedButtonPtr m_alphaVersionButton;
+    TextureHolder m_textures;
 };
 
 }

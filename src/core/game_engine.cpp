@@ -17,6 +17,7 @@ void core::GameEngine::moveUnit(MoveToAction* action)
         GameTile startingPos = (*unit)->getPosition();
         auto  movePath = (*unit)->moveTo(action, m_board);
         auto moveInfo  = MoveUnitInfo(movePath, startingPos, (*unit)->getID(), (*unit)->getUnitVertexRotation());
+        m_unitLogger.addAction((*unit)->getID(), (*unit)->getMoveStatus());
         notifyHost(moveInfo);
         auto moveAreaQuery{ std::make_unique<GetMoveAreaQuery>(action->m_playerID, action->m_unitID) };
         auto moveArea = (*unit)->getMoveArea(m_board);
@@ -45,6 +46,7 @@ void core::GameEngine::shootUnit(ShootAction* action)
             if (!(*targetUnit)->isDamageVisibleForEnemy(unitShotInfo.m_damageTypeName))
                 unitShotInfo.m_damageTypeName = tankDamageSystem::kHiddenDamage;
         }
+        //m_unitLogger.addAction((*sourceUnit)->getID(), UnitAction::Shot);
         notifyHost(unitShotInfo);
         auto moveArea = (*sourceUnit)->getMoveArea(m_board);
         notifyHost(moveArea);
@@ -71,11 +73,14 @@ void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction
         m_gameRules->setCurrentPlayer(m_playerOne.getId());
         m_gameRules->setActiveUnits(m_playerOne.getId());
         m_gameRules->setActiveUnits(m_playerTwo.getId());
+        m_unitLogger.initUnits(m_unitManager->getAllUnits());
     }
 }
 
 void core::GameEngine::finishActionPhase(FinishActionPhase* finishActionPhase)
 {
+    if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::Setup)
+        return;
     // TODO should we allow to let ppl finish stage with any  action left on unit??
     auto unit =  m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
     if (unit)
@@ -121,8 +126,11 @@ void core::GameEngine::createUnitStateMsg(const UnitStateQuery* unitStateQuery)
     if (!selectedUnit || !targetUnit) return;
  
     PointOfView pointOfView = (unitStateQuery->m_player == (*targetUnit)->getOwnerID()) ? PointOfView::Player : PointOfView::Enemy;
-    auto unitStateMsg = GameMessageFactory::createUnitStateMsg(m_board, *selectedUnit, *targetUnit, m_damageCalculator,  unitStateQuery->m_requiredGunAngleToShot, pointOfView);
-    notifyHost(unitStateMsg);
+    //auto msgBuiler = GameMessageBuilder::createUnitStateMsg(m_board, *selectedUnit, *targetUnit, m_damageCalculator,  unitStateQuery->m_requiredGunAngleToShot, pointOfView);
+    auto msgBuiler = GameMessageBuilder::createUnitStateMsg( *targetUnit, pointOfView).addMoveStatus(m_unitLogger.getLastActions((*targetUnit)->getID())).
+                                          addEnemyInfo(m_board, *selectedUnit,  m_damageCalculator, unitStateQuery->m_requiredGunAngleToShot);
+
+    notifyHost(msgBuiler.getStateMsg());
 }
 
 UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
@@ -161,6 +169,7 @@ void core::GameEngine::endOfTurn()
     m_gameRules->setStage(GameRulesInterface::GameStage::ActionPhase);
     m_gameRules->setActiveUnits(m_playerOne.getId());
     m_gameRules->setActiveUnits(m_playerTwo.getId());
+    m_unitLogger.endOfTurn();
     m_gameRules->isGameEndedFor(PointOfView::Enemy);
     m_gameRules->isGameEndedFor(PointOfView::Player);
     //TODO show  winning or losing msg if game ended

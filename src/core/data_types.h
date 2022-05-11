@@ -146,5 +146,40 @@ struct ActionState {
     Shots m_remainingShots{ 0 };
 };
 
+/**
+ * @brief Helps to understand  unit movement pattern for other components like
+ * damage calculator( example: if unit moving with full speed its a less chance to hit him),
+ * for logger and then show it properly to player
+ * We cant use just action state cuz unit can be damaged so can not move because of it but didnt do any movement
+*/
+enum class UnitMoveStatus{ 
+    Idleing,
+    MovingHalfSpeed,
+    MovingFullSpeed,
+};
+
+enum class ActiveStatus {
+    Inactive = 0,
+    OneAction,
+    TwoActions
+};
+
+/**
+ * @brief  Actions unit made during his 'last turn'(check logger descriprion for it) 
+ * Idle by default
+*/
+struct LastActions {
+    UnitMoveStatus moveAction{ UnitMoveStatus::Idleing };
+    ActiveStatus activeStatus{ ActiveStatus::Inactive };
+};
+
+namespace std {
+template<> struct hash<UnitIdentifier> {
+    size_t operator()(const UnitIdentifier& id) const {
+        return std::hash<unsigned>()(id.identifier);
+    }
+};
+}
+
 Angle VertexToAngle(HexVertexNumber vertex); 
 HexVertexNumber AngleToClosestVertex(Angle angle);

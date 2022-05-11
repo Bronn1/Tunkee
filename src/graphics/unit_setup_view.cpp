@@ -22,7 +22,7 @@ graphics::UnitSetupView::UnitSetupView() : m_textHelper("Deployment phase. To st
 
 void graphics::UnitSetupView::show()
 {
-    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
+    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - 1.25f * m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
     m_textHelper.setTextColor(sf::Color::Black);
     m_textHelper.setCharacterSize(kTooltipCharacterSize);
 }
@@ -31,7 +31,8 @@ void graphics::UnitSetupView::setAvailableUnits()
 {
     Angle rotation{ 90.f };
     float scalePreview = 0.2f;
-    auto tmpTankView = m_tankFactory.createBacisTankView(UnitIdentifier{ 0 }, rotation, scalePreview);
+    auto tmpTankView = m_tankFactory.createUnitView(core::UnitType::BasicTank, UnitIdentifier{ 0 }, scalePreview);
+    tmpTankView->setRotation(rotation.angle);
 
     auto parentBounds = m_background.getLocalBounds();
     (*tmpTankView).setPosition(parentBounds.width / 2.f, parentBounds.height / 4.f);
@@ -65,7 +66,7 @@ void graphics::UnitSetupView::setSize(const sf::Vector2f& size)
     m_background.setSize(size); 
     sf::FloatRect bounds = m_background.getLocalBounds();
     m_background.setOrigin(bounds.width / 2.f, bounds.height);
-    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
+    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - 1.25f * m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
 }
 
 void graphics::UnitSetupView::handleEvent(const sf::Event::EventType& evenType, const sf::Vector2f& mousePos, const BoardView& board)
@@ -120,7 +121,7 @@ void graphics::UnitSetupView::update(sf::Time dt)
 void graphics::UnitSetupView::setCenter(const sf::Vector2f& pos)
 {
     m_background.setPosition(pos);
-    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
+    m_textHelper.setTextPosition({ m_background.getGlobalBounds().left + m_background.getSize().x - 1.25f * m_textHelper.getTextWidth(), m_background.getGlobalBounds().top });
     auto parentPos = m_background.getPosition();
     // now only one unit by Default
     m_availableUnits[0]->setPosition(parentPos.x, parentPos.y - (m_background.getSize().y / 2.f));
@@ -130,7 +131,8 @@ void graphics::UnitSetupView::setDragDropUnitView(const sf::Vector2f& mousePos)
 {
     Angle rotation{ 90.f };
     float scalePreview = 0.17f;
-    m_unitDragDropView = m_tankFactory.createBacisTankView(UnitIdentifier{ 0 }, rotation, scalePreview);
+    m_unitDragDropView = m_tankFactory.createUnitView(core::UnitType::BasicTank, UnitIdentifier{ 0 }, scalePreview);
+    m_unitDragDropView->setRotation(rotation.angle);
     m_unitDragDropView->setPosition(mousePos);
 }
 

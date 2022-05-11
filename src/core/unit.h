@@ -10,10 +10,10 @@ namespace core
     class GameBoard;
     /** @brief Contains logic of possible action unit can do in
     * a current turn. Unit has two possible types  of action
-    * move and shot, so at every turn unit can do either move-move
+    * move(including rotation) and shot, so at every turn unit can do either move-move
     * or move-shot or shot-shot. Odd numbers in move and shot in a half size
-    * rounded to the next up
-    * Example
+    * rounded to the next up.
+    * Example:
     * movementPoint = 5;
     * rateOfFire = 3;
     * move move - moveP = 5, shots = 0
@@ -40,6 +40,7 @@ namespace core
     public: // Mandatory implementations
         TileDistance getRemainingMoveInFirstHalf() const;
         TileDistance getHalfMovePointsRoundedUp() const; 
+        UnitMoveStatus getMovementStatus() const { return m_moveStatus; }
         TileDistance getHalfMovePoints() const { return TileDistance{ m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
         Shots getHalfShotsRoundedUp() const;
         Shots getHalfShots() const { return Shots{ m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire).shots / 2 }; }
@@ -56,6 +57,7 @@ namespace core
         TileDistance m_remainingMovePoints;
         Shots m_remainingShots;
         ActionState m_actionState{ NoActionsPerformed };
+        UnitMoveStatus m_moveStatus{ UnitMoveStatus::Idleing };
     protected:
         DamageSystemStrategyPtr m_damageSystemStrategy;
     };
@@ -69,7 +71,7 @@ namespace core
 
     enum class UnitType: unsigned char
     {
-        Tank
+        BasicTank
     };
 
     class Unit : public UnitActionState
@@ -112,6 +114,7 @@ namespace core
         Attack getAttack() const { return m_attack; }
         inline UnitIdentifier getID() const { return m_id; }
         UnitType getType() const { return m_type; }
+        UnitMoveStatus getMoveStatus() const { return getMovementStatus(); }
         inline GameTile getPosition() const { return m_position; }
         HexVertexNumber getUnitVertexRotation() const { return m_unitRotation; }
         TileDistance getRangeOfFire() const { return m_rangeOfFire; }

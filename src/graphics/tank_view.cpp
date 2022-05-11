@@ -3,7 +3,8 @@
 //
 
 #include "tank_view.h"
-#include "common.h"
+#include "src/common.h"
+#include "src/graphics/common.h"
 
 #include <numbers>
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -16,15 +17,15 @@ constexpr float kMoveOffsetPerFrame = 0.01f;
 constexpr float kMoveBackAnimationOffset = 0.1f;
 constexpr float kMoveTargetEps = 0.f;
 
-// TODO not sure where better put these constants 
+// Tank damage type to icons  for tooltip
 using namespace std::literals::string_view_literals;
 static constexpr std::array<std::pair<tankDamageSystem::DamageTo, textures::ID>, 7> kDamageIconsArr{ {{tankDamageSystem::kLoader, textures::ID::LoaderKilledIcon},
  { tankDamageSystem::kExploded, textures::ID::ExplodedIcon},{ tankDamageSystem::kBurning, textures::ID::BurningIcon} ,{ tankDamageSystem::kGunDestroyed, textures::ID::GunDestroyedIcon},
  { tankDamageSystem::kCrewShellShocked, textures::ID::CrewShellshockedIcon}, { tankDamageSystem::kEngine, textures::ID::EngineDestroyedIcon}, 
  { core::kHiddenDamage, textures::ID::HiddenDamageIcon}} };
-static constexpr auto kDamageIcons = graphics::ConstexprMap<tankDamageSystem::DamageTo, textures::ID, kDamageIconsArr.size()>{ {kDamageIconsArr} };
+static constexpr auto kDamageIcons = common::ConstexprMap<tankDamageSystem::DamageTo, textures::ID, kDamageIconsArr.size()>{ {kDamageIconsArr} };
 
-graphics::TankView::TankView(UnitIdentifier id, Type type, TextureHolder& textures) :
+graphics::TankView::TankView(UnitIdentifier id, Type type, const TextureHolder& textures) :
     m_type(type), m_bodySprite(textures.get(textures::ID::T34TankBody)), IUnitView(id),
     m_turretSprite(textures.get(textures::ID::T34TankTurret)), m_explosion(textures.get(textures::ID::Explosion)), m_buriningAnimation(textures.get(textures::ID::Explosion)),
     m_textures(textures), m_moveFrame(kMoveOffsetPerFrame, sf::Time::Zero, kMoveTargetEps), m_tooltipDescription(textures)
@@ -59,13 +60,13 @@ graphics::TankView::TankView(UnitIdentifier id, Type type, TextureHolder& textur
 
 void graphics::TankView::drawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    if (!m_isDestroyed)
-    {
+   // if (!m_isDestroyed)
+    //{
         target.draw(m_bodySprite, states);
         target.draw(m_turretSprite, states);
-    }
-    else
-        target.draw(m_bodySprite, states);
+    //}
+   // else
+   //     target.draw(m_bodySprite, states);
 
     target.draw(m_tooltipDescription);
     target.draw(m_explosion, states);
@@ -202,7 +203,7 @@ void graphics::TankView::setUpRotationAnimation(const sf::Vector2f& curPoint, co
 {
     float dx = curPoint.x - targetPoint.x;
     float dy = curPoint.y - targetPoint.y;
-    float rotation = ((atan2(dy, dx)) * 180 / std::numbers::pi);
+    float rotation = ((atan2(dy, dx)) * 180.f / std::numbers::pi);
     
     m_targetRotation = Angle{ rotation };
     if (abs(m_targetRotation.angle - getRotation()) <  5.f)
@@ -244,11 +245,15 @@ void graphics::TankView::showTooltip(const sf::Vector2f& mouse_pos)
 void graphics::TankView::showDamage(std::string_view damageType)
 {
     // get rid of if else if blocks, come up with smth more brilliant(needed first full understanding how many animation we'll have)
-    if (damageType == tankDamageSystem::kExploded)
-    {
+    if (damageType == tankDamageSystem::kExploded) {
         m_isDestroyed = true;
+        m_bodySprite.setTexture(m_textures.get(textures::ID::T34TankBodyDestroyed));
+        m_turretSprite.setTexture(m_textures.get(textures::ID::T34TankTurretDestroyed));
+        constexpr float  kTurretDestroyedOffset = -10.f ;
+        m_turretSprite.move({ -kTurretDestroyedOffset, -kTurretDestroyedOffset });
         m_buriningAnimation.setScale({ 0.9f, 0.9f });
         m_explosion.startAnimation();
+        m_buriningAnimation.startAnimation();
     }
     if (damageType == tankDamageSystem::kBurning)
         m_buriningAnimation.startAnimation();

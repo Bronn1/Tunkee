@@ -5,37 +5,41 @@
 #include <string_view>
 #include <stdexcept>
 #include <cassert>
+#include <filesystem>
 
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Font.hpp>
 
 namespace textures
 {
-    enum class ID
-    {
-        T34TankBody,
-        T34TankTurret,
-        Explosion,
-        Missile,
-        ExplodedIcon,
-        GunDestroyedIcon,
-        EngineDestroyedIcon,
-        CrewShellshockedIcon,
-        BurningIcon,
-        LoaderKilledIcon,
-        HiddenDamageIcon,
-        MovementInfoIcon,
-        ShootingInfoIcon
-
-    };
+enum class ID
+{
+    T34TankBody,
+    T34TankTurret,
+    T34TankTurretDestroyed,
+    T34TankBodyDestroyed,
+    Explosion,
+    Missile,
+    ExplodedIcon,
+    GunDestroyedIcon,
+    EngineDestroyedIcon,
+    CrewShellshockedIcon,
+    BurningIcon,
+    LoaderKilledIcon,
+    HiddenDamageIcon,
+    MovementInfoIcon,
+    ShootingInfoIcon,
+    QuestionMarkIcon,
+    TileGrass
+};
 }
 
 namespace fonts
 {
-    enum class ID
-    {
-        Test
-    };
+enum class ID
+{
+    Test
+};
 
 }
 
@@ -50,9 +54,9 @@ class ResourceHolder
 {
 public:
     //using ResourcePtr = std::unique_ptr<Resource>;
-    void load(const Identifier& id,const  std::string_view filename) {
+    void load(const Identifier& id, const  std::filesystem::path& filename) {
         std::unique_ptr<Resource> resource(std::make_unique<Resource>());
-        if (!(*resource).loadFromFile(filename.data()))
+        if (!(*resource).loadFromFile(filename.string()))
             throw std::runtime_error("ResourceHolder::load - Failed to load " );
 
         (*resource).setSmooth(true);

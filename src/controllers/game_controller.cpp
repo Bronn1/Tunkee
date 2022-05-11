@@ -79,11 +79,15 @@ std::optional<controllers::UnitNodePtr> controllers::UnitSetupContoller::addUnit
 {
     Angle rotation{ 270.f };
     float scale = 0.17f;
-    auto tmpUnit = m_tankFactory.createBacisTank(position, rotation, m_player);
-    UnitIdentifier addedUnitID = m_gameEngine->addNewUnit(std::move(tmpUnit));
+    auto unit = m_tankFactory.createUnitModel(core::UnitType::BasicTank, m_player);
+    unit->setPosition(position);
+    unit->setGunRotation(rotation);
+    UnitIdentifier addedUnitID = m_gameEngine->addNewUnit(std::move(unit));
     if (addedUnitID)
     {
-        return { m_tankFactory.createBacisTankView(addedUnitID, rotation, scale) };
+        auto unitView = m_tankFactory.createUnitView(core::UnitType::BasicTank, addedUnitID, scale);
+        unitView->setRotation(rotation.angle);
+        return  unitView ;
         //m_worldView->addNewUnitView(std::move(basicTankView), position);
     }
     return std::nullopt;

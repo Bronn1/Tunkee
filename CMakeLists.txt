@@ -49,6 +49,11 @@ set(Header_Files
         "src/core/unit_damage_common.h"
         "src/graphics/common.h"
         "src/gui/text_label.h"
+        "src/core/unit_logger.h"
+        "src/graphics/button.h" 
+        "src/graphics/rounded_rectangle_shape.h"
+         "src/common.h" 
+         "src/graphics/ui_element_interface.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -87,7 +92,10 @@ set(Source_Files
          "src/core/game_message.cpp" 
         "src/core/unit_damage_common.cpp"
         "src/graphics/common.cpp"
-         "src/gui/text_label.cpp"
+        "src/gui/text_label.cpp"
+        "src/core/unit_logger.cpp"
+        "src/graphics/button.cpp"
+        "src/graphics/rounded_rectangle_shape.cpp" 
         )
 source_group("Source Files" FILES ${Source_Files})
 

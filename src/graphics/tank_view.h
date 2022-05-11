@@ -34,7 +34,7 @@ namespace graphics
             TurretRotating
         };
     public:
-        TankView(UnitIdentifier id, Type type, TextureHolder& textures);
+        TankView(UnitIdentifier id, Type type, const  TextureHolder& textures);
         sf::FloatRect getBoundingRect() const override;
         Angle  calculateGunRotation(const sf::Vector2f& curPoint, const sf::Vector2f& targetPoint) const override;
         void shot(IUnitView* target, std::string_view damageType) override;
@@ -66,7 +66,7 @@ namespace graphics
         bool m_isDestroyed{ false };
         bool m_isSelected{ false };
         UnitInfoTooltip m_tooltipDescription;
-        TextureHolder& m_textures;
+        const TextureHolder& m_textures;
         GraphicMovementFrame m_moveFrame;
         MoveState m_currentState{ MoveState::Idle };
         Angle m_targetRotation{0.f};

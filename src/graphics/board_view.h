@@ -2,6 +2,7 @@
 
 #include "tile_view.h"
 #include "scene_node.h"
+#include "resource_holder.h"
 
 #include <unordered_map>
 #include <optional>
@@ -16,7 +17,7 @@ namespace graphics {
     class BoardView
     {
     public:
-        BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width);
+        BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, const  TextureHolder& tileTextures, int width);
         explicit BoardView(const int map_size, const  sf::Texture& basicTexture);
         void draw(sf::RenderWindow& target);
         core::GameTile getSelectorTileCoordinates() const { return m_tileSelectorCoordinates;  }
