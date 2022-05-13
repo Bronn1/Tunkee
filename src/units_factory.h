@@ -15,10 +15,12 @@ public:
     using UnitViewPtr = std::unique_ptr<graphics::IUnitView>;
     using UnitModelPtr = std::unique_ptr<core::Unit>;
 
+    UnitFactory();
     virtual UnitModelPtr createUnitModel(const core::UnitType type, const PlayerIdentifier) const = 0;
     virtual UnitViewPtr createUnitView(const core::UnitType type, const UnitIdentifier id, const  float scale) const = 0;
     UnitViewPtr createNullUnitView();
     const TextureHolder& getTexureHolder() const { return m_textures; }
+private:
     void loadUnitTextures();
 private:
     TextureHolder m_textures;
@@ -27,7 +29,6 @@ private:
 class TanksFactory : public UnitFactory
 {
 public:
-    TanksFactory();
     UnitModelPtr  createUnitModel(const core::UnitType type, const PlayerIdentifier) const override;
     UnitViewPtr  createUnitView(const core::UnitType type, const UnitIdentifier id, const  float scale) const override;
 private:
