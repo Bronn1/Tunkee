@@ -74,9 +74,6 @@ bool tankDamageSystem::TankDamageSystemStrategy::isDamageVisibleForEnemy(const D
 // �������� ������� ������� � ����� � ����� ���-��
 //  range - 20 
 // ���������� � ��� �� �������, � ���������� damage
-// TODO add in pathingding function to move only in one directions, so before findShortestPAth will be check if clicked tile belongs to this direction;
-// unit recieve move area and path. and cut everything, or better unit will decide which function to pick
-
 
 tankDamageSystem::TankDamageSystemStrategy::TankDamageSystemStrategy(CrewInfo info)
 {

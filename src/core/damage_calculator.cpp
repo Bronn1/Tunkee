@@ -1,6 +1,6 @@
 
 #include "damage_calculator.h"
-
+#include "exceptions.h"
 
 namespace ranges =  std::ranges;
 
@@ -63,7 +63,7 @@ void core::DamageCalculator::fillDamageProbabilities(UnitPartsInfoVec& partsInfo
     //std::remove_const<decltype(e)>::type
     std::type_index typeIndx = std::type_index(typeid(*targetUnit));
     if (!m_damageTables.contains(typeIndx))
-        throw std::runtime_error(std::string("Unknown unit type received in damage calculator") + typeid(targetUnit).name());// TODO throw custom exception
+        throw DamageCalculatorLogicException("Unknown unit type received in damage calculator" + std::string(typeid(targetUnit).name())); 
 
     Attack unitAttack = selectedUnit->getAttack();
     auto armor = targetUnit->getArmor(requiredGunAngleToShot);
@@ -127,8 +127,7 @@ UnitStateInfo  core::DamageCalculator::shot( Unit* sourceUnit, Unit* targetUnit,
 
 core::HitThreshold core::DamageCalculator::calculateHitThreshold(const Unit* source, const Unit* target, const std::vector<GameTile>& lineOfFire) const
 {
-    // TODO create smarter handler for tile types which effects Hit Threshold number(it's gonna be tough to handle a lot of different tile types also violates solid)
-    // TODO a lot of fine are missed rn, add all from the game rules
+    // TODO not fully supported effects of terrain  to the hit  threshold yet
     auto isTileEffectsHitThreshold = [](const auto& tile) { return (tile.m_type == GameTileType::Shrub) ? true : false; };
     short obstaclesCount = ranges::count_if(begin(lineOfFire), end(lineOfFire) - 1, isTileEffectsHitThreshold);
     short finePerDistance = 5;

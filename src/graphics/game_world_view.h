@@ -68,7 +68,6 @@ namespace graphics {
         UnitSetupView m_unitsSetupView;
         sf::Clock m_timer;
 
-        // TODO prob hide all view logic inside separate class
         sf::Vector2f m_mousePosBeforeMoving;
         sf::View     m_view;
         bool         m_isViewMoving{ false };

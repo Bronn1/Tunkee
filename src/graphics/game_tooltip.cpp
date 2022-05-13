@@ -130,8 +130,6 @@ void graphics::UnitInfoTooltip::setContent(bool isAlive, const  std::vector<std:
         iconHeight = m_icons.back().getGlobalBounds().height;
         if (id == textures::ID::HiddenDamageIcon)
         {
-            // TODO for test now, prob counter should be for every damage, need to think about it
-            // add strict specification for unitInfo vector(for now only 3 elements moveInfo, shotingInfo, hidden damage counter)
             m_hiddenDamageCounter.setString("x" + unitInfo.at(2));
             m_hiddenDamageCounter.setPosition(parentCoords.x + prevX + m_icons.back().getGlobalBounds().width + kBorderOffset, 
                                               parentCoords.y + prevY + iconHeight/ 2.f);

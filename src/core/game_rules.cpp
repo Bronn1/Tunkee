@@ -1,4 +1,5 @@
 #include "game_rules.h"
+#include "exceptions.h"
 
 bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
 {
@@ -11,7 +12,7 @@ bool core::GameRulesBasic::isMoveActionAllowed(const MoveToAction& moveAction)
         auto unitPtr = m_unitManager->getUnitIfExist(m_selectedUnit);
         if (unitPtr)
         {
-            bool canMove = unitPtr.value()->canMove();// TODO move all unit checks to unit, here only game rules checks
+            bool canMove = unitPtr.value()->canMove();
             m_lastError = (canMove) ? "" : "Unit doesn't have any activity left!";
             return canMove;
         }
@@ -108,10 +109,11 @@ bool core::GameRulesBasic::isGameEndedFor(PointOfView pov)
 
 void core::GameRulesBasic::setActiveUnits(const PlayerIdentifier playerId)
 {
-    if (m_playerActiveUnits.contains(playerId))
-        m_playerActiveUnits[playerId] = m_unitManager->countActiveUnitsOwnedBy(playerId);
-    else
-        std::cout << "Unknown players with ID: " << playerId.identifier << "\n"; //TODO logger and prob throw
+    if (!m_playerActiveUnits.contains(playerId)) {
+        throw InvalidPlayerIDException("Unknown players with ID: " + std::to_string(playerId.identifier));
+    }
+
+    m_playerActiveUnits[playerId] = m_unitManager->countActiveUnitsOwnedBy(playerId);
 }
 
 void core::GameRulesBasic::setPlayer(const PlayerIdentifier playerId)
@@ -134,7 +136,6 @@ bool core::GameRulesBasic::isShootActionAllowed(const ShootAction& shootAction)
         
         if (sourceUnit && targetUnit && (*targetUnit)->getOwnerID() != m_currentPlayer)
         {
-            // TODO move all unit checks to unit, here only game rules checks
             bool canShoot = sourceUnit.value()->canShoot();
             m_lastError = (canShoot) ? "" : "Unit doesn't have activity to perform shooting!";
             return canShoot;

@@ -9,7 +9,7 @@ using ActionPtr = std::shared_ptr<GameAction>;
 namespace core
 {
     /**
-     * @brief TODO REFACTOR TO PURE INTERFACE and it will be strategy in main engine 
+     * @brief TODO REFACTOR TO PURE INTERFACE and it will be strategy pattern in main engine 
     Prob we want to change some base rules  by player choice, so we need a base class for rules
     * and pick needed rules version of the game during game initialization
     */

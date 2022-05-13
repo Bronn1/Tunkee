@@ -18,7 +18,7 @@ public:
 
     /**
      * @brief Starting point of builder, inits Game model and world view
-     * @param target 
+     * @param target -  SFML window to render graphics
      * @return 
     */
     static GameBuilder  initGameEngine(sf::RenderWindow& target);
@@ -29,7 +29,6 @@ public:
     * Currently just adds enemy unit for alpha tests(cuz AI module isn't ready yet).
     */
     GameBuilder& singleGameMode();
-
 private:
     friend class graphics::GameWorldView;
     GameBuilder() = default;

@@ -25,7 +25,6 @@ void controllers::GameController::onChangeUnitRotation(const UnitIdentifier unit
     auto rotateAction{ std::make_unique<RotateUnitActiom>(rotation, rotationType) };
     rotateAction->m_unitID = { unitID };
     rotateAction->m_playerID = m_player;
-    // TODO maybe add replace all type of rotation to this function
     m_gameEngine->rotateUnitGun(rotateAction.get());
 }
 
@@ -63,7 +62,7 @@ void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
     finishActionPhase->m_playerID = playerId;
     m_gameEngine->finishActionPhase(finishActionPhase.get());
     
-    // TODO for test
+    // TODO hardcoded player id for tests
     //auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{1}) };
     //m_gameEngine->selectUnit(selectUnitQuery.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };

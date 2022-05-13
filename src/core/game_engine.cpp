@@ -149,9 +149,8 @@ UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
 
 void core::GameEngine::rotateUnitGun(RotateUnitActiom* rotateAction)
 {
-    // TODO should we check everytime if somebody trying to cheat????..(checks for current player and unit owner)
     auto unit = m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
-    if (!unit) return; // just add logger (doubt we should throw here)
+    if (!unit) return; // throw?
         
     (*unit)->setGunRotation(rotateAction->m_angle);
     RotateGunInfo gunRotation((*unit)->getGunRotation(), (*unit)->getID());
@@ -172,12 +171,11 @@ void core::GameEngine::endOfTurn()
     m_unitLogger.endOfTurn();
     m_gameRules->isGameEndedFor(PointOfView::Enemy);
     m_gameRules->isGameEndedFor(PointOfView::Player);
-    //TODO show  winning or losing msg if game ended
+    //TODO notify gui 
 }
 
 void core::GameEngine::setPlayer(const Player& player)
 {
-    // TODO additional checker for full lobby
     if (m_playerOne.getId() == PlayerIdentifier{ 0 }) {
         m_playerOne = player;
     }

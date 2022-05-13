@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include <string_view>
 #include <stdexcept>
 #include <cassert>
@@ -68,8 +68,7 @@ public:
     }
     
 private:
-    // TODO unordered would be better here
-    std::map<Identifier, std::unique_ptr<Resource>> m_holder;
+    std::unordered_map<Identifier, std::unique_ptr<Resource>> m_holder;
 };
 
 using TextureHolder = ResourceHolder<textures::ID, sf::Texture>;

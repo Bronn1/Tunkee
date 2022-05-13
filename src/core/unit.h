@@ -147,7 +147,6 @@ namespace core
         UnitIdentifier m_id;
         GameTile m_position;
         PlayerIdentifier m_owner{0};
-        // TODO add restrictions to rotation in case of possible damage to turret
         HexVertexNumber m_unitRotation{ 1 };
         TileDistance m_rangeOfFire{ 20 };
         Armor m_armor{ 4, 2 };

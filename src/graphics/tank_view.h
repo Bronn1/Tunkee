@@ -17,7 +17,6 @@ namespace graphics
     constexpr int kMoveBackAnimationPeriod = 50;
     
      // TODO add animation when unit move slightly with unrotatable turret to shoot
-    // TODO refactor behaviour  when damage recieved
     using SceneNodePtr = std::unique_ptr<ISceneNode>;
 
     class TankView : public IUnitView
@@ -62,7 +61,6 @@ namespace graphics
         // later on after full animation support add maybe in array and remove after animation is done
         Animation  m_explosion;
         Animation  m_buriningAnimation;
-        // TODO change all damage type to Unit parts 
         bool m_isDestroyed{ false };
         bool m_isSelected{ false };
         UnitInfoTooltip m_tooltipDescription;

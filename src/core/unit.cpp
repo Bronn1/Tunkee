@@ -306,7 +306,7 @@ void core::TankUnit::setGunRotation(const Angle& angle)
 
 bool core::TankUnit::canGunRotate(const Angle& target) const
 {
-    // TODO Implement later, should include gun rotation counter
+    // TODO Implement later
     return true;
 }
 
@@ -317,7 +317,6 @@ bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTil
 
     if (auto isInlineOfSight = ranges::find(lineOfSight, target); isInlineOfSight == end(lineOfSight))
     {
-        // TODO print game message in GUI
         std::cout << "Unit: " << getID().identifier << " doesn't have  target tile: " << target << " in line of sight\n";
         return false;
     }

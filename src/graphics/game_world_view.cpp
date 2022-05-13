@@ -48,8 +48,7 @@ int graphics::GameWorldView::handleEvent(sf::Event& event)
     while (m_renderTarget.pollEvent(event))
     {
         if (m_selectedUnit->isPerformingAction()){
-            //we need to skip animation if player clicking while unit is doing smth
-            // TODO for now just continue to fix not responding bug
+            // TODO we need to skip animation if player clicking while unit is doing smth
             continue;
         }
         if (event.type ==  sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
@@ -99,7 +98,6 @@ void graphics::GameWorldView::initUI()
 
 void graphics::GameWorldView::switchEvent(const sf::Event& event, const sf::Vector2f& mousePos)
 {
-    // TODO would be good to refactor this switch with states or at least separate functions
     switch (event.type)
     {
     case sf::Event::MouseButtonReleased:
@@ -256,7 +254,6 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
 {
 
     assert(moveUnit.m_unitId == m_selectedUnit->getId());
-    // TODO how to make sure player havent picked other unit during waiting response from server with high ping??
     // in case of multiplayer game if player clicked on other unit;
     //if(moveUnit.m_unitId != m_selectedUnit->getId())
     //    for(const auto& unit: m_units)

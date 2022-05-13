@@ -21,9 +21,11 @@ core::GameMessageBuilder core::GameMessageBuilder::createUnitStateMsg(const Unit
     msgBuiler.m_stateMsg.crewInfo = targetUnit->getCrewInfo();
     msgBuiler.m_stateMsg.unitParts = targetUnit->getUnitPartsInfo();
     for (auto& part : msgBuiler.m_stateMsg.unitParts)
-        if (!part.m_isVisibleForEnemy && pointOfView == PointOfView::Enemy) part.m_state = DamageStatus::Hidden;
+        if (!part.m_isVisibleForEnemy && pointOfView == PointOfView::Enemy) 
+            part.m_state = DamageStatus::Hidden;
     for (auto& member : msgBuiler.m_stateMsg.crewInfo)
-        if (!member.m_isVisibleForEnemy && pointOfView == PointOfView::Enemy) member.m_state = DamageStatus::Hidden;
+        if (!member.m_isVisibleForEnemy && pointOfView == PointOfView::Enemy) 
+            member.m_state = DamageStatus::Hidden;
 
     msgBuiler.m_stateMsg.id = targetUnit->getID();
     msgBuiler.m_stateMsg.isAlive = targetUnit->isAlive(pointOfView);
@@ -50,7 +52,7 @@ core::GameMessageBuilder& core::GameMessageBuilder::addMoveStatus(const LastActi
 {
     m_stateMsg.lastActions = lastActions;
     auto moveStatus = kIdleMoveStatus;
-    // TODO should be icon or shown as animation, cant figure it out yet, just for tests will be text
+    // maybe switch to icons instead of text
     if (m_stateMsg.lastActions.moveAction == UnitMoveStatus::MovingFullSpeed) {
         moveStatus = kFullMoveStatus;
     } else if (m_stateMsg.lastActions.moveAction == UnitMoveStatus::MovingHalfSpeed) {

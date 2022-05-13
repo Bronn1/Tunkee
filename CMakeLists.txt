@@ -52,8 +52,9 @@ set(Header_Files
         "src/core/unit_logger.h"
         "src/graphics/button.h" 
         "src/graphics/rounded_rectangle_shape.h"
-         "src/common.h" 
-         "src/graphics/ui_element_interface.h"
+        "src/common.h" 
+        "src/graphics/ui_element_interface.h"
+        "src/core/exceptions.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 

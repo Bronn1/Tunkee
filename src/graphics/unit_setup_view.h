@@ -25,7 +25,6 @@ namespace graphics
     using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
     using UnitIDMapUnit = std::map<UnitIdentifier, UnitViewPtr, Comparator<UnitIdentifier>>;
 
-    // TODO standardize with ISceneNode interface
     class UnitSetupView : public sf::Transformable, public sf::Drawable, private sf::NonCopyable
     {
     public:

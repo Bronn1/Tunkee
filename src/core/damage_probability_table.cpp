@@ -1,6 +1,6 @@
 #include "damage_probability_table.h"
 #include "unit_damage_system_strategy.h"
-
+#include "exceptions.h"
 
 void core::DamageProbabilityTable::loadProbabilitiesFromFile(std::string_view filename)
 {
@@ -21,7 +21,9 @@ int core::DamageProbabilityTable::getOverallProbabilitySize(const ThreatLevel& l
 
 int core::DamageProbabilityTable::getProbabilityTo(const ThreatLevel& lvl, const UnitDamageName columnName) const
 {
-    if (!m_damageProbabilities.contains(lvl)) return 0; // TODO exception or just error msg???
+    if (!m_damageProbabilities.contains(lvl)) {
+        throw core::DamageCalculatorLogicException("Cannot find table of damage probabilities for threat level: " + std::to_string(lvl.level));
+    }
     
     auto probIt = std::ranges::find_if(m_damageProbabilities.at(lvl), [&columnName](const auto& probability) { return columnName == probability.name; });
     return (probIt != end(m_damageProbabilities.at(lvl))) ? (*probIt).probability : 0;
