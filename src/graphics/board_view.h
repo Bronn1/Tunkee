@@ -2,6 +2,7 @@
 
 #include "tile_view.h"
 #include "scene_node.h"
+#include "resource_holder.h"
 
 #include <unordered_map>
 #include <optional>
@@ -16,13 +17,13 @@ namespace graphics {
     class BoardView
     {
     public:
-        BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, sf::Texture* basicTexture, int width);
+        BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, const  TextureHolder& tileTextures, int width);
         explicit BoardView(const int map_size, const  sf::Texture& basicTexture);
         void draw(sf::RenderWindow& target);
         core::GameTile getSelectorTileCoordinates() const { return m_tileSelectorCoordinates;  }
         sf::Vector2f getTileSelectorPosition() const { return m_tileSelector.getPosition(); }
         sf::Vector2f getPositionByTileCoordinates(const core::GameTile& coordinates) const;
-        std::stack<sf::Vector2f> getBulkPositionsByTiles(const std::vector < core::GameTile>& coordinates) const;
+        std::stack<sf::Vector2f> convertTileCoordinatesToScreenPos(const std::vector < core::GameTile>& coordinates) const;
         std::optional<core::GameTile> getCoordinatesIfValid(const sf::Vector2f& pos) const;
         std::optional<sf::Vector2f>  getTileCenterIfValid(const sf::Vector2f& pos) const;
         sf::Vector2f getTileVertex(const core::GameTile& coordinates, HexVertexNumber vertex) const { return m_tiles.at(coordinates).getPointGlobal(vertex.vertexNum); }

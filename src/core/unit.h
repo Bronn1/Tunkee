@@ -7,14 +7,13 @@
 
 namespace core 
 {
-
     class GameBoard;
     /** @brief Contains logic of possible action unit can do in
     * a current turn. Unit has two possible types  of action
-    * move and shot, so at every turn unit can do either move-move
+    * move(including rotation) and shot, so at every turn unit can do either move-move
     * or move-shot or shot-shot. Odd numbers in move and shot in a half size
-    * rounded to the next up
-    * Example
+    * rounded to the next up.
+    * Example:
     * movementPoint = 5;
     * rateOfFire = 3;
     * move move - moveP = 5, shots = 0
@@ -40,11 +39,12 @@ namespace core
 
     public: // Mandatory implementations
         TileDistance getRemainingMoveInFirstHalf() const;
-        TileDistance getHalfMovePointsRoundedUp() const;
+        TileDistance getHalfMovePointsRoundedUp() const; 
+        UnitMoveStatus getMovementStatus() const { return m_moveStatus; }
         TileDistance getHalfMovePoints() const { return TileDistance{ m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints).distance / 2 }; }
         Shots getHalfShotsRoundedUp() const;
         Shots getHalfShots() const { return Shots{ m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire).shots / 2 }; }
-        void setDamageStrategy(DamageSystemStrategies strategy, Crew crewAmount);
+        void setDamageStrategy(DamageSystemStrategies strategy, CrewInfo crew);
         void setActionState(const ActionStatus& state);
         virtual ~UnitActionState() = default;
         friend class Unit;
@@ -57,6 +57,7 @@ namespace core
         TileDistance m_remainingMovePoints;
         Shots m_remainingShots;
         ActionState m_actionState{ NoActionsPerformed };
+        UnitMoveStatus m_moveStatus{ UnitMoveStatus::Idleing };
     protected:
         DamageSystemStrategyPtr m_damageSystemStrategy;
     };
@@ -68,28 +69,10 @@ namespace core
         std::vector<std::string_view> damageDone{};
     };
 
-    class UnitLogger
-    {
-    public:
-        // pop
-        // isCurrentTurnEmpty()
-        // 
-        //std::string getFullInformation() const;
-    private:
-        std::deque< UnitTurnInfo> m_turnsHistory{};
-        // get unit infoMessage
-        // undo checkIfEnemysecretsFind for fog of war check if we can undo last move or shot or rotation should be function in game engine undo command(pop stack( with flag undoable or not, 
-        // if yes pass to logger and unit to change state
-        //getlastmove
-        // getlastShot
-        // 
-    };
-
     enum class UnitType: unsigned char
     {
-        Tank
+        BasicTank
     };
-
 
     class Unit : public UnitActionState
     {
@@ -99,6 +82,7 @@ namespace core
         virtual bool isTargetInLineOfSight(const GameBoard& board, const GameTile& target) const = 0;
         virtual int  getArmor(const Angle& attackingAngle) const = 0;
         virtual void setGunRotation(const Angle& angle) = 0;
+        virtual bool canGunRotate(const Angle& target) const = 0;
         virtual void applyDamage(const std::string_view damageType) = 0;
         /** Move to destination with adjustment by available movement.
         * returns adjusted path
@@ -125,20 +109,26 @@ namespace core
     public:
         // Mandatory implementation
         bool isAlive(PointOfView pointOfView) const { return m_damageSystemStrategy->isAlive(pointOfView); }
+        bool isDamageVisibleForEnemy(DamageTo damage) const { return m_damageSystemStrategy->isDamageVisibleForEnemy(damage); }
         ActionStatus isUnitHaveFullActionState() const;
         Attack getAttack() const { return m_attack; }
         inline UnitIdentifier getID() const { return m_id; }
         UnitType getType() const { return m_type; }
+        UnitMoveStatus getMoveStatus() const { return getMovementStatus(); }
         inline GameTile getPosition() const { return m_position; }
         HexVertexNumber getUnitVertexRotation() const { return m_unitRotation; }
         TileDistance getRangeOfFire() const { return m_rangeOfFire; }
-        Shots getRateOfFire() const { return m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire); }
+        Shots getRateOfFire() const { return m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire); } // reduce amount of get/set by replacing separate data into action status struct
         inline Angle getGunRotation() const { return m_gunRotation; }
         inline PlayerIdentifier getOwnerID() const { return m_owner; }
         TileDistance getFullMovement() const { return m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints); }
         Shots getRemainingShots() const { return m_remainingShots; }
         TileDistance getRemainingMovement() const { return m_remainingMovePoints; }
-        void setDamageState(const DamageType damageType, const  UnitPart::State  state) { m_damageSystemStrategy->setDamageState(damageType, state); }
+        DamageStatus getDamageStatus(const DamageTo damageOf) const { return m_damageSystemStrategy->getDamageStatus(damageOf); }
+        CrewInfo getCrewInfo() const { return m_damageSystemStrategy->getCrewInfo(); }
+        UnitPartsInfoVec getUnitPartsInfo() const { return m_damageSystemStrategy->getPartsInfo(); }
+        int getHiddenDamageCounter() const { return m_damageSystemStrategy->getHiddenDamageCounter(); }
+        void setDamageStatus(const DamageTo damageTo, const  DamageStatus  state) { m_damageSystemStrategy->setDamageStatus(damageTo, state); }
         inline void setOwner(const PlayerIdentifier id) { m_owner = id; }
         inline void setPosition(const GameTile& pos) { m_position = pos; }
         inline void setUnitID(const UnitIdentifier id) { m_id = id; }
@@ -146,6 +136,8 @@ namespace core
         inline void setAttack(const Attack attack) { m_attack = attack; }
         void setBodyRotation(const HexVertexNumber rotation) { m_unitRotation = rotation; }
         void  setRangeOfFire(const TileDistance shootingDistance) { m_rangeOfFire = shootingDistance; }
+        void   setDamageVisibleForEnemy(const std::vector<DamageTo>& damageNames = {}) { m_damageSystemStrategy->setDamageVisibleForEnemy(damageNames); }
+
         bool hasActionLeft() const { return canMove() || canShoot(); }
         virtual ~Unit() = default;
     private:
@@ -155,7 +147,6 @@ namespace core
         UnitIdentifier m_id;
         GameTile m_position;
         PlayerIdentifier m_owner{0};
-        // TODO add restrictions to rotation in case of possible damage to turret
         HexVertexNumber m_unitRotation{ 1 };
         TileDistance m_rangeOfFire{ 20 };
         Armor m_armor{ 4, 2 };
@@ -174,7 +165,7 @@ namespace core
         TankUnit(UnitIdentifier id, TileDistance movePoints, Shots rateOfFire);
 
         void setGunRotation(const Angle& angle) override;
-
+        bool canGunRotate(const Angle& target) const override;
         void changeStateByMovement(const TileDistance& distance)  override { defaultChangeStateByMovement(distance); }
         void changeStateByShooting(const Shots& shots) override { defaultChangeStateByShooting(shots); }
         void applyDamage(const std::string_view damageType) override { defaultApplyDamage(damageType); }
@@ -194,9 +185,10 @@ namespace core
         NullUnit() : Unit(UnitIdentifier{ 0 }, TileDistance{ 0 }, Shots{ 1 }) {
             setOwner(PlayerIdentifier{ 0 });
             setActionState(ActionStatus::empty);
-            setDamageStrategy(DamageSystemStrategies::TankDamageSystem, Crew{ 0, 0 });
+            setDamageStrategy(DamageSystemStrategies::TankDamageSystem, CrewInfo{});
         }
 
+        bool canGunRotate(const Angle& target) const  override { return false; }
         bool hasActionLeft() const { return  false; }
         void setGunRotation(const Angle& angle) override { }
         void changeStateByMovement(const TileDistance& distance)  override {  }

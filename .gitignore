@@ -38,3 +38,4 @@
 /.vs
 /cmake-build-debug
 /.PVS-Studio
+CMakeSettings.json

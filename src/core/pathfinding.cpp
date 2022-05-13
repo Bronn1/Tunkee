@@ -35,8 +35,6 @@ std::vector<GameTile> pathfinding::getAvailableArea(const GameBoard& board, cons
     std::unordered_map<GameTile, int> pathCosts{};
     std::vector<GameTile> area{};
     std::queue<GameTile> travelQueue;
-    //if (startingPos != nullptr)
-    // TODO check for nullptr (operator !=)
     travelQueue.push(startingPos);
     pathCosts.insert({ startingPos , 0});
     while (!travelQueue.empty()) {
@@ -76,7 +74,6 @@ std::vector<GameTile> pathfinding::getAvailableAreaWithRotation(const GameBoard&
     auto tileInFront = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, unitRotation);
     auto  neighborsLeft = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 5 });
     auto  neighborsRight = pathfinding::getLineOfSightWithoutObstacles(board, startingPos, movement, HexVertexNumber{ unitRotation.vertexNum + 1 });
-    // TODO return unordered_sets or sets instead of additional allocation
     std::unordered_set < GameTile> tilesWithoutRotation(begin(tileInFront), end(tileInFront));
     tilesWithoutRotation.insert(begin(neighborsLeft), end(neighborsLeft));
     tilesWithoutRotation.insert(begin(neighborsRight), end(neighborsRight));
@@ -139,7 +136,6 @@ std::vector<GameTile> pathfinding::getShortestPath(const GameBoard& board, const
     std::unordered_map<GameTile, int> pathCosts{};
     std::unordered_map<GameTile, GameTile> cameFrom{};
 
-    // TODO check for nullptr (operator !=)
     travelQueue.push({ startingPos,  0 });
     pathCosts.insert({ startingPos , 0 });
     //cameFrom.insert({ startingPos , startingPos });

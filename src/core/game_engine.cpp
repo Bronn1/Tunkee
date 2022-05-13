@@ -15,13 +15,13 @@ void core::GameEngine::moveUnit(MoveToAction* action)
     {
         auto unit = m_unitManager->getUnitIfExist(action->m_unitID);
         GameTile startingPos = (*unit)->getPosition();
-        // TODO should be call to unit instead
         auto  movePath = (*unit)->moveTo(action, m_board);
         auto moveInfo  = MoveUnitInfo(movePath, startingPos, (*unit)->getID(), (*unit)->getUnitVertexRotation());
-        notify(moveInfo);
+        m_unitLogger.addAction((*unit)->getID(), (*unit)->getMoveStatus());
+        notifyHost(moveInfo);
         auto moveAreaQuery{ std::make_unique<GetMoveAreaQuery>(action->m_playerID, action->m_unitID) };
         auto moveArea = (*unit)->getMoveArea(m_board);
-        notify(moveArea);
+        notifyHost(moveArea);
     }
     else
     {
@@ -41,9 +41,18 @@ void core::GameEngine::shootUnit(ShootAction* action)
         if (!isUnitInLineOfSight) return;
         auto lineOfFireVec = m_board.getStraightLine(sourceUnit.value()->getPosition(), targetUnit.value()->getPosition());
         auto unitShotInfo = m_damageCalculator.shot(sourceUnit.value(), targetUnit.value(), lineOfFireVec);
-        notify(unitShotInfo);
+        if ((*targetUnit)->getOwnerID() != m_gameHost)
+        {
+            if (!(*targetUnit)->isDamageVisibleForEnemy(unitShotInfo.m_damageTypeName))
+                unitShotInfo.m_damageTypeName = tankDamageSystem::kHiddenDamage;
+        }
+        //m_unitLogger.addAction((*sourceUnit)->getID(), UnitAction::Shot);
+        notifyHost(unitShotInfo);
         auto moveArea = (*sourceUnit)->getMoveArea(m_board);
-        notify(moveArea);
+        notifyHost(moveArea);
+        if (m_gameRules->isGameEndedFor(PointOfView::Enemy))
+            std::cout << "Player: " << m_gameRules->getCurrentPlayer().identifier << " has won, Gratz!\n";
+
     }
     else
     {
@@ -55,25 +64,32 @@ void core::GameEngine::shootUnit(ShootAction* action)
 void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction)
 {
     Player& player = (m_playerOne.getId() == finishSetupStageAction->m_playerID) ? m_playerOne : m_playerTwo;
-    bool isAbleToEnd = player.endSetupStage();
-    // notify or return some success indicator
-    // when both players ready notify about visible/created units for both
-    //notify(m_unitMng.getAllVisibleUnitsForPlaer());
+    bool isAbleToEnd = player.endSetupStage(); // move to game_rules strategy
+    // notifyHost or return some success indicator
+    // when both players ready notifyHost about visible/created units for both
+    //notifyHost(m_unitMng.getAllVisibleUnitsForPlaer());
     if (isAbleToEnd) {
         m_gameRules->setStage(GameRulesInterface::GameStage::ActionPhase);
         m_gameRules->setCurrentPlayer(m_playerOne.getId());
         m_gameRules->setActiveUnits(m_playerOne.getId());
         m_gameRules->setActiveUnits(m_playerTwo.getId());
+        m_unitLogger.initUnits(m_unitManager->getAllUnits());
     }
 }
 
 void core::GameEngine::finishActionPhase(FinishActionPhase* finishActionPhase)
 {
-    m_gameRules->nextActionPhase(finishActionPhase);
+    if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::Setup)
+        return;
     // TODO should we allow to let ppl finish stage with any  action left on unit??
     auto unit =  m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
     if (unit)
         (*unit)->setActionState(ActionStatus::empty);
+
+    if (m_gameRules->isGameEndedFor(PointOfView::Enemy))
+        std::cout << "Player: " << m_gameRules->getCurrentPlayer().identifier << " has won, Gratz!\n";
+    // try to implement as a strategy
+    m_gameRules->nextActionPhase(finishActionPhase);
 
     if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::TurnEnd)
         endOfTurn();
@@ -85,22 +101,36 @@ void core::GameEngine::requestMoveArea(GetMoveAreaQuery* moveAreaQuery)
     if (unit)
     {
         auto moveArea = (*unit)->getMoveArea(m_board);
-        notify(moveArea);
+        notifyHost(moveArea);
     }
 }
 
 void core::GameEngine::selectUnit(const SelectUnitQuery* selectUnitQuery)
 {
     auto selectedUnitNotify = UnitSelectedInfo(m_gameRules->selectUnit(selectUnitQuery));
-    notify(selectedUnitNotify);
+    notifyHost(selectedUnitNotify);
 
     auto unit = m_unitManager->getUnitIfExist(selectedUnitNotify.m_unitId);
     if (unit)
     {
         //auto moveAreaQuery{ std::make_shared<GetMoveAreaQuery>(selectUnitQuery->m_playerID, selectUnitQuery->m_unitID) };
         auto moveArea = (*unit)->getMoveArea(m_board);
-        notify(moveArea);
+        notifyHost(moveArea);
     }
+}
+
+void core::GameEngine::createUnitStateMsg(const UnitStateQuery* unitStateQuery)
+{
+    auto selectedUnit = m_unitManager->getUnitIfExist(unitStateQuery->m_selectedUnit);
+    auto targetUnit = m_unitManager->getUnitIfExist(unitStateQuery->m_targetUnit);
+    if (!selectedUnit || !targetUnit) return;
+ 
+    PointOfView pointOfView = (unitStateQuery->m_player == (*targetUnit)->getOwnerID()) ? PointOfView::Player : PointOfView::Enemy;
+    //auto msgBuiler = GameMessageBuilder::createUnitStateMsg(m_board, *selectedUnit, *targetUnit, m_damageCalculator,  unitStateQuery->m_requiredGunAngleToShot, pointOfView);
+    auto msgBuiler = GameMessageBuilder::createUnitStateMsg( *targetUnit, pointOfView).addMoveStatus(m_unitLogger.getLastActions((*targetUnit)->getID())).
+                                          addEnemyInfo(m_board, *selectedUnit,  m_damageCalculator, unitStateQuery->m_requiredGunAngleToShot);
+
+    notifyHost(msgBuiler.getStateMsg());
 }
 
 UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
@@ -119,31 +149,33 @@ UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
 
 void core::GameEngine::rotateUnitGun(RotateUnitActiom* rotateAction)
 {
-    // TODO should we check everytime if somebody trying to cheat????..(checks for current player and unit owner)
     auto unit = m_unitManager->getUnitIfExist(m_gameRules->getSelectedUnit());
-    if (!unit) return; // just add logger (doubt we should throw here)
+    if (!unit) return; // throw?
         
     (*unit)->setGunRotation(rotateAction->m_angle);
     RotateGunInfo gunRotation((*unit)->getGunRotation(), (*unit)->getID());
-    notify(gunRotation);
+    notifyHost(gunRotation);
 }
 
 void core::GameEngine::endOfTurn()
 {
     std::cout << "END OF TURN...\n";
+    auto changedUnitStatesVec = m_damageCalculator.nextTurn();
+    for (const auto& state : changedUnitStatesVec)
+        notifyHost(state);
     m_unitManager->passNextTurnToUnits();
     //m_unitManager->setUnitsActions(ActionStatus::full);
     m_gameRules->setStage(GameRulesInterface::GameStage::ActionPhase);
     m_gameRules->setActiveUnits(m_playerOne.getId());
     m_gameRules->setActiveUnits(m_playerTwo.getId());
-    auto changedUnitStatesVec = m_damageCalculator.nextTurn();
-    for (const auto& state : changedUnitStatesVec)
-        notify(state);
+    m_unitLogger.endOfTurn();
+    m_gameRules->isGameEndedFor(PointOfView::Enemy);
+    m_gameRules->isGameEndedFor(PointOfView::Player);
+    //TODO notify gui 
 }
 
 void core::GameEngine::setPlayer(const Player& player)
 {
-    // TODO additional checker for full lobby
     if (m_playerOne.getId() == PlayerIdentifier{ 0 }) {
         m_playerOne = player;
     }

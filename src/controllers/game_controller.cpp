@@ -25,7 +25,6 @@ void controllers::GameController::onChangeUnitRotation(const UnitIdentifier unit
     auto rotateAction{ std::make_unique<RotateUnitActiom>(rotation, rotationType) };
     rotateAction->m_unitID = { unitID };
     rotateAction->m_playerID = m_player;
-    // TODO maybe add replace all type of rotation to this function
     m_gameEngine->rotateUnitGun(rotateAction.get());
 }
 
@@ -40,6 +39,12 @@ void controllers::GameController::onUnitClicked(const UnitIdentifier selectedUni
         auto shootAction { std::make_unique<ShootAction>(m_player, selectedUnitID, clickedUnitID)};
         m_gameEngine->shootUnit(shootAction.get());
     }
+}
+
+void controllers::GameController::onShowUnitStateMsg(const UnitIdentifier selectedUnitID, const UnitIdentifier targetUnitID, const Angle& requiredGunAngleToShot) const
+{
+    auto unitStateQuery = std::make_unique<UnitStateQuery>(selectedUnitID, targetUnitID, requiredGunAngleToShot, m_player);
+    m_gameEngine->createUnitStateMsg(unitStateQuery.get());
 }
 
 void controllers::GameController::finishSetupStage(PlayerIdentifier playerId)
@@ -57,7 +62,7 @@ void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
     finishActionPhase->m_playerID = playerId;
     m_gameEngine->finishActionPhase(finishActionPhase.get());
     
-    // TODO for test
+    // TODO hardcoded player id for tests
     //auto selectUnitQuery{ std::make_shared<SelectUnitQuery>(PlayerIdentifier{2}, UnitIdentifier{1}) };
     //m_gameEngine->selectUnit(selectUnitQuery.get());
     finishActionPhase->m_playerID = PlayerIdentifier{ 2 };
@@ -69,15 +74,19 @@ controllers::UnitSetupContoller::UnitSetupContoller(core::GameEngine* engine, co
 {
 }
 
-std::optional<UnitViewPtr> controllers::UnitSetupContoller::addUnit(const core::GameTile& position)
+std::optional<controllers::UnitNodePtr> controllers::UnitSetupContoller::addUnit(const core::GameTile& position)
 {
     Angle rotation{ 270.f };
     float scale = 0.17f;
-    auto tmpUnit = m_tankFactory.createBacisTank(position, rotation, m_player);
-    UnitIdentifier addedUnitID = m_gameEngine->addNewUnit(std::move(tmpUnit));
+    auto unit = m_tankFactory.createUnitModel(core::UnitType::BasicTank, m_player);
+    unit->setPosition(position);
+    unit->setGunRotation(rotation);
+    UnitIdentifier addedUnitID = m_gameEngine->addNewUnit(std::move(unit));
     if (addedUnitID)
     {
-        return { m_tankFactory.createBacisTankView(addedUnitID, rotation, scale) };
+        auto unitView = m_tankFactory.createUnitView(core::UnitType::BasicTank, addedUnitID, scale);
+        unitView->setRotation(rotation.angle);
+        return  unitView ;
         //m_worldView->addNewUnitView(std::move(basicTankView), position);
     }
     return std::nullopt;

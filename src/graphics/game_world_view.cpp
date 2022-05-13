@@ -1,26 +1,31 @@
 #include "game_world_view.h"
 #include "tank_view.h"
+#include "src/common.h"
 
 #include <ranges>
 
-const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
+constexpr float kTooltipAnimationTime = 3;
+constexpr float kZoomViewOffset = 0.2f;
+constexpr float kEdgeOffset = 20.f;
 
 graphics::GameWorldView::GameWorldView(sf::RenderWindow& target, BoardView board, controllers::GameController controller) :
     m_renderTarget(target), m_board(std::move(board)), m_gameController(controller)
 {
     m_view = target.getDefaultView();
+    m_startViewSize = m_view.getSize();
     auto [height, width] = m_renderTarget.getSize();
     m_unitsSetupView.setSize(sf::Vector2f{ (float)height, (float)width / 4.f });
     auto [view_height, view_width] = m_view.getSize();
+    m_unitsSetupView.show();
     m_unitsSetupView.setCenter(sf::Vector2f{ (float)view_height / 2.f, (float)view_width });
+    m_timer.restart();
+
+    initUI();
 }
 
 void graphics::GameWorldView::draw()
 {
     m_board.draw(m_renderTarget);
-    if(!m_isUnitSetupViewHided)
-        m_unitsSetupView.draw(m_renderTarget);
-
     auto mouse_pos = sf::Mouse::getPosition(m_renderTarget);
     auto translated_pos = m_renderTarget.mapPixelToCoords(mouse_pos);
     for (const auto& [id, unit] : m_units)
@@ -28,40 +33,81 @@ void graphics::GameWorldView::draw()
         m_renderTarget.draw(*unit);
         unit->showTooltip(translated_pos);
     }
-    for (const auto& view : m_views)
+    for (const auto& view : m_graphicElements)
         m_renderTarget.draw(*view);
+
+    m_renderTarget.draw(m_unitsSetupView);
+    for (const auto& ui : m_UIelements)
+        m_renderTarget.draw(*ui);
 }
 
-void graphics::GameWorldView::update(sf::Event& event)
+int graphics::GameWorldView::handleEvent(sf::Event& event)
 {
     auto mousePos = sf::Mouse::getPosition(m_renderTarget);
     auto translatedMousePos = m_renderTarget.mapPixelToCoords(mousePos);
-
-    // actually useless anyway events are gonna be saved in poll event
-    if (!m_selectedUnit->isPerformingAction())
+    while (m_renderTarget.pollEvent(event))
     {
-        while (m_renderTarget.pollEvent(event))
-        {
-            m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
-            handleEvent(event, translatedMousePos);
+        if (m_selectedUnit->isPerformingAction()){
+            // TODO we need to skip animation if player clicking while unit is doing smth
+            continue;
         }
+        if (event.type ==  sf::Event::KeyPressed && sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
+            m_renderTarget.setView(m_renderTarget.getDefaultView());
+            return common::kExitGameSession;
+        }
+
+        m_unitsSetupView.handleEvent(event.type, translatedMousePos, m_board);
+        for (auto& ui : m_UIelements) {
+            ui->handleEvent(event, translatedMousePos);
+        }
+        switchEvent(event, translatedMousePos);
     }
 
-    for (const auto& [id, unit] : m_units) unit->update(TimePerFrame);
-    for (const auto& view : m_views) view->update(TimePerFrame);
+    return 0;
 }
 
-void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vector2f& mousePos)
+void graphics::GameWorldView::update(const sf::Time updateTime)
 {
-    // TODO would be good to refactor this horrible switch with states or at least separates functions
+    if (m_timer.getElapsedTime() < updateTime) { return; }
+    m_timer.restart();
+    for (const auto& [id, unit] : m_units) unit->update(updateTime);
+    for (const auto& view : m_graphicElements) view->update(updateTime);
+    m_unitsSetupView.update(updateTime);
+}
+
+void graphics::GameWorldView::initUI()
+{
+    // TODO  this kind of constants should be in one file, maybe in graphic_common or ui_setup, also possible to change just to usual texture with text inside
+    constexpr std::string_view kFinishActionText = "Finish Action";
+    // Finish Action button bottom right corner
+    auto finishActionState = [this]() {
+        m_selectedUnit->markAsSelected();
+        clearMoveArea();
+        m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
+        m_gameController.finishActionPhase(m_playerId);
+        std::erase_if(m_graphicElements, [](const auto& value) {return value->isMarkedToDelete() == true; });
+    };
+    auto finishActionStageButton = std::make_unique<RoundedButton>(sf::Vector2f{ 130.f, 50.f }, std::move(finishActionState), sf::Keyboard::Space);
+    auto [sizeX, sizeY] = m_view.getSize();
+    finishActionStageButton->setPosition({ m_view.getCenter().x + (sizeX / 2) - (finishActionStageButton->getSize().x + kEdgeOffset) * finishActionStageButton->getScale().x ,
+                                 m_view.getCenter().y + (sizeY / 2) - (finishActionStageButton->getSize().y + kEdgeOffset) * finishActionStageButton->getScale().y });
+    finishActionStageButton->setText(kFinishActionText);
+    finishActionStageButton->setVisibility(false);
+    m_UIelements.push_back(std::move(finishActionStageButton));
+}
+
+void graphics::GameWorldView::switchEvent(const sf::Event& event, const sf::Vector2f& mousePos)
+{
     switch (event.type)
     {
     case sf::Event::MouseButtonReleased:
-        if (!checkIfClickedOnUnit(mousePos))
-        {
-            onBoardClicked(mousePos);
+        if (event.mouseButton.button == sf::Mouse::Left) {
+            if (!checkIfClickedOnUnit(mousePos))
+            {
+                onBoardClicked(mousePos);
+            }
         }
-        if (event.mouseButton.button == sf::Mouse::Right) {
+        else  {
             m_isViewMoving = false;
         }
         break;
@@ -72,24 +118,18 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
         }
         break;
     case sf::Event::MouseMoved:
-    {
+        checkMousePosition(mousePos);
         moveView(event, mousePos);
         break;;
-    }
+    case sf::Event::MouseWheelMoved:
+        resizeView((static_cast<int>(event.mouseWheelScroll.wheel) > 0) ? -kZoomViewOffset : kZoomViewOffset);
+        break;
     case sf::Event::KeyPressed:
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
         {
             m_gameController.finishSetupStage(m_playerId);
             m_units.merge(m_unitsSetupView.getAddedUnitRef());
             endSetupStage();
-        }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) // TODO only for tests of swtiching action phase
-        {
-            m_selectedUnit->markAsSelected();
-            clearMoveArea();
-            m_selectedUnit = m_units[UnitIdentifier{ 0 }].get();
-            m_gameController.finishActionPhase(m_playerId);
-            std::erase_if(m_views,  [](const auto& value) {return value->isDestoyed() == true; });
         }
         break;
     case sf::Event::Closed:
@@ -104,8 +144,7 @@ void graphics::GameWorldView::handleEvent(const sf::Event& event, const sf::Vect
 
 void graphics::GameWorldView::moveView(const sf::Event& event, const sf::Vector2f& mousePos)
 {
-    if (m_isViewMoving)
-    {
+    if (m_isViewMoving) {
         sf::Vector2f deltaMousePos = m_mousePosBeforeMoving - mousePos;
 
         m_view.move(deltaMousePos);
@@ -114,7 +153,25 @@ void graphics::GameWorldView::moveView(const sf::Event& event, const sf::Vector2
         m_unitsSetupView.setCenter(sf::Vector2f{ viewCenter.x, viewCenter.y + viewSize.y / 2.f });
         m_renderTarget.setView(m_view);
         m_mousePosBeforeMoving = m_renderTarget.mapPixelToCoords(sf::Vector2i(event.mouseMove.x, event.mouseMove.y));
+        // Finish Action button bottom right corner
+        auto [sizeX, sizeY] = m_view.getSize();
+        m_UIelements.at(0)->setPosition({ m_view.getCenter().x + (sizeX / 2) - (m_UIelements.at(0)->getSize().x + kEdgeOffset) * m_UIelements.at(0)->getScale().x ,
+                                     m_view.getCenter().y + (sizeY / 2) - (m_UIelements.at(0)->getSize().y + kEdgeOffset) * m_UIelements.at(0)->getScale().y });
     }
+}
+
+void graphics::GameWorldView::resizeView(const float resizeFactor)
+{
+    m_view.zoom(1.f + resizeFactor);
+    m_renderTarget.setView(m_view);
+    auto [width, height] = m_view.getSize();
+    auto viewCenter = m_view.getCenter();
+    m_unitsSetupView.setCenter(sf::Vector2f{ viewCenter.x, viewCenter.y + height / 2.f });
+    auto [sizeX, sizeY] = m_view.getSize();
+    // Finish  Action button bottom right corner 
+    m_UIelements.at(0)->setScale({ sizeX / m_startViewSize.x, sizeY / m_startViewSize.y });
+    m_UIelements.at(0)->setPosition({ m_view.getCenter().x + (sizeX / 2 )- (m_UIelements.at(0)->getSize().x + kEdgeOffset) * m_UIelements.at(0)->getScale().x ,
+                                     m_view.getCenter().y + (sizeY / 2) - (m_UIelements.at(0)->getSize().y + kEdgeOffset) * m_UIelements.at(0)->getScale().y });
 }
 
 bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
@@ -140,6 +197,20 @@ bool graphics::GameWorldView::checkIfClickedOnUnit(const sf::Vector2f& mousePos)
     return false;
 }
 
+void graphics::GameWorldView::checkMousePosition(const sf::Vector2f& mousePos)
+{
+    for (const auto& [id, unit] : m_units)
+    {
+        if (unit->getBoundingRect().contains(mousePos))
+        {
+            Angle requiredGunAngleToShot{ 0.0f };
+            if(m_selectedUnit->getId())
+                requiredGunAngleToShot = m_selectedUnit->calculateGunRotation(m_selectedUnit->getPosition(), unit->getPosition());
+            m_gameController.onShowUnitStateMsg(m_selectedUnit->getId(), unit->getId(), requiredGunAngleToShot);
+        }
+    }
+}
+
 void graphics::GameWorldView::onBoardClicked(const sf::Vector2f& mousePos)
 {
     m_gameController.moveUnit(m_selectedUnit->getId(), (m_board).getSelectorTileCoordinates());
@@ -161,8 +232,17 @@ void graphics::GameWorldView::newUnitSelected(const UnitSelectedInfo& unitInfo)
     }
 }
 
-void graphics::GameWorldView::informationMsgRecieved(const GameInfoMessage& msgInfo)
+void graphics::GameWorldView::informationMsgRecieved(const core::UnitStateMsg& unitStateMsg)
 {
+    std::vector<tankDamageSystem::DamageTo> damageToVec{};
+    if (unitStateMsg.hiddenDamageCounter)
+        damageToVec.push_back(core::kHiddenDamage);
+    for (const auto& crew : unitStateMsg.crewInfo)
+        if (crew.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(crew.m_name);
+    for (const auto& part : unitStateMsg.unitParts)
+        if(part.m_state == tankDamageSystem::DamageStatus::Damaged) damageToVec.push_back(part.m_name);
+
+    m_units[unitStateMsg.id]->setTooltipMsg(unitStateMsg.isAlive, unitStateMsg.unitInfo, damageToVec);
 }
 
 void graphics::GameWorldView::moveAreaRecieved(const MoveAreaInfo& moveArea)
@@ -174,7 +254,6 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
 {
 
     assert(moveUnit.m_unitId == m_selectedUnit->getId());
-    // TODO how to make sure player havent picked other unit during waiting response from server with high ping??
     // in case of multiplayer game if player clicked on other unit;
     //if(moveUnit.m_unitId != m_selectedUnit->getId())
     //    for(const auto& unit: m_units)
@@ -183,33 +262,41 @@ void graphics::GameWorldView::moveUnitRecieved(const MoveUnitInfo& moveUnit)
     core::GameTile dest = moveUnit.m_unitPos;
     if (size(moveUnit.m_movePath)) dest = moveUnit.m_movePath.back();
     auto rotationPoint = m_board.getTileVertex(dest, moveUnit.m_rotation);
-    m_units[moveUnit.m_unitId]->rotateTo(m_units[moveUnit.m_unitId]->getPosition(), rotationPoint);
+    m_units[moveUnit.m_unitId]->setUpRotationAnimation(m_units[moveUnit.m_unitId]->getPosition(), rotationPoint);
     m_units[moveUnit.m_unitId]->setCurrentRotationPoint(rotationPoint);
 
-    auto movementPath = m_board.getBulkPositionsByTiles(moveUnit.m_movePath);
+    auto movementPath = m_board.convertTileCoordinatesToScreenPos(moveUnit.m_movePath);
     if (size(movementPath) == 0) return;
 
-    m_units[moveUnit.m_unitId]->setMovementState(std::move(movementPath));
+    m_units[moveUnit.m_unitId]->setMovementPath(std::move(movementPath));
     //m_isPerformingAction = true;
 }
 
 void graphics::GameWorldView::ChangeUnitStateRecieved(const UnitStateInfo& unitState)
 {
+    auto animatedTooltip = std::make_unique<AnimatedTooltip>(m_unitsSetupView.getTextureHolder(), kTooltipAnimationTime);
+    animatedTooltip->setText(std::string(unitState.m_damageTypeName), m_units[unitState.m_targetUnit]->getPosition());
+    animatedTooltip->setTextColor(sf::Color::Red);
+    m_graphicElements.push_back(std::move(animatedTooltip));
+    
+    Angle requiredGunAngleToShot = m_selectedUnit->calculateGunRotation(m_units[unitState.m_srcUnit]->getPosition(), m_units[unitState.m_targetUnit]->getPosition());
+    m_gameController.onShowUnitStateMsg(unitState.m_srcUnit, unitState.m_targetUnit, requiredGunAngleToShot);
+
     if (unitState.m_damageTypeName == core::kShotMissed)
         return;
 
-    if (unitState.m_damageState == core::UnitPart::State::Damaged)
+    if (unitState.m_damageStatus == core::DamageStatus::Damaged)
         if (unitState.m_srcUnit != UnitIdentifier{ 0 })
-            m_views.push_back(m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName));
+            m_units[unitState.m_srcUnit]->shot(m_units[unitState.m_targetUnit].get(), unitState.m_damageTypeName);
         else
             m_units[unitState.m_targetUnit]->showDamage(unitState.m_damageTypeName);
     else
-        m_units[unitState.m_targetUnit]->resetUnitState(unitState.m_damageTypeName);
+        m_units[unitState.m_targetUnit]->recoveryDamage(unitState.m_damageTypeName);
 }
 
 void graphics::GameWorldView::rotateGunRecieved(const RotateGunInfo& rotateUnitGun)
 {
-    m_units[rotateUnitGun.m_unitId]->setGunRotation(rotateUnitGun.m_gunRotation);
+    m_units[rotateUnitGun.m_unitId]->setUpGunRotationAnimation(rotateUnitGun.m_gunRotation);
 }
 
 void graphics::GameWorldView::clearMoveArea()
@@ -220,7 +307,8 @@ void graphics::GameWorldView::clearMoveArea()
 
 void graphics::GameWorldView::endSetupStage()
 {
-    m_isUnitSetupViewHided = true;
+    m_unitsSetupView.setState(UnitSetupView::State::Hidden);
+    m_UIelements.at(0)->setVisibility(true);
 }
 
 bool graphics::GameWorldView::addNewUnitView(UnitViewPtr unit, core::GameTile position)

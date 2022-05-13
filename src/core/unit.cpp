@@ -53,30 +53,27 @@ std::vector<core::GameTile> core::Unit::defaultMoveTo(const MoveToAction* moveTo
 void core::Unit::defaultRotateTo(const GameTile& destination, GameBoard& board)
 {
     auto vertex = getUnitVertexRotation();
-    HexVertexNumber curVertex{ vertex.vertexNum }; // left vertex to cur
+    HexVertexNumber curVertex{ vertex.vertexNum }; 
     int distance = pathfinding::getDistance(m_position, destination);
-    const int kBypassAllHexVertices = 4;
+    constexpr int kBypassAllHexVertices = 4;
     for (const int i : views::iota(0, kBypassAllHexVertices))
     {
-        auto tilesInfrontVec = pathfinding::getLineOfSightWithoutObstacles(board, m_position, TileDistance{ (unsigned)distance + 5 }, HexVertexNumber{ m_unitRotation.vertexNum + i });
+        
+        auto tilesInfrontVec = pathfinding::getLineOfSightWithoutObstacles(board, m_position, TileDistance{ (unsigned)distance + 3 }, HexVertexNumber{ m_unitRotation.vertexNum + i });
         if (ranges::find(tilesInfrontVec, destination) != end(tilesInfrontVec))
         {
             m_rotationCounter += i;
             rotateToVertex(HexVertexNumber{ m_unitRotation.vertexNum + i });
             return;
         }
-        tilesInfrontVec = pathfinding::getLineOfSightWithoutObstacles(board, m_position, TileDistance{ (unsigned)distance + 5 }, HexVertexNumber{ m_unitRotation.vertexNum - i });
+        tilesInfrontVec = pathfinding::getLineOfSightWithoutObstacles(board, m_position, TileDistance{ (unsigned)distance + 3 }, HexVertexNumber{ m_unitRotation.vertexNum - i });
         if (ranges::find(tilesInfrontVec, destination) != end(tilesInfrontVec))
         {
             m_rotationCounter += i;
-            rotateToVertex(HexVertexNumber{ m_unitRotation.vertexNum + i });
+            rotateToVertex(HexVertexNumber{ m_unitRotation.vertexNum - i });
             return;
         }
     }
-
-    // TODO could be good to do refactor here, cuz we shouldn't be there ,unit should be able to find his proper rotation
-    // if we have  reached this part something is very wrong!
-    // throw std::runtime_error("pzd\n");
 }
 
 bool core::Unit::defaultShoot(const Shots& shots)
@@ -106,7 +103,7 @@ void core::Unit::defaultSetUnitRotation(const HexVertexNumber rotation)
 }
 
 int core::Unit::defaultGetArmor(const Angle& attackingAngle) const
-{	// TODO not tested yet
+{
     const Angle kFrontalArmorAngleFrom = Angle{ 180 - 60 };
     const Angle kFrontalArmorAngleTo = Angle{ 180 + 60 };
     Angle resultAngle = VertexToAngle(m_unitRotation) - attackingAngle;
@@ -133,7 +130,7 @@ MoveAreaInfo core::Unit::defaultGetMoveArea(const GameBoard& board) const
     std::vector<GameTile> moveArea = {};
     int firstLayerSize = 0;
 
-    // full Movement and half Movement should be showed with different colors in game
+    // full Movement and half Movement should be showed up with different colors in game
     if (remainingMovement >= halfMovement) {
         TileDistance remainingMovementInFirstHalf = getRemainingMoveInFirstHalf();
         moveArea = pathfinding::getAvailableAreaWithRotation(board, getPosition(), remainingMovementInFirstHalf, getUnitVertexRotation());
@@ -185,7 +182,7 @@ void core::Unit::rotateToVertex(const HexVertexNumber vertex)
 
 void core::UnitActionState::setActionState(const ActionStatus& state)
 {
-    if (state == ActionStatus::full) {
+    if (state == ActionStatus::full && m_damageSystemStrategy->isAlive(PointOfView::Player))  {
         m_remainingMovePoints = m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints);
         m_remainingShots = m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire);
         m_actionState = NoActionsPerformed;
@@ -204,13 +201,15 @@ void core::UnitActionState::defaultChangeStateByMovement(const TileDistance& dis
     else
         m_remainingMovePoints -= distance;
 
-
+    m_moveStatus = UnitMoveStatus::MovingHalfSpeed;
     TileDistance halfDistance = getHalfMovePoints();
     if (m_actionState == NoActionsPerformed || m_actionState == MovePerformed) {
-        if (m_remainingMovePoints < halfDistance || m_damageSystemStrategy->amountOfActionCanDo() <= 1)
+        if (m_remainingMovePoints < halfDistance || m_damageSystemStrategy->amountOfActionCanDo() <= 1){
             m_remainingShots = { 0 };
-        else if (m_remainingShots == m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire))
+            m_moveStatus = UnitMoveStatus::MovingFullSpeed;
+        } else if (m_remainingShots == m_damageSystemStrategy->getRateOfFireWithFine(m_rateOfFire)) {
             m_remainingShots -= getHalfShots();
+        }
 
         m_actionState = MovePerformed;
     }
@@ -231,10 +230,11 @@ void core::UnitActionState::defaultChangeStateByShooting(const Shots& shots)
 
     Shots halfShots = getHalfShots();
     if (m_actionState == NoActionsPerformed || m_actionState == ShotPerformed) {
-        if (m_remainingShots < halfShots || m_damageSystemStrategy->amountOfActionCanDo() <= 1)
+        if (m_remainingShots < halfShots || m_damageSystemStrategy->amountOfActionCanDo() <= 1) {
             m_remainingMovePoints = { 0 };
-        else if (m_remainingMovePoints == m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints))
+        } else if (m_remainingMovePoints == m_damageSystemStrategy->getMoveDistanceWithFine(m_fullMovePoints)) {
             m_remainingMovePoints -= getHalfMovePoints();
+        }
 
         m_actionState = ShotPerformed;
     }
@@ -266,15 +266,15 @@ TileDistance core::UnitActionState::getHalfMovePointsRoundedUp() const
     return TileDistance((fullMovePtsWithFine.distance % 2 == 0) ? (fullMovePtsWithFine.distance / 2) : (fullMovePtsWithFine.distance / 2) + 1);
 }
 
-void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, Crew crewAmount)
+void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, CrewInfo crew)
 {
     switch (strategy)
     {
     case DamageSystemStrategies::TankDamageSystem:
-        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crewAmount);
+        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crew);
         break;
     default:
-        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crewAmount);
+        m_damageSystemStrategy = std::make_unique<tankDamageSystem::TankDamageSystemStrategy>(crew);
         break;
     }
 }
@@ -282,10 +282,13 @@ void core::UnitActionState::setDamageStrategy(DamageSystemStrategies strategy, C
 core::TankUnit::TankUnit(UnitIdentifier id, TileDistance dis, Shots rateOfFire)
     : Unit(id, dis, rateOfFire)
 {
-    m_type = UnitType::Tank;
+    m_type = UnitType::BasicTank;
 
-    setDamageStrategy(DamageSystemStrategies::TankDamageSystem, Crew{ 5, 3 });
-    //applyDamage(tankDamageSystem::kTurretJammed);
+    // TODO ger rid of bool in contsructor, change to enum for better readability
+    setDamageStrategy(DamageSystemStrategies::TankDamageSystem, CrewInfo{ CrewMemberInfo{tankDamageSystem::kCommander, false, false}, CrewMemberInfo{tankDamageSystem::kDriver, true, false},CrewMemberInfo{tankDamageSystem::kRadioman, false, false},
+                   CrewMemberInfo{tankDamageSystem::kLoader, true, false} , CrewMemberInfo{tankDamageSystem::kGunner , true, false} });
+
+    //applyDamage(tankDamageSystem::kBurning);
 }
 
 void core::TankUnit::setGunRotation(const Angle& angle)
@@ -301,6 +304,12 @@ void core::TankUnit::setGunRotation(const Angle& angle)
     std::cout << " " << m_gunRotation.angle << " model2\n";
 }
 
+bool core::TankUnit::canGunRotate(const Angle& target) const
+{
+    // TODO Implement later
+    return true;
+}
+
 bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTile& target) const
 {
     int distance = pathfinding::getDistance(getPosition(), target);
@@ -308,7 +317,6 @@ bool core::TankUnit::isTargetInLineOfSight(const GameBoard& board, const GameTil
 
     if (auto isInlineOfSight = ranges::find(lineOfSight, target); isInlineOfSight == end(lineOfSight))
     {
-        // TODO print game message in GUI
         std::cout << "Unit: " << getID().identifier << " doesn't have  target tile: " << target << " in line of sight\n";
         return false;
     }
@@ -319,6 +327,4 @@ MoveAreaInfo core::TankUnit::getMoveArea(const GameBoard& board) const
 {
     return defaultGetMoveArea(board);
 }
-// v predelax etix uglov pustb vrashaetca
-// samoxodka povorchivaetsa s animation i potom obratno
 

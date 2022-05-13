@@ -8,27 +8,29 @@
 #include <memory>
 #include <SFML/Graphics/Texture.hpp>
 
-using UnitViewPtr = std::unique_ptr < graphics::UnitView>;
-using UnitModelPtr = std::unique_ptr<core::Unit>;
 
-/*class UnitFactory
+class UnitFactory 
 {
-protected:
-    virtual UnitModelPtr createUnit(UnitIdentifier id) const = 0;
-    virtual SceneNodePtr createUnitView(UnitIdentifier id) const = 0;
-};*/
+public:
+    using UnitViewPtr = std::unique_ptr<graphics::IUnitView>;
+    using UnitModelPtr = std::unique_ptr<core::Unit>;
 
-class TanksFactory 
+    virtual UnitModelPtr createUnitModel(const core::UnitType type, const PlayerIdentifier) const = 0;
+    virtual UnitViewPtr createUnitView(const core::UnitType type, const UnitIdentifier id, const  float scale) const = 0;
+    UnitViewPtr createNullUnitView();
+    const TextureHolder& getTexureHolder() const { return m_textures; }
+    void loadUnitTextures();
+private:
+    TextureHolder m_textures;
+};
+
+class TanksFactory : public UnitFactory
 {
 public:
     TanksFactory();
-    UnitModelPtr createBacisTank(const core::GameTile& pos, const Angle rotation, const PlayerIdentifier);
-    UnitViewPtr createBacisTankView(const UnitIdentifier id, const Angle rotation, const  float scale);
-    UnitViewPtr createNullUnitView();
+    UnitModelPtr  createUnitModel(const core::UnitType type, const PlayerIdentifier) const override;
+    UnitViewPtr  createUnitView(const core::UnitType type, const UnitIdentifier id, const  float scale) const override;
 private:
-    UnitModelPtr createTank(const core::GameTile& pos, const Angle rotation, const TileDistance movement, const PlayerIdentifier);
-    UnitViewPtr createTankView(const UnitIdentifier id, const Angle rotation, const float scale);
-private:
-    TextureHolder m_textures;
-
+    UnitModelPtr createBasicTank( const PlayerIdentifier id) const;
+    UnitViewPtr createBasicTankView(const UnitIdentifier id,  const float scale) const;
 };

@@ -1,5 +1,6 @@
 # Tunkee
-Turn-based tactical game with armored vehicles theme
+Port of board turn-based tactical game with armored vehicles theme.
+Currently under development.
 
 ## Build
 Latest C++20 version of compiler is required.

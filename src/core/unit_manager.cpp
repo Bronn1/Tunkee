@@ -3,6 +3,8 @@
 #include <algorithm>
 
 
+namespace ranges = std::ranges;
+
 core::IdentifierGenerator generator()
 {
     for (unsigned i = 0;; i++)
@@ -46,14 +48,13 @@ std::vector<UnitIdentifier> core::UnitManager::getActiveUnitsForPlayer(const Pla
 bool core::UnitManager::hasActiveUnits(const PlayerIdentifier& playerId) const
 {
     auto hasUnitAction = [&playerId](auto& idUnitPair) { return (playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->hasActionLeft()); };
-    return std::ranges::find_if(m_units, hasUnitAction) != end(m_units);
+    return ranges::find_if(m_units, hasUnitAction) != end(m_units);
 }
 
 int core::UnitManager::countActiveUnitsOwnedBy(const PlayerIdentifier& playerId) const
 {
-    // TODO  return only alive units, cuz destroyed units should be still represented in manager
-    auto isOwnedByAndActive = [&playerId](auto& idUnitPair) { return (playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->hasActionLeft()); };
-    return  std::ranges::count_if(m_units, isOwnedByAndActive);
+    auto isOwnedByAndActive = [&playerId](const auto& idUnitPair) { return (playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->hasActionLeft()); };
+    return  ranges::count_if(m_units, isOwnedByAndActive);
 }
 
 void core::UnitManager::passNextTurnToUnits()
@@ -70,6 +71,11 @@ void core::UnitManager::setUnitsActions(const ActionStatus state)
 {
     for (const auto& [id, unit] : m_units)
         unit->setActionState(state);
+}
+
+int core::UnitManager::countAliveUnits(const PlayerIdentifier& playerId, PointOfView pov) const
+{
+    return ranges::count_if(m_units, [&playerId, &pov]( const auto& idUnitPair) {return playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->isAlive(pov); });
 }
 
 std::vector<UnitIdentifier> core::UnitManager::getUnitIDs() const
@@ -90,6 +96,12 @@ std::vector<UnitIdentifier> core::UnitManager::getUnitIDsForPlayer(const PlayerI
 
 }
 
+void core::UnitManager::setAllDamageVisible()
+{
+    for (auto& [id, unit] : m_units) 
+        unit->setDamageVisibleForEnemy();
+}
+
 UnitIdentifier core::UnitManager::addUnit(UnitPtr unit)
 {
     auto& promise = m_generatorHandle.promise();
@@ -99,3 +111,16 @@ UnitIdentifier core::UnitManager::addUnit(UnitPtr unit)
     m_units.insert({ unit.get()->getID(), std::move(unit) });
     return UnitIdentifier{ promise.m_value };
 }
+std::vector<UnitIdentifier> core::UnitManager::getAllUnits() const
+{
+    std::vector<UnitIdentifier> res {};
+    ranges::transform(m_units, std::back_inserter(res), 
+        [](const auto& unitPair) { 
+            return unitPair.first; 
+        });
+    return res;
+}
+// показываю в момент попадания и накопленные
+// +3 on red
+// ctolbci ikonka text
+// details dlya ver popadani9 po chast9m

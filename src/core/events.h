@@ -2,6 +2,7 @@
 
 #include "data_types.h"
 #include "game_command.h"
+#include "game_message.h"
 
 #include <string>
 #include <vector>
@@ -19,13 +20,13 @@ namespace events {
     {
     public:
         virtual void newUnitSelected(const UnitSelectedInfo& unitInfo) {}
-        virtual void informationMsgRecieved(const GameInfoMessage& msgInfo) {}
+        virtual void informationMsgRecieved(const core::UnitStateMsg& unitStateMsg) {}
         virtual void moveAreaRecieved(const MoveAreaInfo& moveArea) {}
         virtual void moveUnitRecieved(const MoveUnitInfo& moveUnit) {}
         virtual void ChangeUnitStateRecieved(const UnitStateInfo&  shotUnit) {}
         virtual void rotateGunRecieved(const RotateGunInfo& rotateUnitGun) {}
         void operator ()(const UnitSelectedInfo& unitInfo) { newUnitSelected(unitInfo); }
-        void operator ()(const GameInfoMessage& msgInfo) { informationMsgRecieved(msgInfo); }
+        void operator ()(const core::UnitStateMsg& unitStateMsg) { informationMsgRecieved(unitStateMsg); }
         void operator ()(const MoveAreaInfo& moveArea) { moveAreaRecieved(moveArea); }
         void operator ()(const MoveUnitInfo& moveUnit) { moveUnitRecieved(moveUnit); }
         void operator ()(const UnitStateInfo& shotUnit) { ChangeUnitStateRecieved(shotUnit); }
@@ -43,7 +44,7 @@ namespace events {
     class Events
     {
     public:
-        using GameInfoVariant = std::variant<UnitSelectedInfo, GameInfoMessage, MoveAreaInfo, MoveUnitInfo, UnitStateInfo, RotateGunInfo>;
+        using GameInfoVariant = std::variant<UnitSelectedInfo, core::UnitStateMsg, MoveAreaInfo, MoveUnitInfo, UnitStateInfo, RotateGunInfo>;
         void subscribe(Observer<Notifier>* obs)
         {
             m_observers.push_back(obs);
@@ -53,7 +54,7 @@ namespace events {
             std::erase(m_observers, obs);
         }
     protected:
-        void notify(const GameInfoVariant& info) const
+        void notifyHost(const GameInfoVariant& info) const
         {
             for (const auto& observer : m_observers)
             {

@@ -41,7 +41,8 @@ namespace core {
         int generateUniformRandNumber(const int rangeFrom, const int rangeTo) const;
         inline int rollDiceWithFaces(int amountOfFaces = kMaxHitThreshold) const  { return generateUniformRandNumber(kMinHitThreshold, amountOfFaces); }
         std::vector<UnitStateInfo> nextTurn();
-        void saveTempDamage(Unit* targetUnit, const DamageType damageType);
+        void saveTempDamage(Unit* targetUnit, const DamageTo damageTo);
+        void fillDamageProbabilities(UnitPartsInfoVec& partsInfoVec, const  Unit* selectedUnit, const Unit* targetUnit,  const Angle& requiredGunAngleToShot) const;
     private:
         
         /** @brief holds Probability tables of damage based on unit type */
