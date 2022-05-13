@@ -1,11 +1,6 @@
 #include "units_factory.h"
 #include "graphics/tank_view.h"
 
-
-TanksFactory::TanksFactory()
-{
-    loadUnitTextures();
-}
  
 TanksFactory::UnitModelPtr TanksFactory::createUnitModel(const core::UnitType type, const PlayerIdentifier id) const
 {
@@ -49,6 +44,11 @@ TanksFactory::UnitViewPtr TanksFactory::createBasicTankView(const UnitIdentifier
     basicTankView->setScale(scale, scale);
 
     return basicTankView;
+}
+
+UnitFactory::UnitFactory()
+{
+    loadUnitTextures();
 }
 
 UnitFactory::UnitViewPtr UnitFactory::createNullUnitView()
