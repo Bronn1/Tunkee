@@ -22,15 +22,12 @@ core::UnitManager::UnitManager()
 
 std::optional<core::Unit*> core::UnitManager::getUnitIfExist(const UnitIdentifier unitId) const
 {
-    if (m_units.contains(unitId))
-    {
-        return { m_units.at(unitId).get() };
-    }
-    else
-    {
+    if (!m_units.contains(unitId)) {
         std::cerr << "Unit with id: " << unitId.identifier << " does not exists\n";
         return std::nullopt;
     }
+
+    return { m_units.at(unitId).get() };
 }
 
 std::vector<UnitIdentifier> core::UnitManager::getActiveUnitsForPlayer(const PlayerIdentifier playerId) const
@@ -40,15 +37,14 @@ std::vector<UnitIdentifier> core::UnitManager::getActiveUnitsForPlayer(const Pla
     {
         if (playerId == unitPtr->getOwnerID() && unitPtr->hasActionLeft())
             activeUnits.push_back(id);
-
     }
     return activeUnits;
 }
 
 bool core::UnitManager::hasActiveUnits(const PlayerIdentifier& playerId) const
 {
-    auto hasUnitAction = [&playerId](auto& idUnitPair) { return (playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->hasActionLeft()); };
-    return ranges::find_if(m_units, hasUnitAction) != end(m_units);
+    auto hasUnitActionLeft = [&playerId](auto& idUnitPair) { return (playerId == idUnitPair.second->getOwnerID() && idUnitPair.second->hasActionLeft()); };
+    return ranges::find_if(m_units, hasUnitActionLeft) != end(m_units);
 }
 
 int core::UnitManager::countActiveUnitsOwnedBy(const PlayerIdentifier& playerId) const
@@ -59,11 +55,8 @@ int core::UnitManager::countActiveUnitsOwnedBy(const PlayerIdentifier& playerId)
 
 void core::UnitManager::passNextTurnToUnits()
 {
-    for (const auto& [id, unit] : m_units)
-    {
+    for (const auto& [id, unit] : m_units) {
         unit->nextTurn();
-        //setUnitsActions
-        std::cout << "Calculating alive units...\n";
     }
 }
 
