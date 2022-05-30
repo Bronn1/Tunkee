@@ -4,6 +4,7 @@
 
 
 namespace ranges = std::ranges;
+namespace views = std::views;
 
 core::IdentifierGenerator generator()
 {
@@ -28,17 +29,6 @@ std::optional<core::Unit*> core::UnitManager::getUnitIfExist(const UnitIdentifie
     }
 
     return { m_units.at(unitId).get() };
-}
-
-std::vector<UnitIdentifier> core::UnitManager::getActiveUnitsForPlayer(const PlayerIdentifier playerId) const
-{
-    std::vector<UnitIdentifier> activeUnits{};
-    for (auto& [id, unitPtr] : m_units)
-    {
-        if (playerId == unitPtr->getOwnerID() && unitPtr->hasActionLeft())
-            activeUnits.push_back(id);
-    }
-    return activeUnits;
 }
 
 bool core::UnitManager::hasActiveUnits(const PlayerIdentifier& playerId) const
@@ -81,12 +71,22 @@ std::vector<UnitIdentifier> core::UnitManager::getUnitIDs() const
 
 std::vector<UnitIdentifier> core::UnitManager::getUnitIDsForPlayer(const PlayerIdentifier playerId) const
 {
-    auto view_filter = m_units |  std::views::filter([&playerId](const auto& idUnitPair) { return playerId == idUnitPair.second->getOwnerID(); }) |
-                                  std::views::transform([](const auto& idUnitPair) { return idUnitPair.first; });
+    auto view_filter = m_units | views::filter([&playerId](const auto& idUnitPair) { return playerId == idUnitPair.second->getOwnerID(); }) |
+                       views::transform([](const auto& idUnitPair) { return idUnitPair.first; });
     std::vector<UnitIdentifier> unitIds(begin(view_filter), end(view_filter));
 
     return unitIds;
 
+}
+
+std::vector<UnitIdentifier> core::UnitManager::getActiveUnitsForPlayer(const PlayerIdentifier playerId) const
+{
+    std::vector<UnitIdentifier> activeUnits{};
+    for (auto& [id, unitPtr] : m_units) {
+        if (playerId == unitPtr->getOwnerID() && unitPtr->hasActionLeft())
+            activeUnits.push_back(id);
+    }
+    return activeUnits;
 }
 
 void core::UnitManager::setAllDamageVisible()
