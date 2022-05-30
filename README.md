@@ -2,6 +2,15 @@
 Port of board turn-based tactical game with armored vehicles theme.
 Currently under development.
 
+## What is done?
++ Hexagonal board with simple terrain(grass) and pathfinding module. 
++ Units with abilities to move, shoot.
++ Extendable units damage system.
++ 2D graphics for units and board.
++ Animation support(Burning, Explosion, Shooting).
++ Different unit tooltips with information about internal state.
++ Almost full support for the rules of the game.
+
 ## Build
 Latest C++20 version of compiler is required.
 
