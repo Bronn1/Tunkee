@@ -1,13 +1,6 @@
-#include <SFML/Graphics.hpp>
-#include <vector>
-#include <iostream>
-#include <chrono>
-#include <thread>
 #include "src/tunkee_game.h"
 
-#include <stdexcept>
 #include <iostream>
-
 
 int main()
 {
@@ -16,8 +9,8 @@ int main()
         TunkeGame tunkee;
         tunkee.run();
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
-        std::cout << "\nEXCEPTION: " << e.what() << std::endl;
+        std::cerr << "\nEXCEPTION: " << e.what() << std::endl;
     }
 }
