@@ -9,6 +9,7 @@ constexpr int   kPointCount = 6;
 constexpr float kHexOffsetMultiplierY = 0.93f;
 constexpr float kHexOffsetMultiplierX = 0.75f;
 
+namespace ranges = std::ranges;
 
 graphics::BoardView::BoardView(const std::vector<core::GameTile>& tileCoordinateSystem, const  TextureHolder& tileTextures, int width)
 {
@@ -93,6 +94,26 @@ std::optional<sf::Vector2f> graphics::BoardView::getTileCenterIfValid(const sf::
             return { tile.getPosition() };
 
     return std::nullopt;
+}
+
+void graphics::BoardView::selectSetupArea(const std::vector<core::GameTile>& area)
+{
+    sf::Color colorSetupLayer(kBoardFirstLayerColorR, kBoardFirstLayerColorG, kBoardFirstLayerColorB);
+    m_setupArea.reserve(size(area));
+    for (const auto& tile : area) {
+        if (!m_tiles.contains(tile)) continue;
+
+        m_setupArea.push_back(tile);
+        m_tiles.at(tile).setFillColor(colorSetupLayer);
+    }
+}
+
+void graphics::BoardView::resetSetupArea()
+{
+    for (const auto& tile : m_setupArea) {
+        m_tiles.at(tile).setFillColor(sf::Color::White);
+    }
+    m_setupArea.clear();
 }
 
 

@@ -307,6 +307,7 @@ void graphics::GameWorldView::clearMoveArea()
 
 void graphics::GameWorldView::endSetupStage()
 {
+    m_board.resetSetupArea();
     m_unitsSetupView.setState(UnitSetupView::State::Hidden);
     m_UIelements.at(0)->setVisibility(true);
 }
