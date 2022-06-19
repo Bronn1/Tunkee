@@ -9,6 +9,7 @@
 #include "../src/core/unit.h"
 #include "../src/core/unit_manager.h"
 #include "../src/core/game_engine.h"
+
 #include <ranges>
 #include <memory>
 
@@ -19,7 +20,7 @@ class gameBoardFixture : public ::testing::Test {
 public:
     std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
-    UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };
+    std::unique_ptr<UnitManager> unitMng{ std::make_unique<UnitManager>() };
     std::unique_ptr<Unit> unit{ std::make_unique<TankUnit>(UnitIdentifier{ 1 }, TileDistance{7}, Shots{3}) };
     Unit* unitExpected;
 
@@ -51,6 +52,37 @@ public:
     }
 
 };
+
+
+// getting upper lines aka setup area test
+TEST_F(gameBoardFixture, get3UpperLines)
+{
+    core::GameBoard testableBoard{ testTypes, 5, 7 };
+    auto tilesVec = testableBoard.getUpperLines(3);
+    std::vector<core::GameTile> expectedVec{ {0,0}, {1,0}, {2,0}, {3,0}, {4,0}, {5,0}, {6,0},
+                                          {0,1}, {1,1}, {2,1}, {3,1}, {4,1}, {5,1}, {6,1} ,
+                                           {-1,2}, {0,2}, {1,2}, {2,2}, {3,2}, {4,2}, {5,2} };
+    EXPECT_EQ(tilesVec, expectedVec);
+}
+
+TEST_F(gameBoardFixture, get3BottomLines)
+{
+    core::GameBoard testableBoard{ testTypes, 5, 7 };
+    auto tilesVec = testableBoard.getBottomLines(3);
+    std::vector<core::GameTile> expectedVec{ {-1,2}, {0,2}, {1,2}, {2,2}, {3,2}, {4,2}, {5,2},
+                                              {-1,3}, {0,3},{1,3}, {2,3}, {3,3}, {4,3}, {5,3},
+                                             {-2,4}, {-1, 4}, {0,4} ,{1,4}, {2,4}, {3,4}, {4,4} };
+    EXPECT_EQ(tilesVec, expectedVec);
+}
+
+TEST_F(gameBoardFixture, get2BottomLines)
+{
+    core::GameBoard testableBoard{ testTypes, 5, 7 };
+    auto tilesVec = testableBoard.getBottomLines(2);
+    std::vector<core::GameTile> expectedVec{ {-1,3}, {0,3},{1,3}, {2,3}, {3,3}, {4,3}, {5,3},
+                                             {-2,4}, {-1, 4}, {0,4} ,{1,4}, {2,4}, {3,4}, {4,4} };
+    EXPECT_EQ(tilesVec, expectedVec);
+}
 
 TEST_F(gameBoardFixture, GetMoveAreaCommand) {
     auto cmd{ std::make_unique<GetMoveAreaQuery>(PlayerIdentifier{1}, UnitIdentifier{1}) };

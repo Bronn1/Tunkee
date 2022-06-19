@@ -8,6 +8,7 @@
 
 class MyGameEngineRulesFixture : public ::testing::Test {
 public:
+    using UnitManagerPtr = std::unique_ptr<UnitManager>;
     std::vector<core::GameTileType> testTypes{ core::GameTileType::Grass, core::GameTileType::Grass };
     core::GameBoard testableBoard{ testTypes, 40,  40 };
     UnitManagerPtr unitMng{ std::make_unique<UnitManager>() };

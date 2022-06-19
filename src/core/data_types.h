@@ -129,6 +129,22 @@ enum class ActionStatus
     full = 1
 };
 
+namespace setup
+{
+/**
+ * @brief money to buy units at setup(deployment) phase of quick game and multiplayer
+*/
+struct Money
+{
+    short amount;
+
+    auto operator<=>(const Money&) const = default;
+    auto& operator+=(const Money& other) { amount += other.amount; return *this; };
+    auto& operator-=(const Money& other) { amount -= other.amount; return *this; };
+    inline operator bool() const { return amount != 0; }
+};
+}
+
 template< typename T>
 struct Comparator {
     bool operator() (const T& a, const  T& b) const {
@@ -176,6 +192,12 @@ struct LastActions {
 namespace std {
 template<> struct hash<UnitIdentifier> {
     size_t operator()(const UnitIdentifier& id) const {
+        return std::hash<unsigned>()(id.identifier);
+    }
+};
+
+template<> struct hash<PlayerIdentifier> {
+    size_t operator()(const PlayerIdentifier& id) const{
         return std::hash<unsigned>()(id.identifier);
     }
 };

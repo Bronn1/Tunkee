@@ -23,7 +23,7 @@ void core::GameEngine::moveUnit(MoveToAction* action)
     notifyHost(moveInfo);
     auto moveAreaQuery{ std::make_unique<GetMoveAreaQuery>(action->m_playerID, action->m_unitID) };
     auto moveArea = (*unit)->getMoveArea(m_board);
-    notifyHost(moveArea);
+    notifyHost(moveArea); //  NOTify also Ai and second player if multiplayer
 }
 
 void core::GameEngine::shootUnit(ShootAction* action)
@@ -50,9 +50,6 @@ void core::GameEngine::shootUnit(ShootAction* action)
     notifyHost(moveArea);
     if (m_gameRules->isGameEndedFor(PointOfView::Enemy))
         std::cout << "Player: " << m_gameRules->getCurrentPlayer().identifier << " has won, Gratz!\n";
-
-
-
 }
 
 void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction)
@@ -60,7 +57,7 @@ void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction
     Player& player = (m_playerOne.getId() == finishSetupStageAction->m_playerID) ? m_playerOne : m_playerTwo;
     bool isAbleToEnd = player.endSetupStage(); // move to game_rules strategy
     // notifyHost or return some success indicator
-    // when both players ready notifyHost about visible/created units for both
+    // when both players ready notifyHost  nofity about visible enemy units 
     //notifyHost(m_unitMng.getAllVisibleUnitsForPlaer());
     if (!isAbleToEnd) {
         return;
@@ -70,6 +67,7 @@ void core::GameEngine::finishSetupStage(FinishSetupStage* finishSetupStageAction
     m_gameRules->setCurrentPlayer(m_playerOne.getId());
     m_gameRules->setActiveUnits(m_playerOne.getId());
     m_gameRules->setActiveUnits(m_playerTwo.getId());
+
     m_unitLogger.initUnits(m_unitManager->getAllUnits());
 
 }
@@ -92,6 +90,7 @@ void core::GameEngine::finishActionPhase(FinishActionPhase* finishActionPhase)
     if (m_gameRules->getCurrentStage() == GameRulesInterface::GameStage::TurnEnd)
         endOfTurn();
 }
+
 
 void core::GameEngine::requestMoveArea(GetMoveAreaQuery* moveAreaQuery)
 {
@@ -134,7 +133,9 @@ void core::GameEngine::createUnitStateMsg(const UnitStateQuery* unitStateQuery)
 UnitIdentifier core::GameEngine::addNewUnit(std::unique_ptr<core::Unit> unit)
 {
     Player& player = (m_playerOne.getId() == unit->getOwnerID()) ? m_playerOne : m_playerTwo;
-    if (player.isAbleToAddUnit() && m_board.isAccessible(unit->getPosition())) {
+    auto unitPosition = unit->getPosition();
+    if (player.isAbleToAddUnit() && m_board.isAccessible(unitPosition) &&
+        m_board.isInsideSetupArea(unit->getOwnerID(), unitPosition)) {
         GameTile unitPosition = unit->getPosition();
         UnitIdentifier createdUnitId = m_unitManager->addUnit(std::move(unit));
         player.addUnit(createdUnitId);

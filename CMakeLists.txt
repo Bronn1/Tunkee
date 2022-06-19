@@ -55,6 +55,7 @@ set(Header_Files
         "src/common.h" 
         "src/graphics/ui_element_interface.h"
         "src/core/exceptions.h"
+        "src/core/game_settings.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -102,7 +103,7 @@ source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
-add_executable(Tunkee ${ALL_FILES} )
+add_executable(Tunkee ${ALL_FILES})
 add_library(Tunkee_lib STATIC ${ALL_FILES})
 #add_executable(Tunkee  ${ALL_FILES})
 #set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")

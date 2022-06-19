@@ -11,16 +11,18 @@
 #include <vector>
 #include <memory>
 
-using ActionPtr = std::shared_ptr<GameAction>;
-using QueryPtr = std::shared_ptr<GameQuery>;
-using UnitManagerPtr = std::unique_ptr<core::UnitManager>;
-using GameStateCheckerPtr = std::unique_ptr<core::GameRulesInterface>;
+
 
 namespace core {
 constexpr int kHostID = 1;
 class GameEngine : public events::Events<GameEngine>
 {
 public:
+    using ActionPtr = std::shared_ptr<GameAction>;
+    using QueryPtr = std::shared_ptr<GameQuery>;
+    using UnitManagerPtr = std::unique_ptr<core::UnitManager>;
+    using GameRulesCheckerPtr = std::unique_ptr<core::GameRulesInterface>;
+
     explicit GameEngine(const GameBoard& board, UnitManagerPtr unitMng, const PlayerIdentifier playerOneId = { 1 }, const PlayerIdentifier playerWTwoId = { 2 });
 
     void moveUnit(MoveToAction* action);
@@ -33,7 +35,7 @@ public:
 
     void finishSetupStage(FinishSetupStage* finishSetupStageAction);
     void finishActionPhase(FinishActionPhase* finishActionPhase);
-    std::vector<UnitIdentifier> getUnitIDsForPlayer(const PlayerIdentifier playerId) const { return m_unitManager->getActiveUnitsForPlayer(playerId); }
+    std::vector<UnitIdentifier> getUnitIDsForPlayer(const PlayerIdentifier playerId) const { return m_unitManager->getActiveUnitsForPlayer(playerId); }\
 
     void undoLastCommand(const ActionPtr& cmd);
     void endOfTurn();
@@ -44,8 +46,7 @@ public:
 private:
 private:
     GameBoard m_board;
-    // will be refactored as a  strategy, to make it easier to implement different scenarios 
-    GameStateCheckerPtr m_gameRules;
+    GameRulesCheckerPtr m_gameRules;
     Player m_playerOne{ NullPlayer{} };
     Player m_playerTwo{ NullPlayer{} };
     PlayerIdentifier m_gameHost{ kHostID };

@@ -41,6 +41,7 @@ namespace graphics {
         void onBoardClicked(const sf::Vector2f& mousePos);
         void clearMoveArea();
         void endSetupStage();
+        void setSetupArea(const std::vector<core::GameTile>& area) { m_board.selectSetupArea(area); }
 
         // observer events
         void newUnitSelected(const UnitSelectedInfo& unitInfo) override;

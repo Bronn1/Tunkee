@@ -3,6 +3,7 @@
 #include "core/game_board.h"
 #include "core/game_engine.h"
 #include "core/unit_manager.h"
+#include  "core/game_settings.h"
 #include "graphics/tank_view.h"
 #include "units_factory.h"
 #include "game_builder.h"
@@ -23,8 +24,14 @@ TunkeGame::TunkeGame() :
 
 void TunkeGame::runGameLoop()
 {
-    auto worldBuilder = GameBuilder::initGameEngine(m_window);
-    worldBuilder.singleGameMode();
+    constexpr setup::Money standardAlphaTestSetupMoney{ 1000 };
+    // supporting only quick game for now
+    settings::LaunchSettings launchSettings{ PlayerIdentifier{1}, PlayerIdentifier{2}, standardAlphaTestSetupMoney, 
+                              settings::GameType::QuickGame,settings::MapSize{40, 40}, core::GameBoardType::Plain };
+    auto worldBuilder = GameBuilder::initGameEngine(m_window, launchSettings);
+    if (launchSettings.type == settings::GameType::QuickGame) {
+        worldBuilder.singleGameMode();
+    }
     //auto testBoard = worldBuilder.getBoardModel();
     auto worldView = worldBuilder.getWorldView();
     sf::Color backgroundGrass{ 83, 132, 66 };
