@@ -54,7 +54,7 @@ private:
 
 };
 
-
+// test if guest can join to game host and get response with game settings
 TEST_F(NetworkFixture, testPlayerJoined_network)
 {
     // not the best test performace prob
