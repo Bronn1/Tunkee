@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/core/game_engine.h"
+#include "src/core/i_engine.h"
 #include "src/core/data_types.h"
 #include "src/core/game_tile.h"
 #include "src/units_factory.h"
@@ -14,7 +14,7 @@ namespace controllers {
     class GameController
     {
     public:
-        GameController(core::GameEngine* engine, const PlayerIdentifier player);
+        GameController(core::IEngine* engine, const PlayerIdentifier player);
         void moveUnit(const UnitIdentifier unitID, const core::GameTile& dest) const;
         void onChangeUnitRotation(const UnitIdentifier unitID, const Angle& rotation, const RotateUnitActiom::Type rotationType);
         void onUnitClicked(const UnitIdentifier selectedUnitID, const UnitIdentifier clickedUnitID) const ;
@@ -28,7 +28,7 @@ namespace controllers {
         void deleteOwnUnit(const UnitIdentifier unitId) { m_ownUnits.erase(unitId); }
         void deleteEnemyUnit(const UnitIdentifier unitId) { m_ownUnits.erase(unitId); }
     private:
-        core::GameEngine* m_gameEngine;
+        core::IEngine* m_gameEngine;
         std::set<UnitIdentifier> m_ownUnits;
         std::set<UnitIdentifier> m_enemyUnits;
         PlayerIdentifier m_player;
@@ -40,11 +40,11 @@ namespace controllers {
     {
     public:
         UnitSetupContoller() = default;
-        UnitSetupContoller(core::GameEngine* engine, const PlayerIdentifier player);
+        UnitSetupContoller(core::IEngine* engine, const PlayerIdentifier player);
         std::optional<UnitNodePtr> addUnit(const core::GameTile& position);
         //void setWorldView(graphics::GameWorldView* worldView) { m_worldView = worldView; };
     private:
-        core::GameEngine* m_gameEngine;
+        core::IEngine* m_gameEngine;
         PlayerIdentifier m_player;
         TanksFactory  m_tankFactory;
     };

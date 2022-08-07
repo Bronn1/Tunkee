@@ -1,7 +1,5 @@
 #include "src/tunkee_game.h"
 
-#include <iostream>
-
 int main()
 {
     try

@@ -6,6 +6,7 @@
 #include "units_factory.h"
 #include "graphics/resource_holder.h"
 #include "src/core/game_settings.h"
+#include "src/core/game_engine.h"
 
 #include <memory>
 #include <vector>
@@ -22,7 +23,7 @@ public:
      * @param target -  SFML window to render graphics
      * @return 
     */
-    static GameBuilder  initGameEngine(sf::RenderWindow& target, const settings::LaunchSettings& launchSettings);
+    static GameBuilder  initGameEngine(sf::RenderWindow& target, const settings::GameSettings& launchSettings);
     inline WorldViewPtr  getWorldView() { return std::move(m_worldView); }
     /**
     * @brief Adds all stuff for single player game.
@@ -41,5 +42,5 @@ private:
     GameEnginePtr m_gameEngine;
     TanksFactory m_tankFactory;
     TextureHolder m_tileTextures;
-    settings::LaunchSettings launchSettings;
+    settings::GameSettings launchSettings;
 };

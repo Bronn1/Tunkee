@@ -14,7 +14,8 @@ namespace settings
 {
 enum class GameType
 {
-    QuickGame
+    QuickGame,
+    Multiplayer
 };
 
 enum class SetupAreaType
@@ -32,16 +33,18 @@ struct MapSize
 /**
  * @brief Settings that are necessary for the correct launch of the game
 */
-struct LaunchSettings
+struct GameSettings
 {
-    PlayerIdentifier m_host{ {0} };
-    PlayerIdentifier m_guest{ {0} };;
-    setup::Money amount;
-    GameType type;
-    MapSize mapSize;
-   // SetupAreaType setupAreaType;
-    core::GameBoardType boardType;
     std::vector<core::GameTile> setupArea{};
+    std::string hostName{""};
+    std::string guestName{ "" };
+    MapSize mapSize;
+    PlayerIdentifier hostId{ {0} };
+    PlayerIdentifier guestId{ {0} };
+    setup::Money amount;
+    GameType type{ GameType::QuickGame };
+   // SetupAreaType setupAreaType;
+    core::GameBoardType boardType{ core::GameBoardType::Plain };
 };
 
 } // namespace settings
