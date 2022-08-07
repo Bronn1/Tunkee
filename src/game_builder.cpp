@@ -2,6 +2,7 @@
 #include "controllers/game_controller.h"
 #include "core/unit.h"
 #include "core/player.h"
+#include "network/network_controller.h"
 
 constexpr int kAlphaTestMapSize = 30;
 constexpr std::string_view kBoardTileTexture = "data/textures/grass-test1.jpg";
@@ -17,7 +18,7 @@ void GameBuilder::loadTileTextures()
     m_tileTextures.load(TileGrass, kBoardTileTexture);
 }
 
-GameBuilder GameBuilder::initGameEngine(sf::RenderWindow& target, const settings::LaunchSettings& launchSettings)
+GameBuilder GameBuilder::initGameEngine(sf::RenderWindow& target, const settings::GameSettings& launchSettings)
 {
     GameBuilder builder;
     std::vector<core::GameTileType> tileset = builder.generateMinimalTileset();
@@ -26,8 +27,8 @@ GameBuilder GameBuilder::initGameEngine(sf::RenderWindow& target, const settings
 
     int boardSize = std::size(tileset);
     auto boardModel = core::GameBoard(tileset, boardSize, boardSize);
-    boardModel.initSetupArea(launchSettings.m_host, launchSettings.setupArea);
-    boardModel.initSetupArea(launchSettings.m_guest, launchSettings.setupArea);
+    boardModel.initSetupArea(launchSettings.hostId, launchSettings.setupArea);
+    boardModel.initSetupArea(launchSettings.guestId, launchSettings.setupArea);
     auto boardView  = graphics::BoardView(boardModel.getTileCoordinates(), builder.m_tileTextures, boardSize);
 
     auto unitMgr = std::make_unique<core::UnitManager>();
@@ -37,13 +38,13 @@ GameBuilder GameBuilder::initGameEngine(sf::RenderWindow& target, const settings
     builder.m_gameEngine.get()->setPlayer(playerOne);
     builder.m_gameEngine.get()->setPlayer(playerTwo);
 
-    auto movementController = controllers::GameController(builder.m_gameEngine.get(), launchSettings.m_host);
-    auto unitCreatorController = controllers::UnitSetupContoller(builder.m_gameEngine.get(), launchSettings.m_host);
+    auto movementController = controllers::GameController(builder.m_gameEngine.get(), launchSettings.hostId);
+    auto unitCreatorController = controllers::UnitSetupContoller(builder.m_gameEngine.get(), launchSettings.hostId);
     builder.m_worldView = std::make_unique< graphics::GameWorldView>(target, boardView, std::move(movementController));
     builder.m_worldView->setUnitSetupController(std::move(unitCreatorController));
     builder.m_gameEngine->subscribe(builder.m_worldView.get());
     builder.m_worldView->addNullUnit(builder.m_tankFactory.createNullUnitView());
-    builder.m_worldView->setSetupArea(boardModel.getSetupArea(launchSettings.m_host));
+    builder.m_worldView->setSetupArea(boardModel.getSetupArea(launchSettings.hostId));
     //builder.m_gameEngine.get()->setUpdateViewInterface(builder.m_worldView.get());
 
     return builder;

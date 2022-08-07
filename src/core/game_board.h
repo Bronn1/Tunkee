@@ -16,6 +16,7 @@ namespace details
 {
 constexpr int getStandardSetupAreaHeight(const int height);
 } //namespace details
+
 class GameBoard
 {
 public:

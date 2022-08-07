@@ -7,6 +7,7 @@
 #include "src/controllers/game_controller.h"
 #include "unit_setup_view.h"
 #include "projectile.h"
+#include "src/core/i_engine.h"
 
 #include <map>
 #include <memory>
@@ -19,7 +20,7 @@ namespace graphics {
     using UnitViewPtr = std::unique_ptr < graphics::IUnitView>;
 
 
-    class GameWorldView : public events::Observer<core::GameEngine>
+    class GameWorldView : public events::Observer<core::IEngine>
     {
     public:
         using UIElementPtr = std::unique_ptr < UIElement>;

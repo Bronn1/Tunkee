@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 project(Tunkee)
 
 set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
-set(SFML_ROOT D:/sfml/SFML-2.5.1)
+set(SFML_ROOT D:/sfml2/SFML-2.5.1)
+set(ASIO_ROOT D:/asio/asio-1.22.2)
+set(CEREAL_ROOT D:/cereal/cereal-master)
 set(CMAKE_CXX_STANDARD 23)
 #set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
@@ -56,6 +58,10 @@ set(Header_Files
         "src/graphics/ui_element_interface.h"
         "src/core/exceptions.h"
         "src/core/game_settings.h"
+        "src/network/network_engine.h"
+        "src/network/network_controller.h"
+        "src/network/common.h"
+         "src/core/i_engine.h"
         )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -97,18 +103,25 @@ set(Source_Files
         "src/gui/text_label.cpp"
         "src/core/unit_logger.cpp"
         "src/graphics/button.cpp"
-        "src/graphics/rounded_rectangle_shape.cpp" 
+        "src/graphics/rounded_rectangle_shape.cpp"
+        "src/network/network_engine.cpp"
+        "src/network/network_controller.cpp"
+         "src/network/common.cpp"
         )
 source_group("Source Files" FILES ${Source_Files})
-
 set(ALL_FILES  ${Header_Files}  ${Source_Files})
 
+add_library(asio INTERFACE  ${ASIO_ROOT})
+target_include_directories(asio INTERFACE ${ASIO_ROOT}/include)
+
+add_library(cereal INTERFACE  ${CEREAL_ROOT})
+target_include_directories(cereal INTERFACE ${CEREAL_ROOT}/include)
+
+include_directories(headers /usr/include "${SFML_ROOT}/include"  ${ASIO_ROOT}/include ${CEREAL_ROOT}/include)
 add_executable(Tunkee ${ALL_FILES})
 add_library(Tunkee_lib STATIC ${ALL_FILES})
-#add_executable(Tunkee  ${ALL_FILES})
-#set_target_properties(Tunkee PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-include_directories(headers /usr/include "${SFML_ROOT}/include")
-
+target_link_libraries(Tunkee asio cereal)
+target_link_libraries(Tunkee_lib asio cereal)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
 find_package(SFML REQUIRED system window graphics network audio)
@@ -118,7 +131,6 @@ if (SFML_FOUND)
 endif()
 
 file(COPY data DESTINATION ${CMAKE_BINARY_DIR})
-
 
 # Copy dlls to build
 if(WIN32)

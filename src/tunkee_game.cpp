@@ -25,9 +25,12 @@ TunkeGame::TunkeGame() :
 void TunkeGame::runGameLoop()
 {
     constexpr setup::Money standardAlphaTestSetupMoney{ 1000 };
+    std::string hostName = "hostTest";
+    std::string guestName = "testAI";
     // supporting only quick game for now
-    settings::LaunchSettings launchSettings{ PlayerIdentifier{1}, PlayerIdentifier{2}, standardAlphaTestSetupMoney, 
-                              settings::GameType::QuickGame,settings::MapSize{40, 40}, core::GameBoardType::Plain };
+    settings::GameSettings launchSettings{ {}, std::move(hostName), std::move(guestName), settings::MapSize{40, 40},
+                  PlayerIdentifier{1}, PlayerIdentifier{2}, standardAlphaTestSetupMoney, settings::GameType::QuickGame , 
+                  core::GameBoardType::Plain };
     auto worldBuilder = GameBuilder::initGameEngine(m_window, launchSettings);
     if (launchSettings.type == settings::GameType::QuickGame) {
         worldBuilder.singleGameMode();

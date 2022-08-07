@@ -14,18 +14,22 @@ Currently under development.
 ## Build
 Latest C++20 version of compiler is required.
 
-1. Download and unpack google test framework:
+1. Download and unpack google test framework, Asio, Cereal.
+Download and unpack SFML library for your version of compiler(tested with Visual C++ 15 (2017) - works with newest VS compiler):
 ```
 https://github.com/google/googletest/archive/refs/heads/master.zip
-```
-2. Download and unpack SFML library for your version of compiler(tested with Visual C++ 15 (2017) - 32-bit and this version works with newest VS compiler):
-```
+https://github.com/USCiLab/cereal/archive/refs/heads/master.zip
+https://github.com/chriskohlhoff/asio/archive/refs/heads/master.zip
 https://www.sfml-dev.org/download/sfml/2.5.1/
 ```
-3. Change paths in CMakeList.txt to your downloaded gtest and SFML:
+
+2. Change paths in CMakeList.txt to your downloaded gtest, Asio, Cereal, SFML:
 
 ```
-set(GOOGLETEST_PROJECT_LOCATION D:/path-to-googletest)
-set(SFML_ROOT D:/path-to-SFML-2.5.1)
+set(GOOGLETEST_PROJECT_LOCATION D:/path-to-googletest-root-dir)
+set(SFML_ROOT D:/path-to-SFML-2.5.1-root-dir)
+set(ASIO_ROOT D:/path-to-asio-root-dir/asio)
+set(CEREAL_ROOT D:/path-to-cereal-root-dir)
 ```
-4. Standard steps with 'cmake -A Win32 -S .  -B "out/build32"' and  'cmake --build out/build32 --config Debug'. Should be built for x86 version
+
+3. Standard steps with 'cmake -A Win32 -S .  -B "out/build32"' and  'cmake --build out/build32 --config Debug'.

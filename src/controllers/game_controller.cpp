@@ -5,7 +5,7 @@
 
 
 
-controllers::GameController::GameController(core::GameEngine* engine, const PlayerIdentifier player) :
+controllers::GameController::GameController(core::IEngine* engine, const PlayerIdentifier player) :
     m_gameEngine(engine), m_player(player)
 {
 
@@ -69,7 +69,7 @@ void controllers::GameController::finishActionPhase(PlayerIdentifier playerId)
     m_gameEngine->finishActionPhase(finishActionPhase.get());
 }
 
-controllers::UnitSetupContoller::UnitSetupContoller(core::GameEngine* engine, const PlayerIdentifier player) :
+controllers::UnitSetupContoller::UnitSetupContoller(core::IEngine* engine, const PlayerIdentifier player) :
     m_gameEngine(engine), m_player(player)
 {
 }
