@@ -5,7 +5,7 @@ set(GOOGLETEST_PROJECT_LOCATION D:/gtest/googletest)
 set(SFML_ROOT D:/sfml2/SFML-2.5.1)
 set(ASIO_ROOT D:/asio/asio-1.22.2)
 set(CEREAL_ROOT D:/cereal/cereal-master)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 #set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
